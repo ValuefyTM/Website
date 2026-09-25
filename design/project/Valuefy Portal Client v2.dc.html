@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>VALUEFY | Portal client</title>
+<style>
+body{margin:0;background:#F6F3EC;color:#17173A;font-family:Verdana,Geneva,sans-serif;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+a{color:#9A5F00;text-decoration:none}
+a:hover{color:#17173A}
+button,input{font-family:inherit}
+:focus-visible{outline:2px solid #F2A93B;outline-offset:2px}
+@keyframes pIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes pPop{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes pRing{0%{box-shadow:0 0 0 0 rgba(242,169,59,.55)}100%{box-shadow:0 0 0 9px rgba(242,169,59,0)}}
+@keyframes pShim{0%{transform:translateX(-100%)}100%{transform:translateX(330%)}}
+@keyframes pGrow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<div style="display:flex;min-height:100vh">
+  <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+    <aside style="width:252px;flex-shrink:0;background:#17173A;color:#FFFFFF;padding:24px 16px;display:flex;flex-direction:column;gap:28px;position:sticky;top:0;height:100vh">
+      <div style="padding:0 10px;display:flex;flex-direction:column;gap:8px">
+        <div style="align-self:flex-start;background:#FFFFFF;border-radius:10px;padding:7px 10px"><img src="assets/valuefy-logo.png" alt="VALUEFY" style="height:20px;width:auto;display:block"></img></div>
+        <span style="font-size:10px;font-weight:700;letter-spacing:.14em;color:#F5BE66">PORTAL CLIENT</span>
+      </div>
+      <nav aria-label="Portal" style="display:flex;flex-direction:column;gap:4px">
+        <sc-for list="{{ nav }}" as="n" hint-placeholder-count="3">
+          <button onClick="{{ n.pick }}" aria-current="{{ n.current }}" style="height:46px;padding:0 14px;border:0;border-radius:12px;background:{{ n.bg }};color:{{ n.color }};font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left;transition:background .2s" style-hover="background:rgba(255,255,255,.08)">
+            <img src="{{ n.icon }}" alt="" style="width:20px;height:20px;display:block"></img><span style="flex:1">{{ n.label }}</span><span style="font-size:11px;color:{{ n.color }};opacity:.7">{{ n.count }}</span>
+          </button>
+        </sc-for>
+      </nav>
+      <div style="margin-top:auto;display:flex;flex-direction:column;gap:14px">
+        <div style="padding:16px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;gap:10px">
+          <span style="font-size:13px;font-weight:700">Ai nevoie de o evaluare nouă?</span>
+          <a href="Valuefy Website v4.dc.html" style="height:40px;border-radius:10px;background:#F2A93B;color:#17173A;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center" style-hover="background:#F5BE66;color:#17173A">Solicită evaluare</a>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:0 6px">
+          <span style="width:38px;height:38px;border-radius:50%;background:#F2A93B;color:#17173A;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">AP</span>
+          <span style="display:flex;flex-direction:column;min-width:0"><span style="font-size:13px;font-weight:700">Andrei Popescu</span><span style="font-size:11px;color:#A9ABC4">Persoană fizică</span></span>
+        </div>
+      </div>
+    </aside>
+  </sc-if>
+
+  <main style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <header style="position:sticky;top:0;z-index:20;background:rgba(246,243,236,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid #E6DECF">
+      <div style="height:68px;padding:0 clamp(16px,3vw,36px);display:flex;align-items:center;justify-content:space-between;gap:16px">
+        <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+          <img src="assets/valuefy-logo.png" alt="VALUEFY" style="height:22px;width:auto;display:block"></img>
+        </sc-if>
+        <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#6A6A82;min-width:0">
+            <sc-for list="{{ crumbs }}" as="c" hint-placeholder-count="1">
+              <button onClick="{{ c.pick }}" style="border:0;background:transparent;padding:0;font-size:13px;font-weight:{{ c.weight }};color:{{ c.color }};cursor:pointer;white-space:nowrap">{{ c.label }}</button><span style="color:#C9C0AE;display:{{ c.sep }}">/</span>
+            </sc-for>
+          </div>
+        </sc-if>
+        <div style="display:flex;align-items:center;gap:10px;position:relative">
+          <button onClick="{{ toggleNotif }}" aria-label="Notificări și mesaje" aria-expanded="{{ notifOpen }}" style="width:44px;height:44px;border-radius:12px;border:1px solid #E6DECF;background:{{ bellBg }};cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center">
+            <img src="{{ ic.bell }}" alt="" style="width:20px;height:20px;display:block"></img>
+            <sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;top:-5px;right:-5px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#E5484D;color:#FFFFFF;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid #F6F3EC">{{ unreadTotal }}</span></sc-if>
+          </button>
+          <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+            <span style="width:40px;height:40px;border-radius:50%;background:#17173A;color:#F2A93B;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">AP</span>
+          </sc-if>
+        </div>
+      </div>
+    </header>
+
+    <div style="padding:clamp(16px,3vw,36px);padding-bottom:{{ contentPadBottom }};max-width:1320px;width:100%;display:flex;flex-direction:column;gap:24px">
+
+      <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:24px;animation:pIn .35s ease-out">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <h1 style="margin:0;font-size:clamp(24px,3vw,34px);letter-spacing:-.03em">Bună, Andrei</h1>
+            <p style="margin:0;font-size:14px;color:#6A6A82">Ai {{ activeCount }} evaluări în curs și {{ actionCount }} acțiune care îți cere atenția.</p>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:14px">
+            <div style="position:relative;overflow:hidden;background:#17173A;color:#FFFFFF;border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:10px;grid-column:{{ statSpan }}">
+              <div aria-hidden="true" style="position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(closest-side,rgba(242,169,59,.35),transparent)"></div>
+              <span style="position:relative;font-size:12px;font-weight:700;letter-spacing:.08em;color:#F5BE66">VALOAREA PORTOFOLIULUI</span>
+              <span style="position:relative;font-size:clamp(28px,3.4vw,38px);font-weight:800;letter-spacing:-.03em">{{ portfolioValue }}</span>
+              <span style="position:relative;font-size:12px;color:#A9ABC4">Suma ultimelor valori din rapoartele VALUEFY · {{ valuedCount }} din {{ propCount }} proprietăți</span>
+            </div>
+            <sc-for list="{{ stats }}" as="st" hint-placeholder-count="3">
+              <button onClick="{{ st.pick }}" style="text-align:left;background:#FFFFFF;border:1px solid #E6DECF;border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:10px;cursor:pointer;color:#17173A;transition:all .2s" style-hover="border-color:#F2A93B;transform:translateY(-2px)">
+                <span style="font-size:12px;font-weight:700;letter-spacing:.06em;color:#6A6A82">{{ st.label }}</span>
+                <span style="font-size:34px;font-weight:800;letter-spacing:-.03em">{{ st.value }}</span>
+                <span style="font-size:12px;color:#9A5F00;font-weight:700">{{ st.cta }} →</span>
+              </button>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ hasAction }}" hint-placeholder-val="{{ true }}">
+            <div style="background:#FFF6E6;border:1px solid #F5D9A8;border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+              <span style="width:40px;height:40px;border-radius:12px;background:#F2A93B;color:#17173A;font-size:18px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">!</span>
+              <span style="flex:1;min-width:220px;display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:700">{{ action.title }}</span><span style="font-size:13px;color:#6A6A82">{{ action.sub }}</span></span>
+              <button onClick="{{ action.pick }}" style="height:42px;padding:0 16px;border:0;border-radius:10px;background:#17173A;color:#FFFFFF;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap" style-hover="background:#24245A">Încarcă documentul</button>
+            </div>
+          </sc-if>
+
+          <section style="display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><h2 style="margin:0;font-size:18px;letter-spacing:-.02em">Evaluări în curs</h2></div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:14px">
+              <sc-for list="{{ activeCards }}" as="a" hint-placeholder-count="2">
+                <div style="background:#FFFFFF;border:1px solid #E6DECF;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:16px">
+                  <div style="display:flex;gap:14px;align-items:center">
+                    <img src="{{ a.img }}" alt="" style="width:64px;height:64px;border-radius:14px;object-fit:cover;flex-shrink:0;background:#E6DECF;display:block"></img>
+                    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+                      <span style="font-size:11px;color:#6A6A82;font-family:ui-monospace,Menlo,monospace">{{ a.id }} · {{ a.purpose }}</span>
+                      <span style="font-size:16px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.title }}</span>
+                      <span style="font-size:12px;color:#6A6A82">{{ a.addr }}</span>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <div style="display:flex;gap:4px">
+                      <sc-for list="{{ a.segs }}" as="sg" hint-placeholder-count="7"><span style="flex:1;height:6px;border-radius:6px;background:{{ sg.bg }};position:relative;overflow:hidden;display:block"><span style="position:absolute;top:0;bottom:0;width:40%;background:#F2A93B;border-radius:6px;display:{{ sg.shim }};animation:pShim 1.8s ease-in-out infinite"></span></span></sc-for>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;gap:10px;font-size:12px"><span style="font-weight:700">Etapa {{ a.stepNo }}/7 · {{ a.stepName }}</span><span style="color:#6A6A82">{{ a.pct }}</span></div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:#FBF8F2">
+                    <span style="width:8px;height:8px;border-radius:50%;background:#F2A93B;flex-shrink:0;animation:pRing 1.8s infinite;display:block"></span>
+                    <span style="flex:1;font-size:13px">{{ a.next }}</span>
+                  </div>
+                  <div style="display:flex;gap:8px">
+                    <button onClick="{{ a.open }}" style="flex:1;height:42px;border:0;border-radius:10px;background:#17173A;color:#FFFFFF;font-size:13px;font-weight:700;cursor:pointer" style-hover="background:#24245A">Vezi detalii</button>
+                    <button onClick="{{ a.chat }}" style="height:42px;padding:0 14px;border:1px solid #E6DECF;border-radius:10px;background:#FFFFFF;color:#17173A;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap" style-hover="border-color:#17173A">Scrie evaluatorului</button>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+
+          <section style="display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><h2 style="margin:0;font-size:18px;letter-spacing:-.02em">Proprietățile mele</h2><button onClick="{{ goProps }}" style="border:0;background:transparent;color:#9A5F00;font-size:13px;font-weight:700;cursor:pointer;padding:0">Vezi toate →</button></div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:14px">
+              <sc-for list="{{ propCards }}" as="p" hint-placeholder-count="3">
+                <button onClick="{{ p.open }}" style="text-align:left;padding:0;border:1px solid #E6DECF;border-radius:20px;overflow:hidden;background:#FFFFFF;cursor:pointer;color:#17173A;display:flex;flex-direction:column;transition:all .25s" style-hover="border-color:#F2A93B;transform:translateY(-3px);box-shadow:0 20px 40px -24px rgba(23,23,58,.4)">
+                  <div style="position:relative;height:130px;background:#E6DECF;overflow:hidden">
+                    <img src="{{ p.img }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block"></img>
+                    <span style="position:absolute;top:12px;left:12px;font-size:11px;font-weight:700;padding:5px 10px;border-radius:999px;background:{{ p.statusBg }};color:{{ p.statusColor }}">{{ p.status }}</span>
+                  </div>
+                  <div style="padding:14px 16px 16px;display:flex;flex-direction:column;gap:4px">
+                    <span style="font-size:15px;font-weight:700">{{ p.title }}</span>
+                    <span style="font-size:12px;color:#6A6A82">{{ p.addrFull }}</span>
+                    <span style="margin-top:8px;display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span style="font-size:11px;color:#6A6A82">{{ p.valueLabel }}</span><span style="font-size:15px;font-weight:800;color:{{ p.valueColor }}">{{ p.value }}</span></span>
+                  </div>
+                </button>
+              </sc-for>
+            </div>
+          </section>
+
+          <section style="display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><h2 style="margin:0;font-size:18px;letter-spacing:-.02em">Rapoarte recente</h2><button onClick="{{ goReports }}" style="border:0;background:transparent;color:#9A5F00;font-size:13px;font-weight:700;cursor:pointer;padding:0">Toate rapoartele →</button></div>
+            <div style="background:#FFFFFF;border:1px solid #E6DECF;border-radius:20px;padding:6px">
+              <sc-for list="{{ recentReports }}" as="r" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:14px;padding:12px;border-radius:14px" style-hover="background:#FBF8F2">
+                  <span style="width:38px;height:44px;border-radius:8px;background:#17173A;color:#F2A93B;font-size:9px;font-weight:800;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;flex-shrink:0">PDF</span>
+                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.propTitle }} · {{ r.purpose }}</span><span style="font-size:12px;color:#6A6A82">{{ r.id }} · {{ r.date }}</span></span>
+                  <span style="font-size:14px;font-weight:800;white-space:nowrap">{{ r.value }}</span>
+                  <button onClick="{{ r.dl }}" aria-label="Descarcă {{ r.id }}" style="width:40px;height:40px;flex-shrink:0;border:1px solid #E6DECF;border-radius:10px;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="border-color:#17173A"><img src="{{ ic.download }}" alt="" style="width:18px;height:18px;display:block"></img></button>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isProps }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:20px;animation:pIn .35s ease-out">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+            <div style="display:flex;flex-direction:column;gap:6px"><h1 style="margin:0;font-size:clamp(24px,3vw,34px);letter-spacing:-.03em">Proprietățile mele</h1><p style="margin:0;font-size:14px;color:#6A6A82">{{ propCount }} proprietăți · {{ activeCount }} cu evaluare în curs</p></div>
+            <button onClick="{{ addProp }}" style="height:44px;padding:0 18px;border:0;border-radius:12px;background:#17173A;color:#FFFFFF;font-size:13px;font-weight:700;cursor:pointer" style-hover="background:#24245A">+ Adaugă proprietate</button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px">
+            <sc-for list="{{ propCards }}" as="p" hint-placeholder-count="3">
+              <button onClick="{{ p.open }}" style="text-align:left;padding:0;border:1px solid #E6DECF;border-radius:22px;overflow:hidden;background:#FFFFFF;cursor:pointer;color:#17173A;display:flex;flex-direction:column;transition:all .25s" style-hover="border-color:#F2A93B;transform:translateY(-3px);box-shadow:0 24px 48px -28px rgba(23,23,58,.45)">
+                <div style="position:relative;height:190px;background:#E6DECF;overflow:hidden">
+                  <img src="{{ p.img }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block"></img>
+                  <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,23,58,0) 45%,rgba(23,23,58,.7))"></div>
+                  <span style="position:absolute;top:14px;left:14px;font-size:11px;font-weight:700;padding:6px 10px;border-radius:999px;background:{{ p.statusBg }};color:{{ p.statusColor }}">{{ p.status }}</span>
+                  <span style="position:absolute;left:16px;bottom:14px;right:16px;color:#FFFFFF;display:flex;flex-direction:column;gap:2px"><span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#F5BE66">{{ p.typeCaps }}</span><span style="font-size:18px;font-weight:700;letter-spacing:-.02em">{{ p.title }}</span></span>
+                </div>
+                <div style="padding:16px 18px 18px;display:flex;flex-direction:column;gap:14px">
+                  <span style="font-size:13px;color:#6A6A82">{{ p.addrFull }}</span>
+                  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding-top:12px;border-top:1px solid #F0EADF">
+                    <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:11px;color:#6A6A82">{{ p.valueLabel }}</span><span style="font-size:14px;font-weight:800;color:{{ p.valueColor }};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.value }}</span></span>
+                    <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:11px;color:#6A6A82">Rapoarte</span><span style="font-size:14px;font-weight:800">{{ p.reportCount }}</span></span>
+                    <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:11px;color:#6A6A82">Documente</span><span style="font-size:14px;font-weight:800">{{ p.docCount }}</span></span>
+                  </div>
+                </div>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isProp }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:20px;animation:pIn .35s ease-out">
+          <div style="position:relative;border-radius:24px;overflow:hidden;background:#17173A;min-height:240px;display:flex;align-items:flex-end">
+            <img src="{{ cur.imgLg }}" alt="{{ cur.title }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block"></img>
+            <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(23,23,58,.92) 0%,rgba(23,23,58,.6) 55%,rgba(23,23,58,.2) 100%)"></div>
+            <div style="position:relative;width:100%;padding:clamp(20px,3vw,32px);display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;color:#FFFFFF">
+              <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
+                <button onClick="{{ goProps }}" style="align-self:flex-start;border:0;background:rgba(255,255,255,.12);color:#FFFFFF;height:32px;padding:0 12px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer" style-hover="background:rgba(255,255,255,.2)">← Proprietăți</button>
+                <span style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#F5BE66">{{ cur.typeCaps }}</span>
+                <h1 style="margin:0;font-size:clamp(24px,3.2vw,36px);letter-spacing:-.03em;line-height:1.1">{{ cur.title }}</h1>
+                <span style="font-size:14px;color:#D6D7E6">{{ cur.addrFull }}</span>
+              </div>
+              <div style="background:rgba(255,255,255,.1);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:14px 18px;display:flex;flex-direction:column;gap:4px;min-width:200px">
+                <span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#F5BE66">VALOARE DE PIAȚĂ</span>
+                <span style="font-size:26px;font-weight:800;letter-spacing:-.02em">{{ cur.valueShort }}</span>
+                <span style="font-size:11px;color:#D6D7E6">{{ cur.valueSub }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div role="tablist" style="display:flex;gap:4px;padding:4px;border-radius:14px;background:#EDE6D8;align-self:flex-start;max-width:100%;overflow-x:auto">
+            <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+              <button role="tab" aria-selected="{{ t.on }}" onClick="{{ t.pick }}" style="height:40px;padding:0 18px;border:0;border-radius:10px;background:{{ t.bg }};color:#17173A;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:{{ t.shadow }};display:flex;align-items:center;gap:8px">{{ t.label }}<span style="font-size:11px;padding:2px 7px;border-radius:999px;background:{{ t.countBg }};display:{{ t.countD }}">{{ t.count }}</span></button>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ tabOverview }}" hint-placeholder-val="{{ true }}">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:18px;align-items:start;animation:pIn .3s ease-out">
+              <div style="display:flex;flex-direction:column;gap:18px;min-width:0">
+                <sc-if value="{{ cur.hasActive }}" hint-placeholder-val="{{ true }}">
+                  <section style="background:#FFFFFF;border:1px solid #E6DECF;border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:16px">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+                      <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#9A5F00">EVALUARE ÎN CURS</span><span style="font-size:17px;font-weight:700">{{ cur.active.purpose }}</span><span style="font-size:12px;color:#6A6A82;font-family:ui-monospace,Menlo,monospace">{{ cur.active.id }}</span></div>
+                      <span style="font-size:12px;font-weight:700;padding:6px 12px;border-radius:999px;background:#FFF1D6;color:#9A5F00">Etapa {{ cur.active.stepNo }}/7</span>
+                    </div>
+                    <ol style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column">
+                      <sc-for list="{{ cur.active.steps }}" as="s" hint-placeholder-count="7">
+                        <li style="display:flex;gap:14px">
+                          <div style="display:flex;flex-direction:column;align-items:center;width:24px;flex-shrink:0">
+                            <span style="width:24px;height:24px;border-radius:50%;background:{{ s.dotBg }};border:2px solid {{ s.dotBorder }};color:#17173A;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;animation:{{ s.anim }}">{{ s.mark }}</span>
+                            <span style="flex:1;width:2px;min-height:14px;background:{{ s.line }};display:{{ s.lineD }}"></span>
+                          </div>
+                          <div style="flex:1;min-width:0;padding:2px 0 14px;display:flex;flex-direction:column;gap:3px">
+                            <div style="display:flex;justify-content:space-between;gap:10px"><span style="font-size:14px;font-weight:700;color:{{ s.color }}">{{ s.label }}</span><span style="font-size:12px;color:#6A6A82;white-space:nowrap">{{ s.date }}</span></div>
+                            <span style="font-size:12px;line-height:1.5;color:#6A6A82;display:{{ s.noteD }}">{{ s.note }}</span>
+                          </div>
+                        </li>
+                      </sc-for>
+                    </ol>
+                    <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:#FBF8F2">
+                      <span style="width:40px;height:40px;border-radius:12px;background:#17173A;color:#F2A93B;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ cur.active.evInitials }}</span>
+                      <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:700">{{ cur.active.ev }}</span><span style="font-size:11px;color:#6A6A82">Evaluator autorizat ANEVAR</span></span>
+                      <button onClick="{{ cur.active.chat }}" style="height:40px;padding:0 14px;border:0;border-radius:10px;background:#F2A93B;color:#17173A;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap" style-hover="background:#F5BE66">Mesaj</button>
+                    </div>
+                  </section>
+                </sc-if>
+
+                <section style="background:#FFFFFF;border:1px solid #E6DECF;border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px">
+                  <h2 style="margin:0;font-size:16px">Istoric evaluări</h2>
+                  <ol style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column">
+                    <sc-for list="{{ cur.history }}" as="h" hint-placeholder-count="3">
+                      <li style="display:flex;gap:14px">
+                        <div style="display:flex;flex-direction:column;align-items:center;width:12px;flex-shrink:0;padding-top:5px"><span style="width:12px;height:12px;border-radius:50%;background:{{ h.dot }};border:2px solid {{ h.dotBorder }};display:block"></span><span style="flex:1;width:2px;background:#EDE6D8;display:{{ h.lineD }}"></span></div>
+                        <div style="flex:1;min-width:0;padding-bottom:18px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
+                          <span style="display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:700">{{ h.purpose }}</span><span style="font-size:12px;color:#6A6A82">{{ h.date }} · {{ h.id }}</span></span>
+                          <span style="font-size:14px;font-weight:800;color:{{ h.valueColor }};white-space:nowrap">{{ h.value }}</span>
+                        </div>
+                      </li>
+                    </sc-for>
+                  </ol>
+                  <sc-if value="{{ cur.noHistory }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:#6A6A82">Nicio evaluare finalizată încă.</span></sc-if>
+                </section>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:18px;min-width:0">
+                <section style="background:#17173A;color:#FFFFFF;border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden">
+                  <div aria-hidden="true" style="position:absolute;right:-80px;top:-80px;width:260px;height:260px;border-radius:50%;background:radial-gradient(closest-side,rgba(242,169,59,.3),transparent)"></div>
+                  <div style="position:relative;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start">
+                    <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#F5BE66">VALOARE DE PIAȚĂ</span><span style="font-size:32px;font-weight:800;letter-spacing:-.03em">{{ cur.valueShort }}</span><span style="font-size:12px;color:#A9ABC4">{{ cur.valueSub }}</span></div>
+                    <sc-if value="{{ cur.hasDelta }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;font-weight:800;padding:6px 10px;border-radius:999px;background:rgba(31,169,113,.18);color:#5FD3A0">{{ cur.delta }}</span></sc-if>
+                  </div>
+                  <sc-if value="{{ cur.hasBars }}" hint-placeholder-val="{{ true }}">
+                    <div style="position:relative;height:130px;display:flex;align-items:flex-end;gap:14px;padding-top:10px;border-bottom:1px solid rgba(255,255,255,.12)">
+                      <sc-for list="{{ cur.bars }}" as="b" hint-placeholder-count="2">
+                        <div style="flex:1;max-width:90px;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px">
+                          <span style="font-size:11px;font-weight:700;color:{{ b.labelColor }}">{{ b.val }}</span>
+                          <span style="width:100%;height:{{ b.h }};border-radius:8px 8px 0 0;background:{{ b.bg }};transform-origin:bottom;animation:pGrow .8s cubic-bezier(.2,.8,.2,1) both;display:block"></span>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <div style="display:flex;gap:14px"><sc-for list="{{ cur.bars }}" as="b" hint-placeholder-count="2"><span style="flex:1;max-width:90px;text-align:center;font-size:11px;color:#A9ABC4">{{ b.label }}</span></sc-for></div>
+                  </sc-if>
+                  <span style="position:relative;font-size:11px;line-height:1.5;color:#A9ABC4">{{ cur.valueDisclaimer }}</span>
+                </section>
+
+                <section style="background:#FFFFFF;border:1px solid #E6DECF;border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px">
+                  <h2 style="margin:0;font-size:16px">Detalii proprietate</h2>
+                  <dl style="margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 18px">
+                    <sc-for list="{{ cur.facts }}" as="f" hint-placeholder-count="6">
+                      <div style="min-width:0"><dt style="font-size:11px;color:#6A6A82">{{ f.k }}</dt><dd style="margin:3px 0 0;font-size:14px;font-weight:700;overflow-wrap:anywhere">{{ f.v }}</dd></div>
+                    </sc-for>
+                  </dl>
+                </section>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ tabReports }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:12px;animation:pIn .3s ease-out">
+              <sc-if value="{{ cur.hasActive }}" hint-placeholder-val="{{ false }}">
+                <div style="background:#FFFFFF;border:1.5px dashed #E2D6BE;border-radius:18px;padding:16px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+                  <span style="width:44px;height:52px;border-radius:9px;background:#F0EADF;color:#B3A68C;font-size:9px;font-weight:800;display:flex;align-items:flex-end;justify-content:center;padding-bottom:7px;flex-shrink:0">PDF</span>
+                  <span style="flex:1;min-width:200px;display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:700">Raport de evaluare · {{ cur.active.purpose }}</span><span style="font-size:12px;color:#6A6A82">{{ cur.active.id }} · în lucru — disponibil după verificarea internă</span></span>
+                  <span style="height:38px;padding:0 14px;border-radius:10px;background:#F6F3EC;color:#9A9AAE;font-size:12px;font-weight:700;display:flex;align-items:center">În curând</span>
+                </div>
+              </sc-if>
+              <sc-for list="{{ cur.reports }}" as="r" hint-placeholder-count="2">
+                <div style="background:#FFFFFF;border:1px solid #E6DECF;border-radius:18px;padding:16px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap" style-hover="border-color:#F2A93B">
+                  <span style="width:44px;height:52px;border-radius:9px;background:#17173A;color:#F2A93B;font-size:9px;font-weight:800;display:flex;align-items:flex-end;justify-content:center;padding-bottom:7px;flex-shrink:0">PDF</span>
+                  <span style="flex:1;min-width:200px;display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:700">Raport de evaluare · {{ r.purpose }}</span><span style="font-size:12px;color:#6A6A82">{{ r.id }} · {{ r.date }} · {{ r.ev }} · {{ r.pages }} pagini</span></span>
+                  <span style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><span style="font-size:11px;color:#6A6A82">Valoare de piață</span><span style="font-size:16px;font-weight:800">{{ r.value }}</span></span>
+                  <div style="display:flex;gap:8px">
+                    <button onClick="{{ r.dl }}" style="height:40px;padding:0 14px;border:1px solid #E6DECF;border-radius:10px;background:#FFFFFF;color:#17173A;font-size:13px;font-weight:700;cursor:pointer" style-hover="border-color:#17173A">Vezi</button>
+                    <button onClick="{{ r.dl }}" style="height:40px;padding:0 14px;border:0;border-radius:10px;background:#17173A;color:#FFFFFF;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="background:#24245A"><img src="{{ ic.downloadW }}" alt="" style="width:16px;height:16px;display:block"></img>Descarcă</button>
+                  </div>
+                </div>
+              </sc-for>
+              <sc-if value="{{ cur.noReports }}" hint-placeholder-val="{{ false }}"><div style="padding:28px;text-align:center;font-size:14px;color:#6A6A82;background:#FFFFFF;border:1px solid #E6DECF;border-radius:18px">Încă nu există rapoarte finalizate pentru această proprietate.</div></sc-if>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ tabDocs }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:16px;animation:pIn .3s ease-out">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:10px">
+                <sc-for list="{{ wallet.cats }}" as="c" hint-placeholder-count="6">
+                  <button onClick="{{ c.pick }}" style="text-align:left;padding:14px;border-radius:16px;border:1.5px solid {{ c.border }};background:{{ c.bg }};color:{{ c.color }};cursor:pointer;display:flex;flex-direction:column;gap:10px;transition:all .2s">
+                    <span style="width:34px;height:34px;border-radius:10px;background:{{ c.iconBg }};display:flex;align-items:center;justify-content:center"><img src="{{ c.icon }}" alt="" style="width:18px;height:18px;display:block"></img></span>
+                    <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:700">{{ c.label }}</span><span style="font-size:11px;opacity:.75">{{ c.meta }}</span></span>
+                  </button>
+                </sc-for>
+              </div>
+              <div style="background:#FFFFFF;border:1px solid #E6DECF;border-radius:20px;overflow:hidden">
+                <div style="padding:14px 18px;border-bottom:1px solid #F0EADF;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+                  <span style="font-size:14px;font-weight:700">{{ wallet.title }}</span>
+                  <button onClick="{{ uploadGeneric }}" style="height:38px;padding:0 14px;border:0;border-radius:10px;background:#F2A93B;color:#17173A;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="background:#F5BE66"><img src="{{ ic.upload }}" alt="" style="width:16px;height:16px;display:block"></img>Încarcă</button>
+                </div>
+                <ul style="list-style:none;margin:0;padding:6px;display:flex;flex-direction:column">
+                  <sc-for list="{{ wallet.docs }}" as="d" hint-placeholder-count="4">
+                    <li style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;animation:pIn .25s ease-out" style-hover="background:#FBF8F2">
+                      <span style="width:36px;height:42px;border-radius:7px;background:{{ d.iconBg }};color:{{ d.iconColor }};border:1px {{ d.iconBorderStyle }} {{ d.iconBorder }};font-size:9px;font-weight:800;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px;flex-shrink:0">{{ d.ext }}</span>
+                      <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ d.name }}</span><span style="font-size:12px;color:#6A6A82">{{ d.meta }}</span></span>
+                      <span style="font-size:11px;font-weight:700;padding:5px 10px;border-radius:999px;background:{{ d.stateBg }};color:{{ d.stateColor }};white-space:nowrap">{{ d.state }}</span>
+                      <button onClick="{{ d.act }}" style="height:36px;padding:0 12px;border:1px solid {{ d.btnBorder }};border-radius:9px;background:{{ d.btnBg }};color:{{ d.btnColor }};font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">{{ d.action }}</button>
+                    </li>
+                  </sc-for>
+                </ul>
+                <div style="padding:0 16px 16px">
+                  <button onClick="{{ uploadGeneric }}" style="width:100%;min-height:72px;border:1.5px dashed #D9CDB4;border-radius:14px;background:#FBF8F2;color:#6A6A82;font-size:13px;font-weight:700;cursor:pointer" style-hover="border-color:#F2A93B;color:#9A5F00">Trage fișierele aici sau apasă pentru a încărca · PDF, JPG, PNG</button>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isReports }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:20px;animation:pIn .35s ease-out">
+          <div style="display:flex;flex-direction:column;gap:6px"><h1 style="margin:0;font-size:clamp(24px,3vw,34px);letter-spacing:-.03em">Rapoarte</h1><p style="margin:0;font-size:14px;color:#6A6A82">Toate rapoartele finalizate, pentru toate proprietățile tale.</p></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{ rFilters }}" as="f" hint-placeholder-count="4">
+              <button onClick="{{ f.pick }}" style="height:38px;padding:0 14px;border-radius:999px;border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.color }};font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">{{ f.label }}</button>
+            </sc-for>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:14px">
+            <sc-for list="{{ allReports }}" as="r" hint-placeholder-count="4">
+              <div style="background:#FFFFFF;border:1px solid #E6DECF;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;animation:pIn .3s ease-out" style-hover="border-color:#F2A93B">
+                <div style="display:flex;gap:14px;align-items:center;padding:16px">
+                  <img src="{{ r.img }}" alt="" style="width:56px;height:56px;border-radius:12px;object-fit:cover;flex-shrink:0;background:#E6DECF;display:block"></img>
+                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:11px;color:#6A6A82;font-family:ui-monospace,Menlo,monospace">{{ r.id }}</span><span style="font-size:15px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.propTitle }}</span><button onClick="{{ r.openProp }}" style="align-self:flex-start;border:0;background:transparent;padding:0;color:#9A5F00;font-size:12px;font-weight:700;cursor:pointer">{{ r.city }} →</button></span>
+                </div>
+                <div style="padding:14px 16px;border-top:1px solid #F0EADF;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+                  <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:11px;color:#6A6A82">Scop</span><span style="font-size:13px;font-weight:700">{{ r.purpose }}</span></span>
+                  <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:11px;color:#6A6A82">Data</span><span style="font-size:13px;font-weight:700">{{ r.date }}</span></span>
+                  <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:11px;color:#6A6A82">Valoare</span><span style="font-size:13px;font-weight:800">{{ r.value }}</span></span>
+                </div>
+                <div style="padding:0 16px 16px;display:flex;gap:8px">
+                  <button onClick="{{ r.dl }}" style="flex:1;height:42px;border:0;border-radius:10px;background:#17173A;color:#FFFFFF;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" style-hover="background:#24245A"><img src="{{ ic.downloadW }}" alt="" style="width:16px;height:16px;display:block"></img>Descarcă PDF</button>
+                  <button onClick="{{ r.dl }}" style="height:42px;padding:0 14px;border:1px solid #E6DECF;border-radius:10px;background:#FFFFFF;color:#17173A;font-size:13px;font-weight:700;cursor:pointer" style-hover="border-color:#17173A">Distribuie</button>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </main>
+</div>
+
+<sc-if value="{{ notifOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ closeNotif }}" style="position:fixed;inset:0;z-index:44;background:{{ notifScrim }}"></div>
+  <div role="dialog" aria-label="Notificări și mesaje" style="position:fixed;z-index:45;top:{{ np.top }};right:{{ np.right }};left:{{ np.left }};width:{{ np.width }};max-height:{{ np.maxH }};background:#FFFFFF;border:1px solid #E6DECF;border-radius:{{ np.radius }};box-shadow:0 30px 70px -24px rgba(23,23,58,.4);display:flex;flex-direction:column;overflow:hidden;animation:pPop .22s ease-out">
+    <div style="padding:14px 16px 0;display:flex;flex-direction:column;gap:12px;border-bottom:1px solid #F0EADF">
+      <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:15px;font-weight:700">Notificări</span><button onClick="{{ markRead }}" style="border:0;background:transparent;color:#9A5F00;font-size:12px;font-weight:700;cursor:pointer;padding:0">Marchează citite</button></div>
+      <div style="display:flex;gap:4px">
+        <sc-for list="{{ notifTabs }}" as="t" hint-placeholder-count="2">
+          <button onClick="{{ t.pick }}" style="height:38px;padding:0 12px;border:0;border-bottom:2px solid {{ t.border }};background:transparent;color:{{ t.color }};font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px">{{ t.label }}<span style="font-size:10px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#E5484D;color:#FFFFFF;display:{{ t.badgeD }};align-items:center;justify-content:center">{{ t.badge }}</span></button>
+        </sc-for>
+      </div>
+    </div>
+    <div style="overflow-y:auto;padding:6px">
+      <sc-for list="{{ notifs }}" as="n" hint-placeholder-count="4">
+        <button onClick="{{ n.pick }}" style="width:100%;text-align:left;border:0;background:{{ n.bg }};border-radius:12px;padding:12px;display:flex;gap:12px;cursor:pointer;color:#17173A" style-hover="background:#FBF8F2">
+          <span style="width:38px;height:38px;border-radius:12px;background:{{ n.iconBg }};color:{{ n.iconColor }};font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ n.icon }}</span>
+          <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+            <span style="display:flex;justify-content:space-between;gap:8px"><span style="font-size:13px;font-weight:700">{{ n.title }}</span><span style="font-size:11px;color:#6A6A82;white-space:nowrap">{{ n.time }}</span></span>
+            <span style="font-size:12px;line-height:1.5;color:#4A4A66">{{ n.text }}</span>
+          </span>
+          <span style="width:8px;height:8px;border-radius:50%;background:#F2A93B;flex-shrink:0;margin-top:6px;display:{{ n.dotD }}"></span>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ showFab }}" hint-placeholder-val="{{ true }}">
+  <button onClick="{{ openChat }}" aria-label="Deschide mesajele" style="position:fixed;right:24px;bottom:{{ fabBottom }};z-index:40;height:58px;padding:0 20px 0 8px;border:0;border-radius:999px;background:#17173A;color:#FFFFFF;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:12px;box-shadow:0 18px 40px -12px rgba(23,23,58,.55);transition:transform .2s" style-hover="transform:translateY(-2px)">
+    <span style="position:relative;width:42px;height:42px;border-radius:50%;background:#F2A93B;display:flex;align-items:center;justify-content:center"><img src="{{ ic.chat }}" alt="" style="width:22px;height:22px;display:block"></img><sc-if value="{{ hasMsgUnread }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#E5484D;color:#FFFFFF;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid #17173A">{{ msgUnread }}</span></sc-if></span>
+    <span style="display:{{ fabLabelD }}">Mesaje</span>
+  </button>
+</sc-if>
+
+<sc-if value="{{ chatOpen }}" hint-placeholder-val="{{ false }}">
+  <div role="dialog" aria-label="Mesaje" style="position:fixed;z-index:50;right:{{ cp.right }};bottom:{{ cp.bottom }};top:{{ cp.top }};left:{{ cp.left }};width:{{ cp.width }};height:{{ cp.height }};background:#FFFFFF;border:1px solid #E6DECF;border-radius:{{ cp.radius }};box-shadow:0 30px 80px -20px rgba(23,23,58,.45);display:flex;flex-direction:column;overflow:hidden;transform-origin:bottom right;animation:pPop .25s cubic-bezier(.2,.8,.2,1)">
+    <div style="background:#17173A;color:#FFFFFF;padding:14px 14px 12px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="position:relative;width:40px;height:40px;border-radius:12px;background:#F2A93B;color:#17173A;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ th.initials }}<span style="position:absolute;right:-3px;bottom:-3px;width:12px;height:12px;border-radius:50%;background:#1FA971;border:2px solid #17173A;display:block"></span></span>
+        <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:700">{{ th.name }}</span><span style="font-size:11px;color:#A9ABC4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ th.ref }}</span></span>
+        <button onClick="{{ closeChat }}" aria-label="Închide" style="width:36px;height:36px;border:0;border-radius:10px;background:rgba(255,255,255,.1);color:#FFFFFF;font-size:18px;cursor:pointer" style-hover="background:rgba(255,255,255,.2)">×</button>
+      </div>
+      <div style="display:flex;gap:6px;overflow-x:auto">
+        <sc-for list="{{ threads }}" as="t" hint-placeholder-count="3">
+          <button onClick="{{ t.pick }}" style="height:32px;padding:0 12px;border-radius:999px;border:1px solid {{ t.border }};background:{{ t.bg }};color:{{ t.color }};font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px">{{ t.label }}<span style="width:6px;height:6px;border-radius:50%;background:#E5484D;display:{{ t.dotD }}"></span></button>
+        </sc-for>
+      </div>
+    </div>
+    <div ref="{{ msgRef }}" aria-live="polite" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:#FBF8F2">
+      <sc-for list="{{ msgs }}" as="m" hint-placeholder-count="3">
+        <div style="align-self:{{ m.align }};max-width:84%;flex-shrink:0;display:flex;flex-direction:column;gap:4px;animation:pIn .25s ease-out">
+          <span style="font-size:10px;color:#6A6A82;white-space:nowrap;align-self:{{ m.align }}">{{ m.time }}</span>
+          <span style="padding:10px 13px;border-radius:{{ m.radius }};background:{{ m.bg }};color:{{ m.color }};border:1px solid {{ m.border }};font-size:13px;line-height:1.55;white-space:pre-wrap">{{ m.text }}</span>
+        </div>
+      </sc-for>
+      <sc-if value="{{ typing }}" hint-placeholder-val="{{ false }}"><span style="align-self:flex-start;flex-shrink:0;font-size:12px;color:#6A6A82">{{ th.first }} scrie…</span></sc-if>
+    </div>
+    <div style="padding:10px;border-top:1px solid #F0EADF;display:flex;gap:8px;background:#FFFFFF">
+      <button onClick="{{ uploadGeneric }}" aria-label="Atașează" style="width:44px;height:44px;flex-shrink:0;border:1px solid #E6DECF;border-radius:12px;background:#FFFFFF;cursor:pointer;font-size:18px;color:#6A6A82">+</button>
+      <input value="{{ draft }}" onChange="{{ onDraft }}" onKeyDown="{{ onKey }}" aria-label="Mesaj" placeholder="Scrie un mesaj…" style="flex:1;min-width:0;height:44px;padding:0 14px;border:1px solid #E6DECF;border-radius:12px;background:#FBF8F2;font-size:16px;color:#17173A;outline:none" style-focus="border-color:#F2A93B;background:#FFFFFF"></input>
+      <button onClick="{{ send }}" aria-label="Trimite" style="width:44px;height:44px;flex-shrink:0;border:0;border-radius:12px;background:#F2A93B;color:#17173A;font-size:18px;font-weight:800;cursor:pointer">↑</button>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+  <nav aria-label="Portal mobil" style="position:fixed;left:0;right:0;bottom:0;z-index:35;background:#17173A;display:grid;grid-template-columns:repeat(3,1fr);padding:6px 8px calc(6px + env(safe-area-inset-bottom))">
+    <sc-for list="{{ nav }}" as="n" hint-placeholder-count="3">
+      <button onClick="{{ n.pick }}" style="height:54px;border:0;border-radius:12px;background:{{ n.mBg }};color:{{ n.color }};font-size:11px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px"><img src="{{ n.icon }}" alt="" style="width:20px;height:20px;display:block"></img>{{ n.label }}</button>
+    </sc-for>
+  </nav>
+</sc-if>
+
+<input ref="{{ fileRef }}" type="file" multiple="{{ true }}" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onChange="{{ onFiles }}" style="display:none"></input>
+
+<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+  <div role="status" style="position:fixed;left:50%;bottom:{{ toastBottom }};z-index:60;transform:translateX(-50%);background:#17173A;color:#FFFFFF;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:700;box-shadow:0 16px 40px -12px rgba(23,23,58,.5);animation:pIn .25s ease-out;white-space:nowrap">{{ toast }}</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const U = (id, w) => 'https://images.unsplash.com/' + id + '?auto=format&fit=crop&w=' + w + '&q=70';
+const svg = (d, s) => 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="' + s + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>');
+const P_HOME = '<path d="M3 11l9-7 9 7"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-5h4v5"/>';
+const P_BLD = '<rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 7h1.5M13.5 7H15M9 11h1.5M13.5 11H15M9 15h1.5M13.5 15H15"/>';
+const P_REP = '<path d="M6 3h9l3 3v15H6z"/><path d="M9 10h6M9 14h6M9 18h3"/>';
+const IC = {
+  bell: svg('<path d="M6 16V11a6 6 0 0112 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 004 0"/>', '#17173A'),
+  download: svg('<path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 20h14"/>', '#17173A'),
+  downloadW: svg('<path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 20h14"/>', '#FFFFFF'),
+  upload: svg('<path d="M12 20V9M7 13l5-5 5 5"/><path d="M5 4h14"/>', '#17173A'),
+  chat: svg('<path d="M4 5h16v11H9l-5 4z"/><path d="M8 10h8M8 13h5"/>', '#17173A')
+};
+const CAT_P = { 'Carte funciară': '<path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h4"/>', 'Proprietate': '<path d="M7 3h10v18H7z"/><path d="M10 8h4M10 12h4"/><circle cx="12" cy="17" r="1.5"/>', 'Cadastru': '<path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/>', 'Autorizații': '<circle cx="12" cy="9" r="5"/><path d="M9 13.5L8 21l4-2 4 2-1-7.5"/>', 'Fotografii': '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M21 16l-5-5-8 8"/>', 'Altele': '<path d="M4 7h6l2 2h8v10H4z"/>' };
+const CATS = Object.keys(CAT_P);
+const STAGES = ['Solicitare primită', 'Ofertă acceptată', 'Documente complete', 'Inspecție', 'Analiză și evaluare', 'Verificare internă', 'Raport livrat'];
+const PROPS = [
+  { id: 'apt', type: 'Apartament', title: 'Apartament 3 camere', addr: 'Str. Paris 12, ap. 8', city: 'Timișoara', img: 'photo-1545324418-cc1a3fa10c00',
+    facts: [['Suprafață utilă', '72 m²'], ['Camere', '3'], ['An construcție', '2015'], ['Etaj', '3 din 5'], ['Nr. cadastral', '412345-C1-U8'], ['Carte funciară', 'CF 412345 Timișoara']],
+    active: { id: 'VF-26A7K2', purpose: 'Credit bancar', step: 4, thread: 'apt', dates: ['12 sep', '12 sep', '15 sep', '19 sep', 'în curs', '', ''],
+      notes: ['Trimisă prin asistentul VALUEFY.', 'Contract semnat online.', 'Extras CF, act de proprietate și releveu.', 'Realizată la fața locului · 24 fotografii.', 'Analiza pieței și aplicarea abordărilor de evaluare.', 'Verificare de un al doilea evaluator.', 'Raportul semnat apare în tab-ul Evaluări.'], next: 'Analiză în desfășurare · raport estimat în câteva zile lucrătoare' } },
+  { id: 'house', type: 'Casă', title: 'Casă P+1 cu grădină', addr: 'Str. Trandafirilor 7', city: 'Giroc, jud. Timiș', img: 'photo-1600596542815-ffad4c1539a9',
+    facts: [['Suprafață utilă', '160 m²'], ['Teren', '450 m²'], ['Regim înălțime', 'P+1'], ['An construcție', '2011'], ['Nr. cadastral', '405512'], ['Carte funciară', 'CF 405512 Giroc']], active: null },
+  { id: 'land', type: 'Teren', title: 'Teren intravilan 800 m²', addr: 'Str. Petunia, lot 14', city: 'Dumbrăvița, jud. Timiș', img: 'photo-1500382017468-9049fed747ef',
+    facts: [['Suprafață', '800 m²'], ['Categorie', 'Intravilan, curți-construcții'], ['Deschidere', '20 m'], ['Utilități', 'Curent, apă la limită'], ['Nr. cadastral', '418803'], ['Carte funciară', 'CF 418803 Dumbrăvița']],
+    active: { id: 'VF-26B3M9', purpose: 'Vânzare / cumpărare', step: 3, thread: 'land', dates: ['22 sep', '23 sep', '24 sep', '30 sep · 13:30', '', '', ''],
+      notes: ['Trimisă prin asistentul VALUEFY.', 'Ofertă acceptată.', 'Plan cadastral și extras CF primite.', 'Programată marți, 30 sep, 13:30.', 'Analiza pieței și aplicarea abordărilor de evaluare.', 'Verificare de un al doilea evaluator.', 'Raportul semnat apare în tab-ul Evaluări.'], next: 'Inspecție programată marți, 30 sep, la 13:30' } }
+];
+const EVS = { apt: ['Ing. Mihai Ionescu', 'MI', 'Mihai'], land: ['Ec. Ioana Radu', 'IR', 'Ioana'], gen: ['Echipa VALUEFY', 'V', 'Echipa'] };
+const REPORTS = [
+  { id: 'VF-25Z1Q4', prop: 'house', purpose: 'Succesiune / partaj', date: '2025-08-26', value: 245000, ev: 'Ing. Mihai Ionescu', pages: 38 },
+  { id: 'VF-24H702', prop: 'apt', purpose: 'Asigurare', date: '2024-11-05', value: 127500, ev: 'Ec. Ioana Radu', pages: 26 },
+  { id: 'VF-23K450', prop: 'house', purpose: 'Vânzare / cumpărare', date: '2023-05-10', value: 219000, ev: 'Ec. Ioana Radu', pages: 34 },
+  { id: 'VF-22C118', prop: 'apt', purpose: 'Credit bancar', date: '2022-03-18', value: 118000, ev: 'Ing. Mihai Ionescu', pages: 29 }
+];
+const DOCS0 = [
+  ['apt', 'Carte funciară', 'Extras CF informare.pdf', '14 sep 2026 · 420 KB', 'exp', 'Valabil până la 14 oct'],
+  ['apt', 'Proprietate', 'Contract vânzare-cumpărare.pdf', '2015 · 2,1 MB', 'ok'],
+  ['apt', 'Cadastru', 'Releveu apartament.pdf', '2015 · 860 KB', 'ok'],
+  ['apt', 'Autorizații', 'Certificat energetic.pdf', '2019 · 310 KB', 'ok'],
+  ['apt', 'Fotografii', 'Inspecție 19 sep (24 foto).zip', '19 sep 2026 · 48 MB', 'ok'],
+  ['house', 'Carte funciară', 'Extras CF.pdf', '12 aug 2025 · 390 KB', 'old', 'Expirat — se reemite la nevoie'],
+  ['house', 'Proprietate', 'Certificat de moștenitor.pdf', '2025 · 1,4 MB', 'ok'],
+  ['house', 'Autorizații', 'Autorizație de construire.pdf', '2010 · 980 KB', 'ok'],
+  ['house', 'Cadastru', 'Documentație cadastrală.pdf', '2011 · 3,2 MB', 'ok'],
+  ['house', 'Fotografii', 'Inspecție 19 aug 2025 (38 foto).zip', '2025 · 71 MB', 'ok'],
+  ['land', 'Carte funciară', 'Extras CF teren.pdf', '23 sep 2026 · 350 KB', 'ok'],
+  ['land', 'Cadastru', 'Plan cadastral.pdf', '23 sep 2026 · 1,1 MB', 'ok'],
+  ['land', 'Autorizații', 'Certificat de urbanism', 'Necesar pentru evaluarea în curs', 'missing']
+].map((d, i) => ({ key: 'd' + i, prop: d[0], cat: d[1], name: d[2], meta: d[3], st: d[4], note: d[5] }));
+const MSGS0 = {
+  apt: [['ev', '15 sep, 14:20', 'Bună ziua, am primit documentele, mulțumesc! Vă propun inspecția vineri, 19 septembrie, la ora 10:00.'], ['me', '15 sep, 15:02', 'Perfect, vă aștept la adresă.'], ['ev', 'azi, 09:12', 'Inspecția s-a încheiat, iar analiza e în lucru. Vă anunț aici imediat ce raportul e gata.']],
+  land: [['ev', 'ieri, 16:40', 'Bună ziua! Inspecția e programată marți, 30 sep, la 13:30. Vă rog să încărcați certificatul de urbanism, dacă îl aveți.']],
+  gen: [['ev', '12 sep, 10:00', 'Bine ai venit în portalul VALUEFY! Pentru orice întrebare generală, ne poți scrie aici.']]
+};
+const eur = v => v.toLocaleString('ro-RO') + ' €';
+const fd = d => new Date(d).toLocaleDateString('ro-RO', { day: '2-digit', month: 'short', year: 'numeric' }).replace('.', '');
+
+class Component extends DCLogic {
+  state = { view: 'home', prop: 'apt', tab: 'overview', cat: null, rf: 'all', vw: 1280, notifOpen: false, notifTab: 'all', notifRead: false, chatOpen: false, thread: 'apt', unread: { apt: 1, land: 1, gen: 0 }, draft: '', typing: false, toast: '', docs: DOCS0, uploadTarget: null, msgs: Object.fromEntries(Object.entries(MSGS0).map(([k, v]) => [k, v.map(([f, t, x]) => ({ f, t, x }))])) };
+  msgRef = React.createRef(); fileRef = React.createRef();
+
+  componentDidMount() {
+    this.onR = () => this.setState({ vw: window.innerWidth }); window.addEventListener('resize', this.onR); this.onR();
+    const q = new URLSearchParams(location.search);
+    if (q.get('view')) this.setState({ view: q.get('view'), prop: q.get('prop') || 'apt', tab: q.get('tab') || 'overview' });
+    if (q.get('chat')) this.setState({ chatOpen: true });
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this.onR); clearTimeout(this.tt); }
+  componentDidUpdate(pp, ps) {
+    const s = this.state;
+    if (s.chatOpen && (ps.msgs !== s.msgs || ps.thread !== s.thread || ps.chatOpen !== s.chatOpen || ps.typing !== s.typing)) requestAnimationFrame(() => { const el = this.msgRef.current; if (el) el.scrollTop = el.scrollHeight; });
+  }
+  go(view, prop, tab) { this.setState({ view, prop: prop || this.state.prop, tab: tab || 'overview', cat: null, notifOpen: false }); window.scrollTo(0, 0); }
+  flash(t) { clearTimeout(this.tt); this.setState({ toast: t }); this.tt = setTimeout(() => this.setState({ toast: '' }), 2400); }
+  openChat(th) { const t = th || this.state.thread; this.setState(s => ({ chatOpen: true, notifOpen: false, thread: t, unread: { ...s.unread, [t]: 0 } })); }
+  send() {
+    const x = this.state.draft.trim(); if (!x) return; const t = this.state.thread;
+    const now = 'acum';
+    const add = m => this.setState(s => ({ msgs: { ...s.msgs, [t]: [...s.msgs[t], m] } }));
+    add({ f: 'me', t: now, x }); this.setState({ draft: '' });
+    setTimeout(() => this.setState({ typing: true }), 600);
+    setTimeout(() => { this.setState({ typing: false }); add({ f: 'ev', t: now, x: 'Mulțumesc pentru mesaj! L-am primit și revin cu un răspuns în cel mai scurt timp.' }); }, 2200);
+  }
+  pickUpload(target) { this.setState({ uploadTarget: target || null }); this.fileRef.current && this.fileRef.current.click(); }
+  onFiles(e) {
+    const files = Array.from(e.target.files || []); e.target.value = ''; if (!files.length) return;
+    const s = this.state; const prop = s.view === 'prop' ? s.prop : (s.uploadTarget ? s.docs.find(d => d.key === s.uploadTarget).prop : 'land');
+    files.forEach((f, i) => {
+      const key = i === 0 && s.uploadTarget ? s.uploadTarget : 'u' + Math.random().toString(36).slice(2);
+      const base = s.docs.find(d => d.key === key);
+      const name = base && base.st === 'missing' ? base.name + '.' + (f.name.split('.').pop() || 'pdf') : f.name;
+      const cat = base ? base.cat : (s.cat || 'Altele');
+      const set = (st, meta) => this.setState(ss => { const rest = ss.docs.filter(d => d.key !== key); return { docs: [{ key, prop, cat, name, meta, st }, ...rest] }; });
+      set('up', 'Se încarcă…'); setTimeout(() => set('up', 'Se procesează…'), 900); setTimeout(() => set('ok', 'Încărcat acum · ' + Math.max(1, Math.round(f.size / 1024)) + ' KB'), 1800);
+    });
+    if (s.view !== 'prop' || s.tab !== 'docs') this.go('prop', prop, 'docs');
+    this.setState({ uploadTarget: null });
+  }
+
+  renderVals() {
+    const s = this.state, isMobile = s.vw < 900;
+    const reportsOf = id => REPORTS.filter(r => r.prop === id).sort((a, b) => b.date.localeCompare(a.date));
+    const docsOf = id => s.docs.filter(d => d.prop === id);
+    const pById = id => PROPS.find(p => p.id === id);
+    const latestVal = id => { const r = reportsOf(id)[0]; return r ? r.value : null; };
+    const valued = PROPS.filter(p => latestVal(p.id));
+    const actives = PROPS.filter(p => p.active);
+    const missing = s.docs.filter(d => d.st === 'missing');
+    const msgUnread = Object.values(s.unread).reduce((a, b) => a + b, 0);
+    const baseNotifs = [
+      { kind: 'msg', thread: 'apt', title: 'Ing. Mihai Ionescu', text: 'Inspecția s-a încheiat, iar analiza e în lucru. Vă anunț aici imediat ce raportul e gata.', time: '09:12' },
+      { kind: 'msg', thread: 'land', title: 'Ec. Ioana Radu', text: 'Inspecția e programată marți, 30 sep, la 13:30. Vă rog să încărcați certificatul de urbanism…', time: 'ieri' },
+      { kind: 'status', prop: 'apt', title: 'Status actualizat', text: 'Apartament Timișoara: evaluarea a trecut în etapa „Analiză și evaluare”.', time: 'ieri' },
+      { kind: 'doc', prop: 'land', title: 'Document necesar', text: 'Lipsește certificatul de urbanism pentru Teren Dumbrăvița.', time: '2 zile' },
+      { kind: 'status', prop: 'land', title: 'Inspecție programată', text: 'Teren Dumbrăvița · marți, 30 sep, 13:30.', time: '2 zile' }
+    ];
+    const notifUnreadCount = s.notifRead ? 0 : 3;
+    const unreadTotal = msgUnread + (s.notifRead ? 0 : 3 - Math.min(3, 2 - Math.min(2, msgUnread) + (msgUnread ? 0 : 0)) - (2 - msgUnread > 0 ? 0 : 0));
+    const bellCount = (s.notifRead ? 0 : 3) + msgUnread;
+    const navDef = [['home', 'Acasă', P_HOME, ''], ['props', 'Proprietăți', P_BLD, String(PROPS.length)], ['reports', 'Rapoarte', P_REP, String(REPORTS.length)]];
+    const navOn = k => s.view === k || (k === 'props' && s.view === 'prop');
+    const status = p => p.active ? (p.active.step === 3 ? ['Inspecție programată', '#F2A93B', '#17173A'] : ['Evaluare în curs', '#F2A93B', '#17173A']) : ['Evaluată', 'rgba(255,255,255,.92)', '#17173A'];
+    const propCard = p => { const v = latestVal(p.id), st = status(p); return { title: p.title, addrFull: p.addr + ', ' + p.city, img: U(p.img, 700), typeCaps: p.type.toUpperCase(), status: st[0], statusBg: st[1], statusColor: st[2], value: v ? eur(v) : 'În curs', valueLabel: v ? 'Ultima valoare' : 'Valoare', valueColor: v ? '#17173A' : '#9A5F00', reportCount: String(reportsOf(p.id).length), docCount: String(docsOf(p.id).filter(d => d.st !== 'missing').length), open: () => this.go('prop', p.id) }; };
+    const segs = step => STAGES.map((_, i) => ({ bg: i < step ? '#17173A' : i === step ? '#F6E3BE' : '#EFE9DD', shim: i === step ? 'block' : 'none' }));
+    const repVm = r => { const p = pById(r.prop); return { id: r.id, purpose: r.purpose, date: fd(r.date), value: eur(r.value), ev: r.ev, pages: r.pages, propTitle: p.title, city: p.city, img: U(p.img, 160), dl: () => this.flash('Se descarcă ' + r.id + '.pdf'), openProp: () => this.go('prop', p.id, 'reports') }; };
+
+    const p = pById(s.prop) || PROPS[0];
+    const reps = reportsOf(p.id), lv = reps[0], pv = reps[1];
+    const maxV = Math.max(1, ...reps.map(r => r.value));
+    const a = p.active;
+    const pd = docsOf(p.id);
+    const catDocs = s.cat ? pd.filter(d => d.cat === s.cat) : pd;
+    const docState = d => ({ ok: ['Valid', '#E7F7EF', '#157F55'], exp: [d.note || 'Expiră curând', '#FFF1D6', '#9A5F00'], old: ['Expirat', '#F3EEE5', '#6A6A82'], missing: ['Lipsă', '#FDE8E8', '#B42318'], up: ['Se încarcă', '#EAF0FF', '#2F4DB8'] })[d.st];
+    const history = [...(a ? [{ purpose: a.purpose, date: 'Începută ' + a.dates[0] + ' 2026', id: a.id, value: 'În curs', valueColor: '#9A5F00', dot: '#F2A93B', dotBorder: '#F2A93B' }] : []), ...reps.map(r => ({ purpose: r.purpose, date: fd(r.date), id: r.id, value: eur(r.value), valueColor: '#17173A', dot: '#FFFFFF', dotBorder: '#17173A' }))].map((h, i, arr) => ({ ...h, lineD: i < arr.length - 1 ? 'block' : 'none' }));
+    const np = isMobile ? { top: '68px', right: '8px', left: '8px', width: 'auto', maxH: 'calc(100vh - 150px)', radius: '18px' } : { top: '72px', right: '28px', left: 'auto', width: '400px', maxH: '560px', radius: '18px' };
+    const cp = isMobile ? { right: '0', bottom: '0', top: '0', left: '0', width: 'auto', height: 'auto', radius: '0' } : { right: '24px', bottom: '24px', top: 'auto', left: 'auto', width: '390px', height: 'min(600px, calc(100vh - 110px))', radius: '22px' };
+    const ev = EVS[s.thread];
+    const threadRef = { apt: 'VF-26A7K2 · Apartament Timișoara', land: 'VF-26B3M9 · Teren Dumbrăvița', gen: 'Întrebări generale' }[s.thread];
+    const crumbs = s.view === 'prop' ? [['Proprietăți', () => this.go('props')], [p.title, null]] : [[{ home: 'Acasă', props: 'Proprietăți', reports: 'Rapoarte' }[s.view], null]];
+    const notifsAll = baseNotifs.filter(n => s.notifTab === 'all' || n.kind === 'msg');
+    const nIcon = { msg: ['✉', '#17173A', '#F2A93B'], status: ['✓', '#E7F7EF', '#157F55'], doc: ['!', '#FDE8E8', '#B42318'] };
+
+    return {
+      isDesktop: !isMobile, isMobile,
+      isHome: s.view === 'home', isProps: s.view === 'props', isProp: s.view === 'prop', isReports: s.view === 'reports',
+      ic: IC,
+      nav: navDef.map(([k, label, path, count]) => { const on = navOn(k); return { label, count, current: on ? 'page' : 'false', icon: svg(path, on ? '#F2A93B' : '#A9ABC4'), bg: on ? 'rgba(242,169,59,.14)' : 'transparent', mBg: on ? 'rgba(242,169,59,.14)' : 'transparent', color: on ? '#F5BE66' : '#D6D7E6', pick: () => this.go(k) }; }),
+      crumbs: crumbs.map(([label, fn], i, arr) => ({ label, pick: fn || (() => {}), weight: i === arr.length - 1 ? '700' : '500', color: i === arr.length - 1 ? '#17173A' : '#6A6A82', sep: i < arr.length - 1 ? 'block' : 'none' })),
+      contentPadBottom: isMobile ? '150px' : '120px',
+      bellBg: s.notifOpen ? '#FFFFFF' : 'transparent',
+      hasUnread: bellCount > 0, unreadTotal: String(bellCount),
+      toggleNotif: () => this.setState({ notifOpen: !s.notifOpen, chatOpen: false }), closeNotif: () => this.setState({ notifOpen: false }), notifOpen: s.notifOpen, notifScrim: isMobile ? 'rgba(23,23,58,.3)' : 'transparent', np,
+      markRead: () => this.setState({ notifRead: true, unread: { apt: 0, land: 0, gen: 0 } }),
+      notifTabs: [['all', 'Toate', bellCount], ['msg', 'Mesaje', msgUnread]].map(([k, label, n]) => ({ label, badge: String(n), badgeD: n ? 'flex' : 'none', border: s.notifTab === k ? '#F2A93B' : 'transparent', color: s.notifTab === k ? '#17173A' : '#6A6A82', pick: () => this.setState({ notifTab: k }) })),
+      notifs: notifsAll.map(n => { const unread = n.kind === 'msg' ? s.unread[n.thread] > 0 : !s.notifRead && n.time !== '2 zile' || (!s.notifRead && n.kind === 'doc'); const ic2 = nIcon[n.kind]; return { title: n.title, text: n.text, time: n.time, icon: ic2[0], iconBg: ic2[1], iconColor: ic2[2], bg: unread ? '#FFFBF3' : 'transparent', dotD: unread ? 'block' : 'none', pick: () => { if (n.kind === 'msg') this.openChat(n.thread); else if (n.kind === 'doc') this.go('prop', n.prop, 'docs'); else this.go('prop', n.prop); } }; }),
+      activeCount: String(actives.length), actionCount: String(missing.length), propCount: String(PROPS.length), valuedCount: String(valued.length),
+      portfolioValue: eur(valued.reduce((sum, x) => sum + latestVal(x.id), 0)),
+      statSpan: isMobile ? 'auto' : 'span 2',
+      stats: [['EVALUĂRI ÎN CURS', actives.length, 'Vezi statusul', () => this.go('prop', actives[0].id)], ['PROPRIETĂȚI', PROPS.length, 'Proprietățile mele', () => this.go('props')], ['RAPOARTE', REPORTS.length, 'Toate rapoartele', () => this.go('reports')]].map(([label, value, cta, pick]) => ({ label, value: String(value), cta, pick })),
+      hasAction: missing.length > 0,
+      action: missing.length ? { title: missing[0].name + ' lipsește', sub: pById(missing[0].prop).title + ' · necesar pentru evaluarea în curs', pick: () => { this.go('prop', missing[0].prop, 'docs'); setTimeout(() => this.pickUpload(missing[0].key), 50); } } : { title: '', sub: '', pick: () => {} },
+      activeCards: actives.map(x => ({ id: x.active.id, purpose: x.active.purpose, title: x.title, addr: x.city, img: U(x.img, 200), segs: segs(x.active.step), stepNo: String(x.active.step + 1), stepName: STAGES[x.active.step], pct: Math.round(x.active.step / 7 * 100) + '%', next: x.active.next, open: () => this.go('prop', x.id), chat: () => this.openChat(x.active.thread) })),
+      propCards: PROPS.map(propCard),
+      recentReports: REPORTS.slice(0, 3).map(repVm),
+      goProps: () => this.go('props'), goReports: () => this.go('reports'),
+      addProp: () => this.flash('Adăugarea unei proprietăți — în curând'),
+      cur: {
+        title: p.title, typeCaps: p.type.toUpperCase(), addrFull: p.addr + ', ' + p.city, imgLg: U(p.img, 1600),
+        valueShort: lv ? eur(lv.value) : '—', valueSub: lv ? 'Raport ' + lv.id + ' · ' + fd(lv.date) + ' · ' + lv.purpose : 'Disponibilă după finalizarea primei evaluări',
+        hasDelta: !!(lv && pv), delta: lv && pv ? ((lv.value - pv.value) / pv.value * 100 >= 0 ? '+' : '') + ((lv.value - pv.value) / pv.value * 100).toFixed(1).replace('.', ',') + '% față de ' + new Date(pv.date).getFullYear() : '',
+        hasBars: reps.length > 0,
+        bars: reps.slice().reverse().map((r, i, arr) => ({ h: Math.round(r.value / maxV * 78) + '%', val: Math.round(r.value / 1000) + 'k €', label: new Date(r.date).getFullYear() + ' · ' + r.purpose.split(' ')[0], bg: i === arr.length - 1 ? '#F2A93B' : 'rgba(255,255,255,.22)', labelColor: i === arr.length - 1 ? '#F5BE66' : '#A9ABC4' })),
+        valueDisclaimer: lv ? 'Valoarea de piață este cea stabilită în raportul de evaluare, valabilă la data raportului. Nu reprezintă o estimare actualizată.' : (a ? 'Valoarea va fi afișată aici după livrarea raportului pentru evaluarea în curs (' + a.id + ').' : 'Solicită o evaluare pentru a avea valoarea de piață a proprietății.'),
+        facts: p.facts.map(([k, v]) => ({ k, v })),
+        hasActive: !!a,
+        active: a ? { id: a.id, purpose: a.purpose, stepNo: String(a.step + 1), ev: EVS[a.thread][0], evInitials: EVS[a.thread][1], chat: () => this.openChat(a.thread),
+          steps: STAGES.map((label, i) => { const done = i < a.step, act = i === a.step; return { label, date: a.dates[i] || '', note: a.notes[i], noteD: done || act ? 'block' : 'none', mark: done ? '✓' : '', dotBg: done ? '#F2A93B' : '#FFFFFF', dotBorder: done || act ? '#F2A93B' : '#DDD3C1', anim: act ? 'pRing 1.8s infinite' : 'none', color: done || act ? '#17173A' : '#A6A6B8', line: done ? '#F2A93B' : '#EDE6D8', lineD: i < 6 ? 'block' : 'none' }; }) } : { id: '', purpose: '', stepNo: '', ev: '', evInitials: '', chat: () => {}, steps: [] },
+        history, noHistory: history.length === 0,
+        reports: reps.map(repVm), noReports: reps.length === 0 && !a
+      },
+      tabs: [['overview', 'Prezentare', ''], ['reports', 'Evaluări', String(reps.length)], ['docs', 'Documente', String(pd.length)]].map(([k, label, count]) => { const on = s.tab === k; return { label, count, countD: count ? 'inline-block' : 'none', countBg: on ? '#F6E3BE' : 'rgba(23,23,58,.08)', on: on ? 'true' : 'false', bg: on ? '#FFFFFF' : 'transparent', shadow: on ? '0 2px 8px -2px rgba(23,23,58,.18)' : 'none', pick: () => this.setState({ tab: k }) }; }),
+      tabOverview: s.tab === 'overview', tabReports: s.tab === 'reports', tabDocs: s.tab === 'docs',
+      wallet: {
+        title: (s.cat || 'Toate documentele') + ' · ' + catDocs.length,
+        cats: [null, ...CATS].map(c => { const on = s.cat === c; const list = c ? pd.filter(d => d.cat === c) : pd; const miss = list.filter(d => d.st === 'missing').length; return { label: c || 'Toate', meta: list.length + ' fișiere' + (miss ? ' · ' + miss + ' lipsă' : ''), icon: svg(c ? CAT_P[c] : '<rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18M8 6V4h8v2"/>', on ? '#17173A' : '#F2A93B'), iconBg: on ? '#F2A93B' : '#17173A', border: on ? '#17173A' : (miss ? '#F3C2C2' : '#E6DECF'), bg: on ? '#17173A' : '#FFFFFF', color: on ? '#FFFFFF' : '#17173A', pick: () => this.setState({ cat: c }) }; }),
+        docs: catDocs.map(d => { const st = docState(d), miss = d.st === 'missing'; return { name: d.name, meta: d.cat + ' · ' + d.meta, ext: miss ? '+' : (d.name.split('.').pop() || 'PDF').toUpperCase().slice(0, 4), iconBg: miss ? '#FFFFFF' : '#F3EEE5', iconColor: miss ? '#B42318' : '#6A6A82', iconBorder: miss ? '#E9A5A5' : '#E6DECF', iconBorderStyle: miss ? 'dashed' : 'solid', state: st[0], stateBg: st[1], stateColor: st[2], action: miss ? 'Încarcă' : 'Vezi', btnBg: miss ? '#17173A' : '#FFFFFF', btnColor: miss ? '#FFFFFF' : '#17173A', btnBorder: miss ? '#17173A' : '#E6DECF', act: () => miss ? this.pickUpload(d.key) : this.flash('Se deschide ' + d.name) }; })
+      },
+      uploadGeneric: () => this.pickUpload(null), fileRef: this.fileRef, onFiles: e => this.onFiles(e),
+      rFilters: [['all', 'Toate'], ...PROPS.map(x => [x.id, x.title])].map(([k, label]) => { const on = s.rf === k; return { label, bg: on ? '#17173A' : '#FFFFFF', color: on ? '#FFFFFF' : '#17173A', border: on ? '#17173A' : '#E6DECF', pick: () => this.setState({ rf: k }) }; }),
+      allReports: REPORTS.filter(r => s.rf === 'all' || r.prop === s.rf).map(repVm),
+      showFab: !s.chatOpen, fabBottom: isMobile ? '84px' : '24px', fabLabelD: isMobile ? 'none' : 'block',
+      hasMsgUnread: msgUnread > 0, msgUnread: String(msgUnread),
+      openChat: () => this.openChat(), closeChat: () => this.setState({ chatOpen: false }), chatOpen: s.chatOpen, cp,
+      th: { name: ev[0], initials: ev[1], first: ev[2], ref: threadRef },
+      threads: [['apt', 'Apartament'], ['land', 'Teren'], ['gen', 'General']].map(([k, label]) => { const on = s.thread === k; return { label, bg: on ? '#F2A93B' : 'transparent', color: on ? '#17173A' : '#D6D7E6', border: on ? '#F2A93B' : 'rgba(255,255,255,.2)', dotD: s.unread[k] && !on ? 'block' : 'none', pick: () => this.openChat(k) }; }),
+      msgs: s.msgs[s.thread].map(m => { const me = m.f === 'me'; return { text: m.x, time: me ? 'Tu · ' + m.t : ev[2] + ' · ' + m.t, align: me ? 'flex-end' : 'flex-start', bg: me ? '#17173A' : '#FFFFFF', color: me ? '#FFFFFF' : '#17173A', border: me ? 'transparent' : '#E6DECF', radius: me ? '14px 4px 14px 14px' : '4px 14px 14px 14px' }; }),
+      typing: s.typing, msgRef: this.msgRef,
+      draft: s.draft, onDraft: e => this.setState({ draft: e.target.value }), onKey: e => { if (e.key === 'Enter') this.send(); }, send: () => this.send(),
+      hasToast: !!s.toast, toast: s.toast, toastBottom: isMobile ? '160px' : '100px'
+    };
+  }
+}
+</script>
+</body>
+</html>

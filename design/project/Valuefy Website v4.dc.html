@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>VALUEFY | Evaluări imobiliare</title>
+<meta name="description" content="Servicii profesionale de evaluare pentru apartamente, case, terenuri și proprietăți comerciale. Solicită rapid o ofertă prin VALUEFY."></meta>
+<link rel="preconnect" href="https://fonts.googleapis.com"></link>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Geist:wght@400;500;600;700&amp;display=swap"></link>
+<style>
+:root{--acc:#F2A93B;--acc-ink:#E0931A;--acc-soft:#FDF1DC;--acc-text:#9A5F00}
+html{scroll-behavior:smooth}
+body{margin:0;background:#FFFFFF;color:#17173A;font-family:Manrope,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+a{color:#17173A;text-decoration:none}
+a:hover{color:var(--acc)}
+button,input,textarea,select{font-family:inherit}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+@keyframes vfPulse{0%,100%{opacity:.35}50%{opacity:1}}
+@keyframes vfRing{0%{box-shadow:0 0 0 0 rgba(242,169,59,.45)}100%{box-shadow:0 0 0 8px rgba(242,169,59,0)}}
+@keyframes vfLine{0%{transform:scaleX(0)}60%,100%{transform:scaleX(1)}}
+@keyframes vfDrift{from{background-position:0 0}to{background-position:48px 48px}}
+@keyframes vfIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes vfFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes vfScan{0%{top:-20%}100%{top:110%}}
+@keyframes vfBlob{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(40px,-30px) scale(1.1)}66%{transform:translate(-30px,20px) scale(.95)}}
+@keyframes vfMarq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes vfKen{from{transform:scale(1.04)}to{transform:scale(1.16)}}
+@keyframes vfPing{0%{transform:scale(1);opacity:.9}100%{transform:scale(3);opacity:0}}
+@keyframes vfShimmer{0%{transform:translateX(-100%)}100%{transform:translateX(320%)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</helmet>
+
+<header style="position:fixed;top:0;left:0;right:0;z-index:40;background:rgba(242,236,224,.94);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid {{ hdrBorder }};box-shadow:{{ hdrShadow }};transition:box-shadow .3s,border-color .3s">
+  <div style="max-width:1240px;margin:0 auto;padding:0 24px;height:72px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:24px">
+    <a href="#top" aria-label="VALUEFY — acasă" style="display:flex;align-items:center;justify-self:start"><img src="assets/valuefy-logo.png" alt="VALUEFY" style="height:28px;width:auto;display:block"></img></a>
+    <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+      <nav aria-label="Navigare principală" style="display:flex;align-items:center;gap:2px;padding:4px;border-radius:999px;background:rgba(255,255,255,.55);border:1px solid #E2D8C4;font-size:14px;font-weight:600;white-space:nowrap">
+        <a href="#servicii" style="height:38px;padding:0 18px;border-radius:999px;color:#17173A;display:flex;align-items:center;transition:all .2s" style-hover="background:#FFFFFF;color:#17173A;box-shadow:0 2px 8px -2px rgba(23,23,58,.15)">Servicii</a>
+        <a href="#cum-functioneaza" style="height:38px;padding:0 18px;border-radius:999px;color:#17173A;display:flex;align-items:center;transition:all .2s" style-hover="background:#FFFFFF;color:#17173A;box-shadow:0 2px 8px -2px rgba(23,23,58,.15)">Cum funcționează</a>
+        <a href="#faq" style="height:38px;padding:0 18px;border-radius:999px;color:#17173A;display:flex;align-items:center;transition:all .2s" style-hover="background:#FFFFFF;color:#17173A;box-shadow:0 2px 8px -2px rgba(23,23,58,.15)">Întrebări</a>
+      </nav>
+      <div style="display:flex;align-items:center;gap:10px;justify-self:end">
+        <a href="Valuefy Portal Client v2.dc.html" style="height:44px;padding:0 16px 0 12px;border-radius:999px;border:1px solid #E2DACA;background:#FFFFFF;color:#17173A;font-size:14px;font-weight:600;white-space:nowrap;display:flex;align-items:center;gap:8px;transition:all .2s" style-hover="border-color:#17173A;color:#17173A"><span style="width:24px;height:24px;border-radius:50%;background:#17173A;display:flex;align-items:center;justify-content:center"><span style="width:8px;height:8px;border-radius:50%;border:1.5px solid #F2A93B;display:block"></span></span>Portal client</a>
+        <button onClick="{{ openGeneric }}" style="height:44px;padding:0 20px;border:0;border-radius:999px;background:#17173A;color:#FFFFFF;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:10px;transition:all .2s" style-hover="background:#24245A">Solicită evaluare<span style="width:22px;height:22px;border-radius:50%;background:var(--acc,#F2A93B);color:#17173A;font-size:12px;display:flex;align-items:center;justify-content:center">→</span></button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{ toggleMenu }}" aria-label="Deschide meniul" aria-expanded="{{ menuOpen }}" style="grid-column:3;justify-self:end;width:48px;height:48px;border:1px solid #E7E9ED;border-radius:12px;background:#FFFFFF;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px">
+        <span style="width:18px;height:2px;background:#17173A;border-radius:2px;display:block"></span>
+        <span style="width:18px;height:2px;background:#17173A;border-radius:2px;display:block"></span>
+        <span style="width:12px;height:2px;background:#17173A;border-radius:2px;display:block;align-self:center;margin-left:6px"></span>
+      </button>
+    </sc-if>
+  </div>
+  <sc-if value="{{ showMobileMenu }}" hint-placeholder-val="{{ false }}">
+    <nav aria-label="Meniu mobil" style="border-top:1px solid #E7E9ED;background:#FFFFFF;padding:12px 24px 24px;display:flex;flex-direction:column">
+      <sc-for list="{{ mobileLinks }}" as="l" hint-placeholder-count="5">
+        <a href="{{ l.href }}" onClick="{{ closeMenu }}" style="padding:16px 0;border-bottom:1px solid #E7E9ED;font-size:17px;font-weight:600;display:flex;justify-content:space-between">{{ l.label }}<span style="color:#626771">→</span></a>
+      </sc-for>
+      <button onClick="{{ openGeneric }}" style="margin-top:20px;height:52px;border:0;border-radius:12px;background:var(--acc,#F2A93B);color:#17173A;font-size:16px;font-weight:700;cursor:pointer">Solicită evaluare</button>
+    </nav>
+  </sc-if>
+</header>
+
+<div aria-hidden="true" style="height:73px"></div>
+<main id="top">
+<section aria-labelledby="hero-title" style="position:relative;overflow:hidden;background:{{ hv.bg }};color:{{ hv.color }};border-bottom:1px solid {{ hv.border }}">
+  <div aria-hidden="true" style="position:absolute;inset:0;background:{{ hv.grad }}"></div>
+  <div aria-hidden="true" style="position:absolute;top:-180px;right:-140px;width:680px;height:680px;border-radius:50%;opacity:{{ hv.blobO }};background:radial-gradient(closest-side,rgba(242,169,59,.20),transparent);animation:vfBlob 18s ease-in-out infinite;pointer-events:none"></div>
+  <div aria-hidden="true" style="position:absolute;bottom:-260px;left:28%;width:600px;height:600px;border-radius:50%;opacity:{{ hv.blobO }};background:radial-gradient(closest-side,rgba(242,169,59,.08),transparent);animation:vfBlob 24s ease-in-out infinite reverse;pointer-events:none"></div>
+  <div aria-hidden="true" style="position:absolute;top:12%;left:-200px;width:480px;height:480px;border-radius:50%;opacity:{{ hv.blobO }};background:radial-gradient(closest-side,{{ hv.blob3 }},transparent);animation:vfBlob 20s ease-in-out infinite;pointer-events:none"></div>
+  <div aria-hidden="true" style="position:absolute;inset:0;opacity:{{ hv.dotsO }};background-image:radial-gradient(rgba(242,169,59,.16) 1px,transparent 1px);background-size:24px 24px;-webkit-mask-image:linear-gradient(90deg,transparent 35%,#000 80%);mask-image:linear-gradient(90deg,transparent 35%,#000 80%);pointer-events:none"></div>
+  <div aria-hidden="true" style="position:absolute;inset:0;display:{{ hv.photoD }}">
+    <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&amp;fit=crop&amp;w=2000&amp;q=70" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:70% 50%;display:block"></img>
+    <div style="position:absolute;inset:0;background:{{ hv.photoOverlay }}"></div>
+  </div>
+  <div style="position:relative;max-width:1240px;margin:0 auto;padding:clamp(48px,8vw,104px) 24px clamp(56px,8vw,112px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:clamp(40px,6vw,80px);align-items:center">
+    <div style="display:flex;flex-direction:column;gap:28px">
+      <div style="align-self:flex-start;display:flex;align-items:center;gap:8px;min-height:32px;padding:6px 12px 6px 8px;line-height:1.35;border:1px solid {{ hv.pillBorder }};border-radius:999px;font-size:13px;font-weight:500;color:{{ hv.muted }};background:{{ hv.pillBg }}">
+        <span style="width:18px;height:18px;border-radius:50%;background:var(--acc-soft,#FDF1DC);display:flex;align-items:center;justify-content:center"><span style="width:6px;height:6px;border-radius:50%;background:var(--acc,#F2A93B);display:block"></span></span>
+        Timișoara, vestul României și la nivel național
+      </div>
+      <h1 id="hero-title" style="margin:0;font-size:clamp(36px,5.6vw,72px);line-height:1.02;letter-spacing:-.045em;font-weight:700;text-wrap:balance"><span style="display:block">Evaluări imobiliare.</span><span style="display:block;color:{{ hv.line2 }}">Simplu, rapid și profesionist.</span></h1>
+      <p style="margin:0;font-size:clamp(16px,1.4vw,18px);line-height:1.65;color:{{ hv.muted }};max-width:33em;text-wrap:pretty">Rapoarte de evaluare pentru proprietăți rezidențiale, comerciale și industriale, printr-un proces simplu și digital.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <button onClick="{{ openGeneric }}" style="width:{{ ctaW }};height:54px;padding:0 26px;border:0;border-radius:12px;background:var(--acc,#F2A93B);color:#17173A;font-size:16px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 10px 30px -10px rgba(242,169,59,.55)" style-hover="background:var(--acc-ink,#E0931A)">Solicită o evaluare →</button>
+        
+      </div>
+      <div style="display:flex;align-items:center;gap:14px 20px;flex-wrap:wrap;padding-top:6px">
+        <div style="display:flex;align-items:center;gap:12px;padding:8px 18px 8px 8px;border-radius:999px;background:{{ hv.badgeBg }};border:1px solid {{ hv.badgeBorder }};color:#FFFFFF;box-shadow:{{ hv.badgeShadow }}">
+          <span style="width:46px;height:46px;border-radius:50%;flex-shrink:0;background:radial-gradient(circle at 30% 30%,#F7C465,#D98E12);border:2px solid rgba(255,255,255,.35);box-shadow:0 0 0 3px rgba(242,169,59,.25),inset 0 0 0 5px rgba(255,255,255,.08);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#17173A;line-height:1"><span style="font-size:18px;font-weight:800">✓</span><span style="font-size:7px;font-weight:800;letter-spacing:.04em">ANEVAR</span></span>
+          <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;font-weight:800;letter-spacing:-.01em">Firmă autorizată ANEVAR</span><span style="font-size:12px;color:#A9ABC4">Rapoarte conforme Standardelor de Evaluare</span></span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:{{ hv.muted }}"><span>✓ Proces digital, portal client</span><span>✓ Persoane fizice &amp; companii</span></div>
+      </div>
+    </div>
+
+    <div aria-label="Ilustrație: proprietate, date, analiză, valoare" role="img" style="position:relative;display:flex;flex-direction:column;gap:14px">
+      <div aria-hidden="true" style="position:absolute;z-index:3;left:-36px;top:150px;display:{{ chipD }};color:#17173A;background:#FFFFFF;border:1px solid #E7E9ED;border-radius:14px;padding:10px 14px 10px 10px;align-items:center;gap:10px;box-shadow:0 18px 40px -16px rgba(17,19,24,.3);animation:vfFloat 5s ease-in-out infinite">
+        <span style="width:30px;height:30px;border-radius:9px;background:#1FA971;color:#FFFFFF;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center">✓</span>
+        <span style="display:flex;flex-direction:column"><span style="font-size:13px;font-weight:700">Extras CF încărcat</span><span style="font-size:11px;color:#626771">acum câteva secunde</span></span>
+      </div>
+      <div aria-hidden="true" style="position:absolute;z-index:3;right:-28px;top:300px;display:{{ chipD }};color:#17173A;background:#FFFFFF;border:1px solid #E7E9ED;border-radius:14px;padding:10px 14px 10px 10px;align-items:center;gap:10px;box-shadow:0 18px 40px -16px rgba(17,19,24,.3);animation:vfFloat 6s ease-in-out 1s infinite">
+        <span style="width:30px;height:34px;border-radius:8px;background:var(--acc-soft,#FDF1DC);color:var(--acc-text,#9A5F00);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1"><span style="font-size:8px;font-weight:800">OCT</span><span style="font-size:14px;font-weight:800">09</span></span>
+        <span style="display:flex;flex-direction:column"><span style="font-size:13px;font-weight:700">Inspecție programată</span><span style="font-size:11px;color:#626771">Joi · 10:00</span></span>
+      </div>
+      
+            <div style="position:relative;z-index:2;color:#17173A;background:#FFFFFF;border:1px solid #E7E9ED;border-radius:20px;box-shadow:0 1px 2px rgba(17,19,24,.04),0 30px 70px -24px rgba(0,0,0,.5);overflow:hidden">
+        <div style="position:relative;height:{{ heroImgH }};overflow:hidden;background:#DDE1EA">
+          <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&amp;fit=crop&amp;w=1200&amp;q=70" alt="Bloc de apartamente" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;"></img>
+          <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(17,17,48,0) 50%,rgba(17,17,48,.35))"></div>
+                  </div>
+        <div style="padding:20px 22px;display:flex;align-items:center;gap:14px;border-bottom:1px solid #E7E9ED">
+          <div style="width:48px;height:48px;border-radius:12px;background:#F7F8FA;border:1px solid #E7E9ED;display:flex;align-items:center;justify-content:center"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23111318%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%225%22%20y%3D%223%22%20width%3D%2214%22%20height%3D%2218%22%20rx%3D%221%22%2F%3E%3Cpath%20d%3D%22M9%207h1.5M13.5%207H15M9%2011h1.5M13.5%2011H15M9%2015h1.5M13.5%2015H15M11%2021v-3h2v3%22%2F%3E%3C%2Fsvg%3E" alt="" style="width:24px;height:24px;display:block"></img></div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#626771">Proprietate</div>
+            <div style="font-size:17px;font-weight:700;letter-spacing:-.02em">Apartament</div>
+            <div style="font-size:13px;color:#626771">Timișoara · 72 m² · 3 camere</div>
+          </div>
+          <div style="font-size:12px;font-weight:600;color:#626771;font-family:ui-monospace,Menlo,monospace">VF-2417</div>
+        </div>
+        <div style="padding:10px 22px 6px;display:flex;flex-direction:column">
+          <sc-for list="{{ heroStages }}" as="st" hint-placeholder-count="3">
+            <div style="display:flex;gap:14px;padding:14px 0;border-bottom:1px solid #F0F1F4">
+              <div style="width:24px;height:24px;flex-shrink:0;border-radius:50%;background:{{ st.dotBg }};border:1.5px solid {{ st.dotBorder }};color:#17173A;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;transition:all .4s">{{ st.mark }}</div>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;justify-content:space-between;gap:12px">
+                  <span style="font-size:14px;font-weight:700;color:{{ st.labelColor }};transition:color .4s">{{ st.label }}</span>
+                  <span style="font-size:12px;color:#626771">{{ st.state }}</span>
+                </div>
+                <div style="font-size:12px;color:#626771">{{ st.sub }}</div>
+                <div style="height:4px;border-radius:4px;background:#F0F1F4;overflow:hidden"><div style="height:100%;width:{{ st.bar }};background:var(--acc,#F2A93B);border-radius:4px;transition:{{ st.trans }}"></div></div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="margin:10px 22px 22px;padding:14px 16px;border-radius:12px;background:{{ doneBg }};display:flex;align-items:center;gap:12px;transition:all .5s">
+          <div style="width:28px;height:28px;border-radius:8px;background:{{ doneIconBg }};color:#17173A;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;transition:all .5s">✓</div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:700;color:{{ doneColor }};transition:color .5s">{{ doneLabel }}</div>
+            <div style="font-size:12px;color:#626771">Disponibil în portalul client.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="sel-title" style="max-width:1240px;margin:0 auto;padding:clamp(64px,8vw,104px) 24px 0;display:flex;flex-direction:column;gap:36px">
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <h2 id="sel-title" style="margin:0;font-size:clamp(28px,3.4vw,44px);letter-spacing:-.04em;line-height:1.1">Ce dorești să evaluezi?</h2>
+    <p style="margin:0;font-size:17px;color:#626771">Selectează tipul proprietății și te ghidăm mai departe.</p>
+  </div>
+  <div data-rv="1" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(calc(50% - 8px),180px),1fr));gap:16px">
+    <sc-for list="{{ types }}" as="t" hint-placeholder-count="6">
+      <button onClick="{{ t.pick }}" onMouseEnter="{{ t.enter }}" onMouseLeave="{{ hoverOut }}" onFocus="{{ t.enter }}" onBlur="{{ hoverOut }}" aria-label="Evaluare {{ t.label }}" style="text-align:left;padding:0;border-radius:18px;overflow:hidden;background:#FFFFFF;border:1px solid {{ t.border }};box-shadow:{{ t.shadow }};transform:{{ t.lift }};transition:all .3s cubic-bezier(.2,.8,.2,1);cursor:pointer;display:flex;flex-direction:column;color:#17173A">
+        <div style="position:relative;height:{{ typeImgH }};overflow:hidden;background:#E7E9ED">
+          <img src="{{ t.img }}" alt="" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transform:{{ t.imgT }};transition:transform .9s cubic-bezier(.2,.8,.2,1)"></img>
+          <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(17,17,48,0) 35%,rgba(17,17,48,.45))"></div>
+          <div style="position:absolute;left:14px;bottom:14px;width:44px;height:44px;border-radius:12px;background:{{ t.iconBg }};display:flex;align-items:center;justify-content:center;transition:background .25s;box-shadow:0 6px 16px -6px rgba(0,0,0,.35)"><img src="{{ t.icon }}" alt="" style="width:24px;height:24px;display:block;transform:{{ t.iconT }};transition:transform .35s cubic-bezier(.2,.8,.2,1)"></img></div>
+        </div>
+        <div style="padding:16px 18px 18px;display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <span style="font-size:13px;font-weight:800;letter-spacing:.06em">{{ t.caps }}</span>
+          <span style="color:var(--acc-text,#9A5F00);font-weight:700;opacity:{{ t.arrowO }};transform:{{ t.arrowT }};transition:all .25s">→</span>
+        </div>
+      </button>
+    </sc-for>
+  </div>
+</section>
+
+<section aria-labelledby="scop-title" style="max-width:1240px;margin:0 auto;padding:clamp(56px,7vw,96px) 24px clamp(64px,8vw,112px)">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:clamp(28px,5vw,64px);align-items:start">
+    <div style="display:flex;flex-direction:column;gap:16px;position:{{ faqPos }};top:100px">
+      <div style="font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--acc-text,#9A5F00)">Scopul evaluării</div>
+      <h2 id="scop-title" style="margin:0;font-size:clamp(28px,3.4vw,44px);letter-spacing:-.04em;line-height:1.1;text-wrap:balance">Pentru ce ai nevoie de evaluare?</h2>
+      <p style="margin:0;font-size:16px;line-height:1.65;color:#4A4A66;max-width:26em;text-wrap:pretty">Alege scopul, iar noi pregătim raportul potrivit cerințelor băncii, instanței sau autorităților.</p>
+    </div>
+    <ul data-rv="1" style="grid-column:{{ span2 }};list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border-top:1px solid #EDE6D8">
+      <sc-for list="{{ purposes }}" as="p" hint-placeholder-count="7">
+        <li style="border-bottom:1px solid #EDE6D8">
+          <button onClick="{{ p.pick }}" onMouseEnter="{{ p.enter }}" onMouseLeave="{{ p.leave }}" onFocus="{{ p.enter }}" onBlur="{{ p.leave }}" style="width:100%;min-height:76px;padding:16px {{ p.pad }};border:0;border-radius:14px;background:{{ p.bg }};color:#17173A;text-align:left;cursor:pointer;display:flex;align-items:center;gap:20px;transition:all .3s cubic-bezier(.2,.8,.2,1)">
+            <span style="font-size:12px;font-weight:800;font-family:ui-monospace,Menlo,monospace;color:var(--acc-text,#9A5F00);width:22px;flex-shrink:0">{{ p.n }}</span>
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+              <span style="font-size:clamp(17px,1.6vw,20px);font-weight:700;letter-spacing:-.02em">{{ p.label }}</span>
+              <span style="font-size:14px;line-height:1.5;color:#4A4A66">{{ p.d }}</span>
+            </span>
+            <span aria-hidden="true" style="width:40px;height:40px;flex-shrink:0;border-radius:50%;border:1px solid {{ p.arrowBorder }};background:{{ p.arrowBg }};color:#17173A;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;transform:{{ p.arrowT }};transition:all .3s cubic-bezier(.2,.8,.2,1)">→</span>
+          </button>
+        </li>
+      </sc-for>
+    </ul>
+  </div>
+</section>
+
+<section id="cum-functioneaza" aria-labelledby="how-title" style="background:#F7F8FA;border-top:1px solid #E7E9ED;border-bottom:1px solid #E7E9ED;scroll-margin-top:84px">
+  <div style="max-width:1240px;margin:0 auto;padding:clamp(64px,8vw,112px) 24px;display:flex;flex-direction:column;gap:56px">
+    <div style="display:flex;flex-direction:column;gap:12px;max-width:640px">
+      <div style="font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--acc-text,#9A5F00)">Cum funcționează</div>
+      <h2 id="how-title" style="margin:0;font-size:clamp(28px,3.4vw,44px);letter-spacing:-.04em;line-height:1.1;text-wrap:balance">De la solicitare la raport, fără complicații.</h2>
+    </div>
+    <div style="position:relative">
+      <div aria-hidden="true" style="position:absolute;left:0;right:0;top:19px;height:2px;background:#E7E9ED;border-radius:2px;display:{{ lineD }}"></div>
+      <div aria-hidden="true" style="position:absolute;left:0;right:0;top:19px;height:2px;background:var(--acc,#F2A93B);border-radius:2px;display:{{ lineD }};transform-origin:left;animation:vfLine 5s cubic-bezier(.6,0,.2,1) infinite"></div>
+      <ol style="list-style:none;margin:0;padding:0;position:relative;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:32px">
+        <sc-for list="{{ steps }}" as="s" hint-placeholder-count="3">
+          <li style="display:flex;flex-direction:column;gap:14px">
+            <div style="width:40px;height:40px;border-radius:12px;background:#FFFFFF;border:1px solid #E7E9ED;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--acc-text,#9A5F00)">{{ s.n }}</div>
+            <h3 style="margin:8px 0 0;font-size:20px;letter-spacing:-.025em">{{ s.t }}</h3>
+            <p style="margin:0;font-size:16px;line-height:1.6;color:#626771;max-width:24em">{{ s.d }}</p>
+          </li>
+        </sc-for>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section id="servicii" aria-labelledby="serv-title" style="max-width:1240px;margin:0 auto;padding:clamp(64px,8vw,112px) 24px;display:flex;flex-direction:column;gap:40px;scroll-margin-top:84px">
+  <h2 id="serv-title" style="margin:0;font-size:clamp(28px,3.4vw,44px);letter-spacing:-.04em">Servicii de evaluare</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:1px;background:#E7E9ED;border:1px solid #E7E9ED;border-radius:20px;overflow:hidden">
+    <sc-for list="{{ services }}" as="s" hint-placeholder-count="6">
+      <article style="background:#FFFFFF;display:flex;flex-direction:column;min-height:240px">
+        <div style="position:relative;height:180px;overflow:hidden;background:#E7E9ED">
+          <img src="{{ s.img }}" alt="{{ s.t }}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform .9s cubic-bezier(.2,.8,.2,1)" style-hover="transform:scale(1.07)"></img>
+          <span style="position:absolute;top:14px;left:14px;font-size:12px;font-weight:800;font-family:ui-monospace,Menlo,monospace;background:rgba(255,255,255,.92);border-radius:8px;padding:5px 9px">{{ s.n }}</span>
+        </div>
+        <div style="padding:24px 28px 28px;display:flex;flex-direction:column;gap:12px;flex:1">
+        <h3 style="margin:0;font-size:21px;letter-spacing:-.025em">{{ s.t }}</h3>
+        <p style="margin:0;flex:1;font-size:16px;line-height:1.6;color:#626771">{{ s.d }}</p>
+        <button onClick="{{ s.pick }}" style="align-self:flex-start;min-height:44px;padding:0;border:0;background:transparent;color:var(--acc-text,#9A5F00);font-size:15px;font-weight:700;cursor:pointer" style-hover="color:#17173A">Solicită evaluare →</button>
+        </div>
+      </article>
+    </sc-for>
+  </div>
+</section>
+
+<section aria-labelledby="tech-title" style="position:relative;overflow:hidden;background:#111130;color:#F4F5F7">
+  <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&amp;fit=crop&amp;w=1800&amp;q=70" alt="" aria-hidden="true" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.16;animation:vfKen 24s ease-in-out infinite alternate"></img>
+  <div aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(90deg,#111130 25%,rgba(17,17,48,.7))"></div>
+  <div aria-hidden="true" style="position:absolute;right:-200px;top:-200px;width:700px;height:700px;border-radius:50%;background:radial-gradient(closest-side,rgba(242,169,59,.35),transparent);animation:vfBlob 20s ease-in-out infinite"></div>
+  <div style="position:relative;max-width:1240px;margin:0 auto;padding:clamp(64px,8vw,112px) 24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:clamp(40px,6vw,72px);align-items:center">
+    <div style="display:flex;flex-direction:column;gap:20px">
+      <div style="font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#F2A93B">Portal client</div>
+      <h2 id="tech-title" style="margin:0;font-size:clamp(28px,3.6vw,48px);letter-spacing:-.04em;line-height:1.08;text-wrap:balance">Urmărești evaluarea în timp real, din portalul client.</h2>
+      <p style="margin:0;font-size:17px;line-height:1.65;color:#A9ABC4;max-width:30em;text-wrap:pretty">Fiecare client VALUEFY primește acces la un portal personal. Vezi în ce etapă e dosarul, primești livrabilele și vorbești direct cu evaluatorul — fără emailuri pierdute și fără telefoane de verificare.</p>
+      <ul style="list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:14px">
+        <sc-for list="{{ portalFeats }}" as="pf" hint-placeholder-count="3">
+          <li style="display:flex;gap:14px;align-items:flex-start">
+            <span style="width:38px;height:38px;flex-shrink:0;border-radius:11px;background:rgba(242,169,59,.14);border:1px solid rgba(242,169,59,.3);color:#F5BE66;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">{{ pf.n }}</span>
+            <span style="display:flex;flex-direction:column;gap:3px"><span style="font-size:16px;font-weight:700">{{ pf.t }}</span><span style="font-size:14px;line-height:1.55;color:#A9ABC4">{{ pf.d }}</span></span>
+          </li>
+        </sc-for>
+      </ul>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;padding-top:6px">
+        <a href="Valuefy Portal Client v2.dc.html" style="height:52px;padding:0 22px;border-radius:12px;background:#FFFFFF;color:#111130;font-size:15px;font-weight:700;display:flex;align-items:center;white-space:nowrap" style-hover="background:#FFF3DC;color:#111130">Vezi portalul client →</a>
+        <button onClick="{{ openGeneric }}" style="height:52px;padding:0 22px;border:1px solid #2E2E5A;border-radius:12px;background:#1B1B42;color:#F4F5F7;font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap" style-hover="border-color:#F2A93B">Începe o solicitare</button>
+      </div>
+    </div>
+    <div data-rv="1" aria-label="Exemplu de interfață VALUEFY pentru urmărirea solicitării" role="img" style="background:linear-gradient(180deg,#1B1B42,#15153A);border:1px solid #2A2A55;border-radius:18px;overflow:hidden;box-shadow:0 40px 80px -30px rgba(0,0,0,.7)">
+      <div style="height:44px;border-bottom:1px solid #2A2A55;display:flex;align-items:center;gap:8px;padding:0 16px">
+        <span style="width:10px;height:10px;border-radius:50%;background:#2E2E5A;display:block"></span><span style="width:10px;height:10px;border-radius:50%;background:#2E2E5A;display:block"></span><span style="width:10px;height:10px;border-radius:50%;background:#2E2E5A;display:block"></span>
+        <span style="flex:1;text-align:center;font-size:12px;color:#8A8BA8;font-family:ui-monospace,Menlo,monospace">portal.valuefy.ro</span>
+      </div>
+      <div style="padding:22px;display:flex;flex-direction:column;gap:18px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <div style="font-size:12px;color:#8A8BA8;font-family:ui-monospace,Menlo,monospace">VF-2417</div>
+            <div style="font-size:17px;font-weight:700;letter-spacing:-.02em">Apartament · Timișoara</div>
+          </div>
+          <span style="font-size:12px;font-weight:700;padding:6px 10px;border-radius:999px;background:rgba(242,169,59,.14);color:#F5BE66">În lucru</span>
+        </div>
+        <div style="display:flex;gap:4px">
+          <span style="flex:1;height:4px;border-radius:4px;background:#F2A93B;display:block"></span><span style="flex:1;height:4px;border-radius:4px;background:#F2A93B;display:block"></span><span style="flex:1;height:4px;border-radius:4px;background:#F2A93B;display:block"></span>
+          <span style="flex:1;height:4px;border-radius:4px;background:#2E2E5A;display:block;position:relative;overflow:hidden"><span style="position:absolute;top:0;bottom:0;left:0;width:40%;background:#F2A93B;border-radius:4px;animation:vfShimmer 2.2s ease-in-out infinite;display:block"></span></span><span style="flex:1;height:4px;border-radius:4px;background:#2E2E5A;display:block"></span>
+        </div>
+        <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px">
+          <sc-for list="{{ dash }}" as="d" hint-placeholder-count="5">
+            <li style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;background:{{ d.bg }}">
+              <span style="width:22px;height:22px;border-radius:50%;flex-shrink:0;border:1.5px solid {{ d.ring }};background:{{ d.fill }};color:#111130;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;animation:{{ d.anim }}">{{ d.mark }}</span>
+              <span style="flex:1;font-size:14px;font-weight:600;color:{{ d.color }}">{{ d.label }}</span>
+              <span style="font-size:12px;color:#8A8BA8">{{ d.meta }}</span>
+            </li>
+          </sc-for>
+        </ul>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+          <div style="padding:12px;border:1px solid #2A2A55;border-radius:10px;display:flex;align-items:center;gap:10px;font-size:13px;min-width:0"><span style="width:28px;height:32px;border-radius:5px;background:#2A2A55;flex-shrink:0;display:block"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Extras CF.pdf</span></div>
+          <div style="padding:12px;border:1px solid #2A2A55;border-radius:10px;display:flex;align-items:center;gap:10px;font-size:13px;min-width:0"><span style="width:28px;height:32px;border-radius:5px;background:#2A2A55;flex-shrink:0;display:block"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Releveu.pdf</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="despre" aria-labelledby="trust-title" style="max-width:1240px;margin:0 auto;padding:clamp(64px,8vw,112px) 24px 0;display:flex;flex-direction:column;gap:40px;scroll-margin-top:84px">
+  <h2 id="trust-title" style="margin:0;font-size:clamp(28px,3.4vw,44px);letter-spacing:-.04em;line-height:1.1;max-width:16em;text-wrap:balance">Evaluări realizate cu rigoare profesională.</h2>
+  <div data-rv="1" style="position:relative;overflow:hidden;border-radius:24px;background:#111130;color:#F4F5F7;padding:clamp(28px,4vw,48px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:32px;align-items:center">
+    <div aria-hidden="true" style="position:absolute;right:-160px;top:-160px;width:520px;height:520px;border-radius:50%;background:radial-gradient(closest-side,rgba(242,169,59,.45),transparent);animation:vfBlob 18s ease-in-out infinite"></div>
+    <div style="position:relative;display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+      <span style="width:112px;height:112px;border-radius:50%;flex-shrink:0;background:radial-gradient(circle at 30% 30%,#F7C465,#D98E12);border:2px solid rgba(255,255,255,.35);box-shadow:0 0 0 3px rgba(242,169,59,.25),inset 0 0 0 11px rgba(255,255,255,.08);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#17173A;line-height:1"><span style="font-size:43px;font-weight:800">✓</span><span style="font-size:18px;font-weight:800;letter-spacing:.04em">ANEVAR</span></span>
+      <div style="display:flex;flex-direction:column;gap:8px;min-width:220px;flex:1">
+        <span style="font-size:12px;font-weight:800;letter-spacing:.1em;color:#F5BE66">AUTORIZARE PROFESIONALĂ</span>
+        <span style="font-size:clamp(24px,3vw,36px);font-weight:800;letter-spacing:-.03em;line-height:1.1">Firmă autorizată ANEVAR</span>
+        <sc-if value="{{ hasAnevarNo }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:#A9ABC4;font-family:ui-monospace,Menlo,monospace">Autorizație nr. {{ anevarNo }}</span></sc-if>
+      </div>
+    </div>
+    <div style="position:relative;display:flex;flex-direction:column;gap:14px">
+      <p style="margin:0;font-size:16px;line-height:1.7;color:#C9CAE0;text-wrap:pretty">VALUEFY este firmă de evaluare autorizată de Asociația Națională a Evaluatorilor Autorizați din România (ANEVAR). Rapoartele sunt întocmite de evaluatori autorizați, conform Standardelor de Evaluare ANEVAR, și pot fi folosite în relația cu băncile, instanțele și autoritățile.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px"><span style="font-size:12px;font-weight:700;padding:7px 12px;border-radius:999px;border:1px solid #2E2E5A">Evaluatori autorizați</span><span style="font-size:12px;font-weight:700;padding:7px 12px;border-radius:999px;border:1px solid #2E2E5A">Standarde SEV</span><span style="font-size:12px;font-weight:700;padding:7px 12px;border-radius:999px;border:1px solid #2E2E5A">Verificare internă a rapoartelor</span></div>
+    </div>
+  </div>
+  <div data-rv="1" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));grid-auto-rows:minmax(220px,auto);gap:16px">
+    <sc-for list="{{ mosaic }}" as="mo" hint-placeholder-count="3">
+      <figure style="margin:0;position:relative;overflow:hidden;border-radius:20px;background:#E7E9ED;min-height:260px">
+        <img src="{{ mo.img }}" alt="{{ mo.t }}" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:transform 1.2s cubic-bezier(.2,.8,.2,1)" style-hover="transform:scale(1.06)"></img>
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(17,17,48,0) 45%,rgba(17,17,48,.75));pointer-events:none"></div>
+        <figcaption style="position:absolute;left:20px;right:20px;bottom:18px;color:#FFFFFF;display:flex;flex-direction:column;gap:4px;pointer-events:none"><span style="font-size:12px;font-weight:800;letter-spacing:.08em;color:#F5BE66">{{ mo.n }}</span><span style="font-size:19px;font-weight:700;letter-spacing:-.02em">{{ mo.t }}</span></figcaption>
+      </figure>
+    </sc-for>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:16px">
+    <sc-for list="{{ trust }}" as="tr" hint-placeholder-count="4">
+      <div data-rv="1" style="padding:26px;border:1px solid #E7E9ED;border-radius:16px;display:flex;flex-direction:column;gap:14px;background:#FFFFFF" style-hover="border-color:var(--acc-text,#9A5F00)">
+        <div style="width:40px;height:40px;border-radius:10px;background:var(--acc-soft,#FDF1DC);display:flex;align-items:center;justify-content:center"><img src="{{ tr.icon }}" alt="" style="width:20px;height:20px;display:block"></img></div>
+        <h3 style="margin:0;font-size:18px;letter-spacing:-.02em">{{ tr.t }}</h3>
+        <p style="margin:0;font-size:15px;line-height:1.6;color:#626771">{{ tr.d }}</p>
+      </div>
+    </sc-for>
+  </div>
+</section>
+
+<section aria-labelledby="clients-title" style="background:#FBF8F2;border-top:1px solid #EDE6D8">
+  <div style="max-width:1240px;margin:0 auto;padding:clamp(64px,8vw,112px) 24px;display:flex;flex-direction:column;gap:40px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:24px;align-items:end">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--acc-text,#9A5F00)">Pentru cine lucrăm</div>
+        <h2 id="clients-title" style="margin:0;font-size:clamp(28px,3.4vw,44px);letter-spacing:-.04em;line-height:1.1;text-wrap:balance">Aceeași rigoare, pentru fiecare tip de client.</h2>
+      </div>
+      <p style="margin:0;font-size:16px;line-height:1.65;color:#4A4A66;max-width:30em;text-wrap:pretty">De la proprietarul unui apartament la bănci și dezvoltatori — adaptăm raportul la scopul tău, nu invers.</p>
+    </div>
+    <ul data-rv="1" style="list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px">
+      <sc-for list="{{ clientCards }}" as="c" hint-placeholder-count="6">
+        <li style="background:#FFFFFF;border:1px solid #EDE6D8;border-radius:18px;padding:24px;display:flex;gap:18px;align-items:flex-start;transition:all .25s" style-hover="border-color:var(--acc,#F2A93B);box-shadow:0 18px 36px -22px rgba(23,23,58,.35);transform:translateY(-2px)">
+          <span style="width:52px;height:52px;flex-shrink:0;border-radius:14px;background:#17173A;display:flex;align-items:center;justify-content:center"><img src="{{ c.icon }}" alt="" style="width:26px;height:26px;display:block"></img></span>
+          <span style="display:flex;flex-direction:column;gap:6px;min-width:0">
+            <span style="font-size:18px;font-weight:700;letter-spacing:-.02em">{{ c.t }}</span>
+            <span style="font-size:14px;line-height:1.55;color:#4A4A66">{{ c.d }}</span>
+          </span>
+        </li>
+      </sc-for>
+    </ul>
+  </div>
+</section>
+
+<section id="faq" aria-labelledby="faq-title" style="background:#FFFFFF;scroll-margin-top:84px">
+  <div style="max-width:1240px;margin:0 auto;padding:clamp(64px,8vw,112px) 24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:clamp(24px,4vw,56px);align-items:start">
+    <div style="position:{{ faqPos }};top:100px;display:flex;flex-direction:column;gap:22px">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--acc-text,#9A5F00)">Întrebări frecvente</div>
+        <h2 id="faq-title" style="margin:0;font-size:clamp(28px,3.4vw,44px);letter-spacing:-.04em;line-height:1.1;text-wrap:balance">Ce vor să știe clienții înainte de evaluare.</h2>
+      </div>
+      <div style="position:relative;overflow:hidden;background:#17173A;color:#FFFFFF;border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:14px">
+        <div aria-hidden="true" style="position:absolute;right:-80px;top:-80px;width:240px;height:240px;border-radius:50%;background:radial-gradient(closest-side,rgba(242,169,59,.35),transparent)"></div>
+        <span style="position:relative;font-size:18px;font-weight:700;letter-spacing:-.02em">Nu găsești răspunsul?</span>
+        <span style="position:relative;font-size:14px;line-height:1.6;color:#C9CAE0">Întreabă asistentul sau sună-ne — îți răspundem pe loc.</span>
+        <div style="position:relative;display:flex;gap:10px;flex-wrap:wrap">
+          <button onClick="{{ openGeneric }}" style="height:48px;padding:0 18px;border:0;border-radius:12px;background:var(--acc,#F2A93B);color:#17173A;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap" style-hover="background:var(--acc-ink,#E0931A)">Întreabă asistentul →</button>
+          <a href="tel:{{ phoneHref }}" style="height:48px;padding:0 18px;border:1px solid rgba(255,255,255,.18);border-radius:12px;color:#FFFFFF;font-size:14px;font-weight:700;display:flex;align-items:center;white-space:nowrap" style-hover="border-color:#F2A93B;color:#FFFFFF">{{ phone }}</a>
+        </div>
+      </div>
+    </div>
+    <div data-rv="1" style="grid-column:{{ span2 }};display:flex;flex-direction:column;gap:10px;min-width:0">
+      <sc-for list="{{ faqs }}" as="q" hint-placeholder-count="8">
+        <div style="border-radius:16px;border:1px solid {{ q.border }};background:{{ q.bg }};box-shadow:{{ q.shadow }};transition:all .25s">
+          <button onClick="{{ q.toggle }}" aria-expanded="{{ q.open }}" style="width:100%;min-height:64px;padding:18px 20px;border:0;background:transparent;color:#17173A;text-align:left;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:16px">
+            <span style="font-size:12px;font-weight:800;color:var(--acc-text,#9A5F00);font-family:ui-monospace,Menlo,monospace;flex-shrink:0">{{ q.n }}</span>
+            <span style="flex:1">{{ q.q }}</span>
+            <span aria-hidden="true" style="width:32px;height:32px;flex-shrink:0;border-radius:50%;background:{{ q.iconBg }};color:{{ q.iconColor }};display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;transform:{{ q.rot }};transition:all .25s">+</span>
+          </button>
+          <sc-if value="{{ q.open }}" hint-placeholder-val="{{ false }}">
+            <p style="margin:0;padding:0 clamp(20px,5vw,68px) 22px clamp(20px,5vw,50px);font-size:15px;line-height:1.7;color:#4A4A66;animation:vfIn .25s ease-out;text-wrap:pretty">{{ q.a }}</p>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+<section id="contact" aria-labelledby="cta-title" style="padding:clamp(24px,4vw,48px) 16px;scroll-margin-top:84px">
+  <div style="position:relative;overflow:hidden;max-width:1280px;margin:0 auto;background:#111130;color:#F4F5F7;border-radius:28px;padding:clamp(48px,8vw,104px) clamp(24px,5vw,72px);display:flex;flex-direction:column;align-items:center;text-align:center;gap:22px">
+    <img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&amp;fit=crop&amp;w=1800&amp;q=70" alt="" aria-hidden="true" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.3;animation:vfKen 22s ease-in-out infinite alternate"></img>
+    <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(17,17,48,.55),rgba(17,17,48,.92))"></div>
+    <div aria-hidden="true" style="position:absolute;inset:0;background-image:radial-gradient(rgba(242,169,59,.35) 1px,transparent 1.5px);background-size:48px 48px;animation:vfDrift 12s linear infinite;-webkit-mask-image:radial-gradient(ellipse at center,#000 10%,transparent 70%);mask-image:radial-gradient(ellipse at center,#000 10%,transparent 70%)"></div>
+    <div aria-hidden="true" style="position:absolute;left:50%;top:100%;width:900px;height:500px;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(242,169,59,.35),transparent);pointer-events:none"></div>
+    <h2 id="cta-title" style="position:relative;margin:0;font-size:clamp(34px,5vw,64px);letter-spacing:-.045em;line-height:1.04">Ai nevoie de o evaluare?</h2>
+    <p style="position:relative;margin:0;font-size:18px;line-height:1.6;color:#A9ABC4;max-width:28em">Spune-ne câteva lucruri despre proprietate. Durează doar câteva minute.</p>
+    <div style="position:relative;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;padding-top:8px">
+      <button onClick="{{ openGeneric }}" style="height:56px;padding:0 28px;border:0;border-radius:12px;background:#FFFFFF;color:#111130;font-size:16px;font-weight:700;cursor:pointer;white-space:nowrap" style-hover="background:#FFF3DC">Începe solicitarea →</button>
+    </div>
+    <div style="position:relative;display:flex;gap:24px;flex-wrap:wrap;justify-content:center;font-size:14px;color:#A9ABC4;padding-top:12px">
+      <a href="tel:{{ phoneHref }}" style="color:#F4F5F7">{{ phone }}</a>
+      <a href="mailto:{{ email }}" style="color:#F4F5F7">{{ email }}</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer style="max-width:1240px;margin:0 auto;padding:56px 24px calc(40px + {{ footerPad }})">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:40px">
+    <div style="display:flex;flex-direction:column;gap:14px;grid-column:{{ span2 }};min-width:0">
+      <img src="assets/valuefy-logo.png" alt="VALUEFY" style="height:24px;width:auto;align-self:flex-start;display:block"></img>
+      <p style="margin:0;font-size:14px;color:#626771;max-width:22em">Servicii profesionale de evaluare imobiliară.</p>
+      <div style="display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600">
+        <a href="tel:{{ phoneHref }}">{{ phone }}</a>
+        <a href="mailto:{{ email }}">{{ email }}</a>
+      </div>
+    </div>
+    <sc-for list="{{ footerCols }}" as="col" hint-placeholder-count="3">
+      <nav aria-label="{{ col.t }}" style="display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:12px;font-weight:700;letter-spacing:.08em;color:#626771">{{ col.t }}</div>
+        <sc-for list="{{ col.links }}" as="lk" hint-placeholder-count="4">
+          <a href="{{ lk.href }}" style="font-size:14px">{{ lk.label }}</a>
+        </sc-for>
+      </nav>
+    </sc-for>
+  </div>
+  <div style="margin-top:48px;padding-top:24px;border-top:1px solid #E7E9ED;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:13px;color:#626771">
+    <span>© 2026 VALUEFY</span>
+    <div style="display:flex;gap:20px;flex-wrap:wrap"><a href="https://anpc.ro/ce-este-sal/" style="color:#626771">ANPC – SAL</a><a href="https://ec.europa.eu/consumers/odr" style="color:#626771">SOL</a></div>
+  </div>
+</footer>
+
+<sc-if value="{{ showFab }}" hint-placeholder-val="{{ true }}">
+  <button onClick="{{ openGeneric }}" aria-label="Deschide asistentul de evaluare" style="position:fixed;right:20px;bottom:20px;z-index:50;height:56px;padding:0 20px 0 8px;border:1px solid #E7E9ED;border-radius:999px;background:#FFFFFF;color:#17173A;font-size:15px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:12px;box-shadow:0 12px 32px -8px rgba(17,19,24,.25)" style-hover="border-color:var(--acc-text,#9A5F00)">
+    <span style="width:40px;height:40px;border-radius:50%;background:#17173A;display:flex;align-items:center;justify-content:center;position:relative"><span style="width:22px;height:22px;overflow:hidden;display:block"><img src="assets/valuefy-logo.png" alt="" style="height:22px;width:auto;display:block;filter:brightness(1.1)"></img></span><span style="position:absolute;right:0;bottom:0;width:10px;height:10px;border-radius:50%;background:#1FA971;border:2px solid #FFFFFF;display:block"></span></span>
+    Asistent evaluare
+  </button>
+</sc-if>
+
+<sc-if value="{{ showSticky }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;left:0;right:0;bottom:0;z-index:50;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(255,255,255,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid #E7E9ED;display:flex;gap:10px">
+    <button onClick="{{ openGeneric }}" style="flex:1;height:52px;border:0;border-radius:12px;background:var(--acc,#F2A93B);color:#17173A;font-size:16px;font-weight:700;cursor:pointer">Solicită evaluare</button>
+    <button onClick="{{ openGeneric }}" aria-label="Asistent evaluare" style="width:52px;height:52px;border:1px solid #E7E9ED;border-radius:12px;background:#17173A;cursor:pointer;display:flex;align-items:center;justify-content:center"><span style="width:22px;height:22px;overflow:hidden;display:block"><img src="assets/valuefy-logo.png" alt="" style="height:22px;width:auto;display:block"></img></span></button>
+  </div>
+</sc-if>
+
+<div role="dialog" aria-modal="{{ isMobile }}" aria-label="Asistent evaluare VALUEFY" aria-hidden="{{ chatHidden }}" style="position:fixed;z-index:60;top:{{ dr.top }};right:{{ dr.right }};bottom:{{ dr.bottom }};left:{{ dr.left }};width:{{ dr.width }};border-radius:{{ dr.radius }};background:#FFFFFF;border:1px solid #E7E9ED;box-shadow:0 30px 80px -20px rgba(17,19,24,.35);display:flex;flex-direction:column;overflow:hidden;opacity:{{ dr.opacity }};transform:{{ dr.transform }};pointer-events:{{ dr.pe }};visibility:{{ dr.vis }};transition:opacity .28s ease,transform .35s cubic-bezier(.2,.8,.2,1),visibility .35s">
+  <div style="padding:16px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #E7E9ED">
+    <div style="width:40px;height:40px;border-radius:12px;background:#17173A;display:flex;align-items:center;justify-content:center"><span style="width:22px;height:22px;overflow:hidden;display:block"><img src="assets/valuefy-logo.png" alt="" style="height:22px;width:auto;display:block"></img></span></div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--acc-text,#9A5F00)">VALUEFY AI</div>
+      <div style="font-size:15px;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:8px">Asistent evaluare <span style="font-size:12px;font-weight:600;color:#1FA971;display:flex;align-items:center;gap:5px"><span style="width:6px;height:6px;border-radius:50%;background:#1FA971;display:block"></span>Online</span></div>
+    </div>
+    <button onClick="{{ resetChat }}" aria-label="Solicitare nouă" title="Solicitare nouă" style="width:40px;height:40px;border:1px solid #E7E9ED;border-radius:10px;background:#FFFFFF;cursor:pointer;font-size:16px;color:#626771" style-hover="border-color:#17173A;color:#17173A">↺</button>
+    <button onClick="{{ closeChat }}" aria-label="Închide asistentul" style="width:40px;height:40px;border:1px solid #E7E9ED;border-radius:10px;background:#FFFFFF;cursor:pointer;font-size:18px;color:#17173A" style-hover="border-color:#17173A">×</button>
+  </div>
+  <div style="padding:10px 18px 12px;border-bottom:1px solid #E7E9ED;display:flex;flex-direction:column;gap:8px">
+    <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600"><span style="color:#17173A">{{ progressLabel }}</span><span style="color:#626771">{{ progressName }}</span></div>
+    <div role="progressbar" aria-valuemin="0" aria-valuemax="6" aria-valuenow="{{ progressNow }}" style="display:flex;gap:4px">
+      <sc-for list="{{ progressSegs }}" as="sg" hint-placeholder-count="6">
+        <span style="flex:1;height:4px;border-radius:4px;background:{{ sg.bg }};transition:background .4s;display:block"></span>
+      </sc-for>
+    </div>
+  </div>
+
+  <div ref="{{ scrollRef }}" aria-live="polite" style="flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:10px;background:#F7F8FA">
+    <sc-for list="{{ msgs }}" as="m" hint-placeholder-count="1">
+      <sc-if value="{{ m.isBot }}" hint-placeholder-val="{{ true }}">
+        <div style="align-self:flex-start;max-width:88%;background:#FFFFFF;border:1px solid #E7E9ED;border-radius:4px 16px 16px 16px;padding:12px 14px;font-size:15px;line-height:1.55;white-space:pre-wrap;text-wrap:pretty;animation:vfIn .3s ease-out">{{ m.text }}</div>
+      </sc-if>
+      <sc-if value="{{ m.isUser }}" hint-placeholder-val="{{ false }}">
+        <div style="align-self:flex-end;max-width:88%;background:var(--acc,#F2A93B);color:#17173A;border-radius:16px 4px 16px 16px;padding:11px 14px;font-size:15px;line-height:1.5;white-space:pre-wrap;animation:vfIn .25s ease-out">{{ m.text }}</div>
+      </sc-if>
+      <sc-if value="{{ m.isFile }}" hint-placeholder-val="{{ false }}">
+        <div style="align-self:flex-end;width:78%;background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:10px;animation:vfIn .25s ease-out">
+          <span style="width:30px;height:36px;border-radius:6px;background:#F0F1F4;border:1px solid #E7E9ED;flex-shrink:0;font-size:9px;font-weight:800;color:#626771;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px">{{ m.ext }}</span>
+          <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ m.name }}</span>
+            <span style="font-size:12px;color:{{ m.statusColor }}">{{ m.status }}</span>
+            <span style="height:3px;border-radius:3px;background:#F0F1F4;overflow:hidden;display:block"><span style="height:100%;width:{{ m.pct }};background:{{ m.statusColor }};display:block;transition:width .8s ease"></span></span>
+          </span>
+        </div>
+      </sc-if>
+    </sc-for>
+
+    <sc-if value="{{ typing }}" hint-placeholder-val="{{ false }}">
+      <div aria-label="Asistentul scrie" style="align-self:flex-start;display:flex;gap:5px;padding:14px 16px;background:#FFFFFF;border:1px solid #E7E9ED;border-radius:4px 16px 16px 16px">
+        <span style="width:6px;height:6px;border-radius:50%;background:#626771;display:block;animation:vfPulse 1s infinite"></span>
+        <span style="width:6px;height:6px;border-radius:50%;background:#626771;display:block;animation:vfPulse 1s .15s infinite"></span>
+        <span style="width:6px;height:6px;border-radius:50%;background:#626771;display:block;animation:vfPulse 1s .3s infinite"></span>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ w.chips }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-wrap:wrap;gap:8px;padding-top:4px;animation:vfIn .3s ease-out">
+        <sc-for list="{{ chips }}" as="c" hint-placeholder-count="5">
+          <button onClick="{{ c.pick }}" style="min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--acc,#F2A93B);background:#FFFFFF;color:var(--acc-text,#9A5F00);font-size:14px;font-weight:600;cursor:pointer" style-hover="background:var(--acc,#F2A93B);color:#17173A">{{ c.label }}</button>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ w.city }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;animation:vfIn .3s ease-out">
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:#626771">Localitate
+          <input value="{{ f.city }}" onChange="{{ on.city }}" onKeyDown="{{ on.cityKey }}" placeholder="ex. Timișoara" autocomplete="address-level2" style="height:48px;padding:0 14px;border:1px solid #E7E9ED;border-radius:10px;font-size:16px;color:#17173A;background:#FFFFFF;outline:none" style-focus="border-color:var(--acc-text,#9A5F00)"></input>
+        </label>
+        <sc-if value="{{ hasCitySugg }}" hint-placeholder-val="{{ false }}">
+          <div role="listbox" style="display:flex;flex-wrap:wrap;gap:6px">
+            <sc-for list="{{ citySugg }}" as="cs" hint-placeholder-count="4">
+              <button role="option" onClick="{{ cs.pick }}" style="min-height:36px;padding:0 12px;border-radius:8px;border:1px solid #E7E9ED;background:#F7F8FA;color:#17173A;font-size:13px;font-weight:600;cursor:pointer" style-hover="border-color:var(--acc-text,#9A5F00)">{{ cs.label }}</button>
+            </sc-for>
+          </div>
+        </sc-if>
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:#626771">Adresă <span style="font-weight:500">(opțional)</span>
+          <input value="{{ f.address }}" onChange="{{ on.address }}" placeholder="Stradă, număr" autocomplete="street-address" style="height:48px;padding:0 14px;border:1px solid #E7E9ED;border-radius:10px;font-size:16px;color:#17173A;background:#FFFFFF;outline:none" style-focus="border-color:var(--acc-text,#9A5F00)"></input>
+        </label>
+        <button onClick="{{ on.citySubmit }}" style="height:48px;border:0;border-radius:10px;background:var(--acc,#F2A93B);color:#17173A;font-size:15px;font-weight:700;cursor:pointer">Continuă</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ w.details }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;animation:vfIn .3s ease-out">
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+          <sc-if value="{{ det.surface }}" hint-placeholder-val="{{ true }}">
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:#626771">Suprafață utilă (m²)
+              <input inputMode="decimal" value="{{ f.surface }}" onChange="{{ on.surface }}" placeholder="ex. 72" style="height:48px;padding:0 14px;border:1px solid #E7E9ED;border-radius:10px;font-size:16px;color:#17173A;outline:none" style-focus="border-color:var(--acc-text,#9A5F00)"></input>
+            </label>
+          </sc-if>
+          <sc-if value="{{ det.rooms }}" hint-placeholder-val="{{ true }}">
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:#626771">Camere
+              <input inputMode="numeric" value="{{ f.rooms }}" onChange="{{ on.rooms }}" placeholder="ex. 3" style="height:48px;padding:0 14px;border:1px solid #E7E9ED;border-radius:10px;font-size:16px;color:#17173A;outline:none" style-focus="border-color:var(--acc-text,#9A5F00)"></input>
+            </label>
+          </sc-if>
+          <sc-if value="{{ det.land }}" hint-placeholder-val="{{ false }}">
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:#626771">Suprafață teren (m²)
+              <input inputMode="decimal" value="{{ f.land }}" onChange="{{ on.land }}" placeholder="ex. 500" style="height:48px;padding:0 14px;border:1px solid #E7E9ED;border-radius:10px;font-size:16px;color:#17173A;outline:none" style-focus="border-color:var(--acc-text,#9A5F00)"></input>
+            </label>
+          </sc-if>
+        </div>
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:#626771">Alte detalii utile <span style="font-weight:500">(opțional)</span>
+          <input value="{{ f.notes }}" onChange="{{ on.notes }}" placeholder="{{ det.notesPh }}" style="height:48px;padding:0 14px;border:1px solid #E7E9ED;border-radius:10px;font-size:16px;color:#17173A;outline:none" style-focus="border-color:var(--acc-text,#9A5F00)"></input>
+        </label>
+        <div style="display:flex;gap:8px">
+          <button onClick="{{ on.detailsSkip }}" style="height:48px;padding:0 16px;border:1px solid #E7E9ED;border-radius:10px;background:#FFFFFF;color:#626771;font-size:14px;font-weight:600;cursor:pointer">Nu știu exact</button>
+          <button onClick="{{ on.detailsSubmit }}" style="flex:1;height:48px;border:0;border-radius:10px;background:var(--acc,#F2A93B);color:#17173A;font-size:15px;font-weight:700;cursor:pointer">Continuă</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ w.date }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;animation:vfIn .3s ease-out">
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:#626771">Data până la care ai nevoie de raport
+          <input type="date" value="{{ f.date }}" min="{{ today }}" onChange="{{ on.date }}" style="height:48px;padding:0 14px;border:1px solid #E7E9ED;border-radius:10px;font-size:16px;color:#17173A;outline:none" style-focus="border-color:var(--acc-text,#9A5F00)"></input>
+        </label>
+        <button onClick="{{ on.dateSubmit }}" style="height:48px;border:0;border-radius:10px;background:var(--acc,#F2A93B);color:#17173A;font-size:15px;font-weight:700;cursor:pointer">Confirmă data</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ w.upload }}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{ on.pickFile }}" style="align-self:flex-start;min-height:44px;padding:0 16px;border-radius:10px;border:1px dashed #C4C8D0;background:#FFFFFF;color:#17173A;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="border-color:var(--acc-text,#9A5F00);color:var(--acc-text,#9A5F00)">↑ Încarcă documente (opțional)</button>
+    </sc-if>
+
+    <sc-if value="{{ w.contact }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;animation:vfIn .3s ease-out">
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:#626771">Nume și prenume
+          <input value="{{ f.name }}" onChange="{{ on.name }}" autocomplete="name" style="height:48px;padding:0 14px;border:1px solid #E7E9ED;border-radius:10px;font-size:16px;color:#17173A;outline:none" style-focus="border-color:var(--acc-text,#9A5F00)"></input>
+        </label>
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:#626771">Telefon
+          <input type="tel" value="{{ f.phone }}" onChange="{{ on.phone }}" autocomplete="tel" placeholder="07xx xxx xxx" style="height:48px;padding:0 14px;border:1px solid #E7E9ED;border-radius:10px;font-size:16px;color:#17173A;outline:none" style-focus="border-color:var(--acc-text,#9A5F00)"></input>
+        </label>
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:#626771">Email
+          <input type="email" value="{{ f.email }}" onChange="{{ on.email }}" autocomplete="email" placeholder="nume@exemplu.ro" style="height:48px;padding:0 14px;border:1px solid #E7E9ED;border-radius:10px;font-size:16px;color:#17173A;outline:none" style-focus="border-color:var(--acc-text,#9A5F00)"></input>
+        </label>
+        <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.45;color:#626771;cursor:pointer;padding:4px 0">
+          <input type="checkbox" checked="{{ f.consent }}" onChange="{{ on.consent }}" style="width:20px;height:20px;margin:0;flex-shrink:0;accent-color:#E0931A"></input>
+          <span>Sunt de acord ca datele să fie folosite pentru a primi oferta, conform <a href="#" style="color:var(--acc-text,#9A5F00);font-weight:600">Politicii de confidențialitate</a>.</span>
+        </label>
+        <sc-if value="{{ hasContactErr }}" hint-placeholder-val="{{ false }}">
+          <div role="alert" style="font-size:13px;font-weight:600;color:#C2362B">{{ contactErr }}</div>
+        </sc-if>
+        <button onClick="{{ on.contactSubmit }}" style="height:48px;border:0;border-radius:10px;background:var(--acc,#F2A93B);color:#17173A;font-size:15px;font-weight:700;cursor:pointer">Continuă spre verificare</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ w.summary }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:16px;overflow:hidden;animation:vfIn .3s ease-out">
+        <div style="padding:14px 16px;border-bottom:1px solid #E7E9ED;font-size:13px;font-weight:800;letter-spacing:.02em">Verifică solicitarea</div>
+        <div style="padding:16px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:44px;height:44px;border-radius:12px;background:var(--acc-soft,#FDF1DC);display:flex;align-items:center;justify-content:center"><img src="{{ sum.icon }}" alt="" style="width:24px;height:24px;display:block"></img></div>
+            <div style="min-width:0">
+              <div style="font-size:13px;font-weight:800;letter-spacing:.06em">{{ sum.caps }}</div>
+              <div style="font-size:14px;color:#626771">{{ sum.line }}</div>
+            </div>
+          </div>
+          <dl style="margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px">
+            <sc-for list="{{ sum.rows }}" as="r" hint-placeholder-count="6">
+              <div style="min-width:0"><dt style="font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#626771">{{ r.k }}</dt><dd style="margin:2px 0 0;font-size:14px;font-weight:600;overflow-wrap:anywhere">{{ r.v }}</dd></div>
+            </sc-for>
+          </dl>
+        </div>
+        <sc-if value="{{ editMode }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:0 16px 14px;display:flex;flex-wrap:wrap;gap:6px">
+            <sc-for list="{{ editChips }}" as="ec" hint-placeholder-count="6">
+              <button onClick="{{ ec.pick }}" style="min-height:36px;padding:0 12px;border-radius:8px;border:1px solid #E7E9ED;background:#F7F8FA;color:#17173A;font-size:13px;font-weight:600;cursor:pointer" style-hover="border-color:var(--acc-text,#9A5F00)">{{ ec.label }}</button>
+            </sc-for>
+          </div>
+        </sc-if>
+        <div style="padding:0 16px 16px;display:flex;gap:8px">
+          <button onClick="{{ on.toggleEdit }}" style="height:48px;padding:0 18px;border:1px solid #E7E9ED;border-radius:10px;background:#FFFFFF;color:#17173A;font-size:15px;font-weight:600;cursor:pointer">Modifică</button>
+          <button onClick="{{ on.submit }}" disabled="{{ submitting }}" style="flex:1;height:48px;border:0;border-radius:10px;background:var(--acc,#F2A93B);color:#17173A;font-size:15px;font-weight:700;cursor:pointer">{{ submitLabel }}</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ w.done }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:16px;padding:24px 20px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;animation:vfIn .35s ease-out">
+        <div style="width:56px;height:56px;border-radius:50%;background:#1FA971;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800">✓</div>
+        <div style="font-size:18px;font-weight:800;letter-spacing:-.02em">Solicitarea a fost trimisă.</div>
+        <p style="margin:0;font-size:14px;line-height:1.55;color:#626771">Un specialist VALUEFY va verifica informațiile și te va contacta pentru ofertă și pașii următori.</p>
+        <div style="font-size:13px;color:#626771">Număr solicitare <span style="font-family:ui-monospace,Menlo,monospace;font-weight:700;color:#17173A;background:#F7F8FA;border:1px solid #E7E9ED;border-radius:6px;padding:3px 8px">{{ leadId }}</span></div>
+        <button onClick="{{ resetChat }}" style="margin-top:4px;min-height:44px;padding:0 16px;border:1px solid #E7E9ED;border-radius:10px;background:#FFFFFF;color:#17173A;font-size:14px;font-weight:600;cursor:pointer">Solicitare nouă</button>
+      </div>
+      <sc-if value="{{ showCrm }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#111130;color:#C9CAE0;border-radius:12px;padding:14px;font-family:ui-monospace,Menlo,monospace;font-size:11px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere"><div style="color:#F2A93B;font-weight:700;margin-bottom:6px">CRM payload (intern — nu e vizibil public)</div>{{ crmJson }}</div>
+      </sc-if>
+    </sc-if>
+  </div>
+
+  <div style="padding:12px;border-top:1px solid #E7E9ED;display:flex;gap:8px;background:#FFFFFF">
+    <label style="flex:1;min-width:0;display:flex"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Mesaj</span>
+      <input ref="{{ inputRef }}" value="{{ input }}" onChange="{{ on.input }}" onKeyDown="{{ on.inputKey }}" placeholder="Scrie un mesaj sau pune o întrebare…" style="flex:1;min-width:0;height:48px;padding:0 14px;border:1px solid #E7E9ED;border-radius:12px;font-size:16px;color:#17173A;background:#F7F8FA;outline:none" style-focus="border-color:var(--acc-text,#9A5F00);background:#FFFFFF"></input>
+    </label>
+    <button onClick="{{ on.pickFile }}" aria-label="Atașează document" style="width:48px;height:48px;flex-shrink:0;border:1px solid #E7E9ED;border-radius:12px;background:#FFFFFF;cursor:pointer;font-size:18px;color:#626771" style-hover="border-color:#17173A;color:#17173A">+</button>
+    <button onClick="{{ on.send }}" aria-label="Trimite mesajul" style="width:48px;height:48px;flex-shrink:0;border:0;border-radius:12px;background:var(--acc,#F2A93B);color:#17173A;cursor:pointer;font-size:18px;font-weight:700" style-hover="background:var(--acc-ink,#E0931A)">↑</button>
+    <input ref="{{ fileRef }}" type="file" multiple="{{ true }}" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onChange="{{ on.files }}" style="display:none"></input>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;heroStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Luminos&quot;,&quot;Foto&quot;,&quot;Navy&quot;],&quot;default&quot;:&quot;Luminos&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Hero&quot;},&quot;font&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Manrope&quot;,&quot;Verdana&quot;,&quot;Geist&quot;],&quot;default&quot;:&quot;Verdana&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Brand&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;options&quot;:[&quot;#F2A93B&quot;,&quot;#EE8A1E&quot;,&quot;#E6B34A&quot;],&quot;default&quot;:&quot;#F2A93B&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Brand&quot;},&quot;anevarNo&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Brand&quot;},&quot;phone&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;+40 766 225 936&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contact (CMS)&quot;},&quot;email&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;contact@valuefy.ro&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contact (CMS)&quot;},&quot;model&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;claude-haiku-4-5&quot;,&quot;claude-sonnet-4-5&quot;],&quot;default&quot;:&quot;claude-haiku-4-5&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Asistent AI&quot;},&quot;showCrmPreview&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Asistent AI&quot;}}">
+const svg = (d, s = '#17173A') => 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${s}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`);
+const ICONS = {
+  apt: svg('<rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 7h1.5M13.5 7H15M9 11h1.5M13.5 11H15M9 15h1.5M13.5 15H15M11 21v-3h2v3"/>'),
+  house: svg('<path d="M3 11l9-7 9 7"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-5h4v5"/>'),
+  land: svg('<path d="M3 18l5-6 4 4 3-3 6 5"/><path d="M3 21h18"/><circle cx="17" cy="7" r="2"/>'),
+  shop: svg('<path d="M4 9h16l-1.5-5h-13z"/><path d="M5 9v11h14V9"/><path d="M9 20v-6h6v6"/>'),
+  ind: svg('<path d="M3 21V11l5 3v-3l5 3v-3l5 3V5h3v16z"/><path d="M7 18h2M12 18h2"/>'),
+  other: svg('<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8M8 12h8"/>'),
+  badge: svg('<circle cx="12" cy="9" r="5"/><path d="M9 13.5L8 21l4-2 4 2-1-7.5"/>', '#C98A10'),
+  std: svg('<path d="M6 3h9l3 3v15H6z"/><path d="M9 10h6M9 14h6M9 18h3"/>', '#C98A10'),
+  eye: svg('<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>', '#C98A10'),
+  lock: svg('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/>', '#C98A10')
+};
+const TYPES = [
+  { k: 'Apartament', g: 'apartamentului', icon: ICONS.apt },
+  { k: 'Casă', g: 'casei', icon: ICONS.house },
+  { k: 'Teren', g: 'terenului', icon: ICONS.land },
+  { k: 'Spațiu comercial', g: 'spațiului comercial', icon: ICONS.shop },
+  { k: 'Hală / industrial', g: 'halei / proprietății industriale', icon: ICONS.ind },
+  { k: 'Altă proprietate', g: 'proprietății', icon: ICONS.other }
+];
+const PURPOSES = ['Credit bancar', 'Vânzare / cumpărare', 'Impozitare', 'Raportare financiară', 'Succesiune / partaj', 'Expertiză / litigiu', 'Alt scop'];
+const DEADLINES = ['Standard', 'Urgent', 'Termen specific'];
+const DOCS = ['Da', 'Parțial', 'Nu știu ce documente sunt necesare'];
+const CUSTOMERS = ['Persoană fizică', 'Companie'];
+const CITIES = ['Timișoara', 'Dumbrăvița', 'Giroc', 'Chișoda', 'Moșnița Nouă', 'Ghiroda', 'Sânandrei', 'Săcălaz', 'Remetea Mare', 'Lugoj', 'Jimbolia', 'Buziaș', 'Făget', 'Deta', 'Sânnicolau Mare', 'Arad', 'Reșița', 'Caransebeș', 'Deva', 'Hunedoara', 'Oradea', 'Cluj-Napoca', 'București', 'Sibiu', 'Brașov', 'Craiova', 'Iași', 'Constanța'];
+const IMGU = (id, w = 900) => 'https://images.unsplash.com/' + id + '?auto=format&fit=crop&w=' + w + '&q=70';
+const TYPE_IMG = { 'Apartament': 'photo-1545324418-cc1a3fa10c00', 'Casă': 'photo-1600596542815-ffad4c1539a9', 'Teren': 'photo-1500382017468-9049fed747ef', 'Spațiu comercial': 'photo-1441986300917-64674bd600d8', 'Hală / industrial': 'photo-1586528116311-ad8dd3c8310d', 'Altă proprietate': 'photo-1486406146926-c627a92ad1ab' };
+const GROUPS = { type: 1, city: 2, details: 3, purpose: 4, deadline: 4, date: 4, documents: 5, customer: 6, contact: 6, summary: 6, done: 6 };
+const GROUP_NAMES = ['Proprietate', 'Localizare', 'Detalii', 'Scop și termen', 'Documente', 'Contact'];
+const DOC_HELP = 'De regulă sunt necesare:\n• extras de carte funciară (recent)\n• actul de proprietate\n• documentația cadastrală / releveul\n• autorizația de construire, dacă e cazul\n\nLista exactă depinde de proprietate și de scop — specialistul ți-o confirmă în ofertă. Le poți trimite și ulterior.';
+
+class Component extends DCLogic {
+  state = { hs: 0, vw: 1280, scrollY: 0, menu: false, hoverT: -1, faq: 0, open: false, msgs: [], step: 'type', typing: false, busy: false, input: '', lead: {}, f: { consent: false }, contactErr: '', editMode: false, submitting: false, record: null, docs: [] };
+  scrollRef = React.createRef(); inputRef = React.createRef(); fileRef = React.createRef();
+
+  greeting() { return 'Bună! 👋\n\nTe pot ajuta să afli ce presupune evaluarea proprietății tale și să soliciți o ofertă.\n\nCe dorești să evaluezi?'; }
+  typeObj(k) { return TYPES.find(t => t.k === k) || TYPES[5]; }
+
+  componentDidMount() {
+    this.applyTheme();
+    this.onResize = () => this.setState({ vw: window.innerWidth });
+    this.onScroll = () => { const y = window.scrollY; if (Math.abs(y - this.state.scrollY) > 40 || y < 40) this.setState({ scrollY: y }); };
+    window.addEventListener('resize', this.onResize); window.addEventListener('scroll', this.onScroll, { passive: true });
+    this.onResize();
+    const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) this.setState({ hs: 3 }); else { let tick = 0; this.ht = setInterval(() => { tick = (tick + 1) % 6; this.setState({ hs: Math.min(tick, 3) }); }, 2400); }
+    this.setState({ msgs: [{ kind: 'text', role: 'assistant', text: this.greeting() }] });
+    this.loadDemo();
+    if (!reduced) setTimeout(() => this.setupReveal(), 60);
+  }
+  setupReveal() {
+    const hero = document.querySelector('main > section');
+    const els = Array.from(document.querySelectorAll('main h2, main [data-rv], main ol li, main article')).filter(el => el.closest('section') !== hero);
+    const show = (el, i = 0) => { if (el.__rv) return; el.__rv = 1; setTimeout(() => { el.style.opacity = '1'; el.style.translate = '0 0'; }, Math.min(i, 6) * 80); };
+    const idx = el => el.parentElement ? Math.max(0, Array.from(el.parentElement.children).indexOf(el)) : 0;
+    const vh = window.innerHeight || 800;
+    const check = () => els.forEach(el => { if (!el.__rv) { const r = el.getBoundingClientRect(); if (r.top < vh * 0.95 && r.bottom > 0) show(el, idx(el)); } });
+    els.forEach(el => { el.style.transition = (el.style.transition ? el.style.transition + ',' : '') + 'opacity .8s cubic-bezier(.2,.8,.2,1),translate .8s cubic-bezier(.2,.8,.2,1)'; el.style.opacity = '0'; el.style.translate = '0 28px'; });
+    let io = null;
+    if ('IntersectionObserver' in window) { io = new IntersectionObserver(en => en.forEach(e => { if (e.isIntersecting) { io.unobserve(e.target); show(e.target, idx(e.target)); } }), { threshold: 0 }); els.forEach(el => io.observe(el)); }
+    this.rvScroll = () => check(); window.addEventListener('scroll', this.rvScroll, { passive: true });
+    check();
+    this.rvFallback = setTimeout(() => els.forEach(el => show(el)), 2500);
+    this.io = io;
+  }
+  componentWillUnmount() { clearInterval(this.ht); clearTimeout(this.rvFallback); if (this.rvScroll) window.removeEventListener('scroll', this.rvScroll); if (this.io) this.io.disconnect(); window.removeEventListener('resize', this.onResize); window.removeEventListener('scroll', this.onScroll); }
+  componentDidUpdate(pp, ps) {
+    if (pp.font !== this.props.font || pp.accent !== this.props.accent) this.applyTheme();
+    const s = this.state;
+    if (ps.msgs !== s.msgs || ps.step !== s.step || ps.typing !== s.typing || ps.editMode !== s.editMode) {
+      requestAnimationFrame(() => { const el = this.scrollRef.current; if (el) el.scrollTop = el.scrollHeight; });
+    }
+  }
+  applyTheme() {
+    const fonts = { Manrope: 'Manrope,system-ui,sans-serif', Verdana: 'Verdana,Geneva,sans-serif', Geist: 'Geist,system-ui,sans-serif' };
+    document.body.style.fontFamily = fonts[this.props.font ?? 'Verdana'] || fonts.Verdana;
+    const acc = { '#F2A93B': ['#F2A93B', '#E0931A', '#FDF1DC', '#9A5F00'], '#EE8A1E': ['#EE8A1E', '#D8740A', '#FDEBD8', '#9A4C00'], '#E6B34A': ['#E6B34A', '#D19D2F', '#FBF2DD', '#8A6200'] }[this.props.accent ?? '#F2A93B'] || ['#F2A93B', '#E0931A', '#FDF1DC', '#9A5F00'];
+    const r = document.documentElement.style; r.setProperty('--acc', acc[0]); r.setProperty('--acc-ink', acc[1]); r.setProperty('--acc-soft', acc[2]); r.setProperty('--acc-text', acc[3]);
+  }
+  loadDemo() {
+    const demo = new URLSearchParams(location.search).get('demo'); if (!demo) return;
+    if (demo === 'menu') return this.setState({ menu: true });
+    const lead = { property_type: 'Apartament', city: 'Timișoara', address: 'Str. Paris 12', surface_area: '72', rooms: '3', details_done: true };
+    const msgs = [{ kind: 'text', role: 'assistant', text: this.greeting() }, { kind: 'text', role: 'user', text: 'Apartament' }, { kind: 'text', role: 'assistant', text: this.q('city', lead) }, { kind: 'text', role: 'user', text: 'Timișoara, Str. Paris 12' }];
+    if (demo === 'chat') return this.setState({ open: true, lead: { property_type: 'Apartament', city: 'Timișoara', address: 'Str. Paris 12' }, msgs: [...msgs, { kind: 'text', role: 'assistant', text: this.q('details', lead) }], step: 'details', f: { consent: false, surface: '72', rooms: '3' } });
+    Object.assign(lead, { valuation_purpose: 'Credit bancar', deadline: 'Standard', documents_status: 'Da', customer_type: 'Persoană fizică', name: 'Andrei Popescu', phone: '0722 000 000', email: 'andrei@exemplu.ro' });
+    const m2 = [...msgs, { kind: 'text', role: 'user', text: '72 m² · 3 camere' }, { kind: 'text', role: 'user', text: 'Credit bancar' }, { kind: 'file', name: 'Extras CF.pdf', ext: 'PDF', status: '✓ Document încărcat', pct: '100%', statusColor: '#1FA971' }, { kind: 'text', role: 'assistant', text: this.q('summary', lead) }];
+    this.setState({ open: true, lead, msgs: m2, step: 'summary' }, () => { if (demo === 'done') this.submit(); });
+  }
+
+  q(step, l) {
+    const t = this.typeObj(l.property_type);
+    return {
+      type: 'Ce dorești să evaluezi?',
+      city: `Perfect. Te ajut să obții o ofertă pentru evaluarea ${t.g}. În ce localitate se află proprietatea?`,
+      details: `Câteva detalii despre ${l.property_type === 'Altă proprietate' ? 'proprietate' : t.k.toLowerCase()} ne ajută să estimăm corect oferta.`,
+      purpose: 'Pentru ce ai nevoie de evaluare?',
+      deadline: 'Când ai nevoie de raport?',
+      date: 'Alege data până la care ai nevoie de raport.',
+      documents: 'Ai documentele proprietății disponibile?',
+      customer: 'Solicitarea este pentru o persoană fizică sau pentru o companie?',
+      contact: 'Aproape gata. Ca un specialist VALUEFY să îți trimită oferta cu costul, termenul și lista de documente, am nevoie de datele tale de contact. Le folosim doar pentru această solicitare.',
+      summary: 'Mulțumesc! Verifică te rog datele de mai jos înainte de trimitere.'
+    }[step];
+  }
+  nextStep(l) {
+    if (!l.property_type) return 'type';
+    if (!l.city) return 'city';
+    if (!l.details_done && !l.surface_area && !l.land_area) return 'details';
+    if (!l.valuation_purpose) return 'purpose';
+    if (!l.deadline) return 'deadline';
+    if (!l.documents_status) return 'documents';
+    if (!l.customer_type) return 'customer';
+    if (!l.name || !(l.phone || l.email)) return 'contact';
+    return 'summary';
+  }
+  push(...m) { this.setState(s => ({ msgs: [...s.msgs, ...m] })); }
+  botSay(text, then) {
+    this.setState({ typing: true });
+    setTimeout(() => { this.setState(s => ({ typing: false, msgs: [...s.msgs, { kind: 'text', role: 'assistant', text }] }), then); }, 650);
+  }
+  advance(extra) {
+    const l = this.state.lead; const next = this.nextStep(l);
+    const say = () => { this.setState({ step: next, editMode: false }); if (next !== this.state.stepAsked || next === 'summary') { this.setState({ stepAsked: next }); this.botSay(this.q(next, l)); } };
+    this.setState({ step: 'wait' });
+    if (extra) this.botSay(extra, say); else say();
+  }
+  setLead(patch, userText, extra) {
+    if (userText) this.push({ kind: 'text', role: 'user', text: userText });
+    this.setState(s => ({ lead: { ...s.lead, ...patch } }), () => this.advance(extra));
+  }
+
+  open(ctx = {}) {
+    this.setState({ open: true, menu: false });
+    const s = this.state;
+    if (s.record) this.reset();
+    const patch = {};
+    if (ctx.type) patch.property_type = ctx.type;
+    if (ctx.purpose) patch.valuation_purpose = ctx.purpose;
+    if (Object.keys(patch).length) {
+      const fresh = s.msgs.length <= 1;
+      this.setState(st => ({ lead: { ...st.lead, ...patch }, msgs: fresh ? [] : st.msgs }), () => {
+        const l = this.state.lead; const next = this.nextStep(l);
+        let pre = '';
+        if (ctx.purpose && !ctx.type) pre = `Am notat: evaluare pentru ${ctx.purpose.toLowerCase()}. `;
+        const text = next === 'type' ? pre + 'Ce dorești să evaluezi?' : (pre ? pre + '\n\n' : '') + this.q(next, l);
+        this.setState({ step: next, stepAsked: next }); this.botSay(text);
+      });
+    }
+    setTimeout(() => this.inputRef.current && this.inputRef.current.focus({ preventScroll: true }), 400);
+  }
+  reset() {
+    this.setState({ msgs: [{ kind: 'text', role: 'assistant', text: this.greeting() }], step: 'type', stepAsked: 'type', lead: {}, f: { consent: false }, record: null, editMode: false, contactErr: '', docs: [], typing: false, busy: false });
+  }
+
+  async ask(text) {
+    text = (text || '').trim(); if (!text || this.state.busy) return;
+    this.push({ kind: 'text', role: 'user', text });
+    this.setState({ input: '', busy: true, typing: true });
+    const enums = { property_type: TYPES.map(t => t.k), valuation_purpose: PURPOSES, documents_status: DOCS, customer_type: CUSTOMERS };
+    const props = {};
+    ['property_type', 'city', 'address', 'surface_area', 'land_area', 'rooms', 'valuation_purpose', 'deadline', 'documents_status', 'customer_type', 'name', 'phone', 'email', 'notes'].forEach(k => props[k] = enums[k] ? { type: 'string', enum: enums[k] } : { type: 'string' });
+    const hist = []; this.state.msgs.filter(m => m.kind === 'text').forEach(m => { const r = m.role; if (!hist.length && r === 'assistant') return; if (hist.length && hist[hist.length - 1].role === r) hist[hist.length - 1].content += '\n' + m.text; else hist.push({ role: r, content: m.text }); });
+    const system = `Ești asistentul de evaluare VALUEFY — firmă de evaluări imobiliare cu evaluator autorizat ANEVAR, activă în Timișoara și vestul României, cu servicii la nivel național. Funcționezi ca un formular conversațional ghidat.
+Pasul curent în interfață: ${this.state.step}. Date colectate: ${JSON.stringify(this.state.lead)}.
+Dacă utilizatorul oferă informații, apelează set_lead_fields cu valori normalizate (pentru câmpurile enum folosește exact una dintre opțiuni; suprafețele doar ca număr; deadline: "Standard", "Urgent" sau o dată).
+Apoi răspunde în română, cald și profesionist, în maxim 2 propoziții scurte. NU pune următoarea întrebare — interfața o afișează automat. Nu oferi prețuri, valori estimate sau termene exacte: costul și termenul sunt comunicate în ofertă, pentru că depind de tipul proprietății, scop, localizare și complexitate. Nu afirma că ai verificat autenticitatea documentelor. Fără markdown.`;
+    let reply = '';
+    try {
+      reply = await window.claude.complete({ model: this.props.model ?? 'claude-haiku-4-5', max_tokens: 400, system, messages: hist, tools: [{ name: 'set_lead_fields', description: 'Salvează în solicitare informațiile oferite de vizitator.', input_schema: { type: 'object', properties: props },
+        run: async (inp) => { const c = {}; Object.entries(inp || {}).forEach(([k, v]) => { if (v != null && String(v).trim()) c[k] = String(v).trim(); }); if (c.surface_area || c.land_area) c.details_done = true; this.setState(s => ({ lead: { ...s.lead, ...c } })); return 'Salvat.'; } }] });
+    } catch (e) { reply = 'Momentan nu pot răspunde. Poți continua solicitarea folosind opțiunile de mai jos.'; }
+    this.setState({ busy: false, typing: false });
+    this.push({ kind: 'text', role: 'assistant', text: (reply || '').trim() || 'Am notat.' });
+    const next = this.nextStep(this.state.lead);
+    if (next !== this.state.step || next === 'summary') { this.setState({ step: next }); if (next !== this.state.stepAsked) { this.setState({ stepAsked: next }); this.botSay(this.q(next, this.state.lead)); } }
+  }
+
+  onFiles(e) {
+    const files = Array.from(e.target.files || []); e.target.value = '';
+    files.forEach(file => {
+      const id = Math.random().toString(36).slice(2);
+      const ext = (file.name.split('.').pop() || '').toUpperCase().slice(0, 4);
+      const upd = (p) => this.setState(s => ({ msgs: s.msgs.map(m => m.id === id ? { ...m, ...p } : m) }));
+      this.push({ kind: 'file', id, name: file.name, ext, status: 'Se încarcă…', pct: '8%', statusColor: '#C98A10' });
+      setTimeout(() => upd({ pct: '70%' }), 80);
+      setTimeout(() => upd({ status: 'Se procesează…', pct: '90%' }), 1000);
+      setTimeout(() => { upd({ status: '✓ Document încărcat', pct: '100%', statusColor: '#1FA971' }); this.setState(s => ({ docs: [...s.docs, file.name] })); }, 1900);
+    });
+  }
+
+  priority(l) {
+    if (/urgent/i.test(l.deadline || '')) return 'URGENT';
+    if (l.deadline_date) { const d = (new Date(l.deadline_date) - new Date()) / 864e5; if (d < 7) return 'URGENT'; }
+    let s = 0;
+    if (['Spațiu comercial', 'Hală / industrial'].includes(l.property_type)) s++;
+    if (['Credit bancar', 'Expertiză / litigiu', 'Raportare financiară'].includes(l.valuation_purpose)) s++;
+    if (l.customer_type === 'Companie') s++;
+    if (l.documents_status === 'Da') s++;
+    return s >= 2 ? 'PRIORITY' : 'NORMAL';
+  }
+  fallbackSummary(l) {
+    const t = this.typeObj(l.property_type);
+    const size = l.surface_area ? ` de ${l.surface_area} m²` : l.land_area ? ` de ${l.land_area} m² teren` : '';
+    return `Client (${(l.customer_type || '').toLowerCase()}) solicită evaluarea ${t.g}${size} din ${l.city} pentru ${(l.valuation_purpose || '').toLowerCase()}. Documente: ${(l.documents_status || '').toLowerCase()}. Termen: ${(l.deadline || '').toLowerCase()}.`;
+  }
+  async submit() {
+    const l = this.state.lead; this.setState({ submitting: true });
+    const id = 'VF-' + new Date().getFullYear().toString().slice(2) + Math.random().toString(36).slice(2, 6).toUpperCase();
+    let summary = this.fallbackSummary(l);
+    try {
+      const r = await Promise.race([window.claude.complete(`Scrie un rezumat intern de o singură propoziție, în română, pentru dashboard-ul VALUEFY, despre această solicitare de evaluare. Stil: "Client solicită evaluarea unui apartament de 72 m² din Timișoara pentru garantarea unui credit. Documentele sunt disponibile. Termen standard." Fără markdown. Date: ${JSON.stringify(l)}`), new Promise((_, rej) => setTimeout(rej, 6000))]);
+      if (r && r.trim()) summary = r.trim();
+    } catch (e) {}
+    const record = { lead_id: id, created_at: new Date().toISOString(), source: 'WEBSITE_AI', property_type: l.property_type || null, city: l.city || null, address: l.address || null, surface_area: l.surface_area ? Number(String(l.surface_area).replace(',', '.')) || l.surface_area : null, land_area: l.land_area ? Number(String(l.land_area).replace(',', '.')) || l.land_area : null, rooms: l.rooms ? Number(l.rooms) || l.rooms : null, valuation_purpose: l.valuation_purpose || null, deadline: l.deadline_date || l.deadline || null, customer_type: l.customer_type || null, documents_status: l.documents_status || null, documents: this.state.docs, name: l.name || null, phone: l.phone || null, email: l.email || null, notes: l.notes || null, conversation_summary: summary, lead_status: 'NEW', priority: this.priority(l) };
+    try { const k = 'valuefy_leads_demo'; const arr = JSON.parse(localStorage.getItem(k) || '[]'); arr.push(record); localStorage.setItem(k, JSON.stringify(arr)); } catch (e) {}
+    console.log('[VALUEFY lead]', record);
+    this.setState({ submitting: false, record, step: 'done' });
+  }
+
+  renderVals() {
+    const s = this.state, l = s.lead, f = s.f;
+    const isMobile = s.vw < 1080;
+    const setF = k => e => { const v = e.target.type === 'checkbox' ? e.target.checked : e.target.value; this.setState(st => ({ f: { ...st.f, [k]: v } })); };
+    const pick = (field, v) => () => {
+      if (field === 'deadline' && v === 'Termen specific') { this.push({ kind: 'text', role: 'user', text: v }); this.setState({ step: 'date' }); return this.botSay(this.q('date', l)); }
+      if (field === 'documents_status' && v === DOCS[2]) return this.setLead({ documents_status: v }, v, DOC_HELP);
+      const extra = field === 'documents_status' && v !== 'Da' ? 'În regulă. Poți încărca acum ce ai, iar restul le trimiți după ce primești oferta.' : field === 'documents_status' ? 'Excelent. Le poți încărca aici acum sau după ce primești oferta.' : null;
+      this.setLead({ [field]: v }, v, extra);
+    };
+    const chipSets = { type: TYPES.map(t => t.k), purpose: PURPOSES, deadline: DEADLINES, documents: DOCS, customer: CUSTOMERS };
+    const chipField = { type: 'property_type', purpose: 'valuation_purpose', deadline: 'deadline', documents: 'documents_status', customer: 'customer_type' };
+    const st = s.typing ? 'wait' : s.step;
+    const typeK = l.property_type;
+    const citySugg = (f.city || '').length >= 1 ? CITIES.filter(c => c.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').startsWith((f.city || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')) && c !== f.city).slice(0, 5) : ['Timișoara', 'Arad', 'Lugoj', 'Reșița', 'Deva'];
+    const group = GROUPS[s.step] || 1;
+    const done = s.step === 'done';
+    const tObj = this.typeObj(typeK);
+    const hs = s.hs;
+    const stagesDef = [['Documente primite', 'Extras CF, act de proprietate, releveu'], ['Inspecție la fața locului', 'Evaluatorul vizitează proprietatea'], ['Analiză și evaluare', 'Piața din zonă și metodele de evaluare']];
+    const flowIdx = hs;
+    const dr = isMobile
+      ? { top: '0', right: '0', bottom: '0', left: '0', width: 'auto', radius: '0', opacity: s.open ? 1 : 0, transform: s.open ? 'none' : 'translateY(24px)', pe: s.open ? 'auto' : 'none', vis: s.open ? 'visible' : 'hidden' }
+      : { top: '84px', right: '20px', bottom: '20px', left: 'auto', width: '440px', radius: '20px', opacity: s.open ? 1 : 0, transform: s.open ? 'none' : 'translateY(16px) scale(.98)', pe: s.open ? 'auto' : 'none', vis: s.open ? 'visible' : 'hidden' };
+    const phone = this.props.phone ?? '+40 766 225 936', email = this.props.email ?? 'contact@valuefy.ro';
+    const showSticky = isMobile && !s.open && s.scrollY > 520;
+    const svc = (n, t, d, ctx, img) => ({ n, t, d, img: IMGU(img, 800), pick: () => this.open(ctx) });
+    const sumRows = [
+      ['Localitate', [l.city, l.address].filter(Boolean).join(', ')], ['Suprafață', l.surface_area ? l.surface_area + ' m²' : l.land_area ? l.land_area + ' m² teren' : '—'],
+      ['Scop', l.valuation_purpose], ['Termen', l.deadline_date ? new Date(l.deadline_date).toLocaleDateString('ro-RO') : l.deadline],
+      ['Documente', l.documents_status === DOCS[2] ? 'De clarificat' : l.documents_status === 'Da' ? 'Disponibile' : l.documents_status], ['Client', l.customer_type],
+      ['Contact', l.name], ['Telefon / email', [l.phone, l.email].filter(Boolean).join(' · ')]
+    ].map(([k, v]) => ({ k, v: v || '—' }));
+    const editMap = [['Proprietate', ['property_type', 'details_done', 'surface_area', 'land_area', 'rooms']], ['Localizare', ['city', 'address']], ['Detalii', ['details_done', 'surface_area', 'land_area', 'rooms']], ['Scop', ['valuation_purpose']], ['Termen', ['deadline', 'deadline_date']], ['Documente', ['documents_status']], ['Client', ['customer_type']], ['Contact', ['name', 'phone', 'email']]];
+    return {
+      isDesktop: !isMobile, isMobile, menuOpen: s.menu, showMobileMenu: isMobile && s.menu,
+      toggleMenu: () => this.setState({ menu: !s.menu }), closeMenu: () => this.setState({ menu: false }),
+      mobileLinks: [['Servicii', '#servicii'], ['Cum funcționează', '#cum-functioneaza'], ['Despre noi', '#despre'], ['Întrebări frecvente', '#faq'], ['Portal client', 'Valuefy Portal Client v2.dc.html'], ['Contact', '#contact']].map(([label, href]) => ({ label, href })),
+      openGeneric: () => this.open(), closeChat: () => this.setState({ open: false }), resetChat: () => this.reset(),
+      iconApt: ICONS.apt,
+      faqPos: isMobile ? 'static' : 'sticky', span2: s.vw < 720 ? 'auto' : 'span 2', lineD: s.vw < 820 ? 'none' : 'block', ctaW: s.vw < 560 ? '100%' : 'auto', typeImgH: s.vw < 560 ? '112px' : '150px', heroImgH: s.vw < 560 ? '150px' : '200px', hdrShadow: s.scrollY > 10 ? '0 8px 30px -12px rgba(23,23,58,.18)' : 'none', hdrBorder: s.scrollY > 10 ? 'transparent' : '#E2D8C4',
+      hv: ({
+        Navy: { bg: '#17173A', color: '#FFFFFF', border: 'transparent', grad: 'linear-gradient(160deg,#1C1C46 0%,#141434 60%,#101028 100%)', blobO: 1, blob3: 'rgba(255,255,255,.05)', dotsO: 1, photoD: 'none', photoOverlay: 'none', pillBorder: 'rgba(255,255,255,.14)', pillBg: 'rgba(255,255,255,.04)', muted: '#C9CAE0', line2: '#F2A93B', badgeBg: 'rgba(255,255,255,.06)', badgeBorder: 'rgba(255,255,255,.12)', badgeShadow: 'none' },
+        Luminos: { bg: '#FBF8F2', color: '#17173A', border: '#EDE6D8', grad: 'linear-gradient(180deg,#FDFBF7 0%,#F7F1E4 100%)', blobO: .9, blob3: 'rgba(23,23,58,.05)', dotsO: .8, photoD: 'none', photoOverlay: 'none', pillBorder: '#E8DFCC', pillBg: '#FFFFFF', muted: '#4A4A66', line2: '#A8680A', badgeBg: '#17173A', badgeBorder: '#17173A', badgeShadow: '0 14px 30px -14px rgba(23,23,58,.5)' },
+        Foto: { bg: '#FBF8F2', color: '#17173A', border: '#EDE6D8', grad: 'transparent', blobO: 0, blob3: 'transparent', dotsO: 0, photoD: 'block', photoOverlay: isMobile ? 'linear-gradient(180deg,rgba(251,248,242,.94),rgba(251,248,242,.86))' : 'linear-gradient(90deg,rgba(251,248,242,.98) 0%,rgba(251,248,242,.92) 38%,rgba(251,248,242,.35) 70%,rgba(251,248,242,.1) 100%)', pillBorder: '#E8DFCC', pillBg: '#FFFFFF', muted: '#3A3A55', line2: '#A8680A', badgeBg: '#17173A', badgeBorder: '#17173A', badgeShadow: '0 14px 30px -14px rgba(23,23,58,.5)' }
+      })[['Navy','Luminos','Foto'].includes(this.props.heroStyle) ? this.props.heroStyle : 'Luminos'], chipD: isMobile ? 'none' : 'flex',
+      hasAnevarNo: !!(this.props.anevarNo ?? ''), anevarNo: this.props.anevarNo ?? '',
+      portalFeats: [['01', 'Status pe fiecare etapă', 'De la documente și programarea inspecției până la analiză, verificare și raport.'], ['02', 'Livrabile la un clic', 'Raportul semnat, anexele și facturile sunt disponibile oricând în contul tău.'], ['03', 'Legătură directă cu evaluatorul', 'Mesaje, programări și documente noi — totul în același dosar.']].map(([n, t, d]) => ({ n, t, d })),
+      marq: (a => [...a, ...a])(['Apartamente', 'Case', 'Terenuri', 'Spații comerciale', 'Hale industriale', 'Birouri', 'Credit bancar', 'Impozitare', 'Raportare financiară', 'Succesiuni', 'Timișoara', 'Arad', 'Lugoj', 'Reșița']).map((label, i) => ({ label, color: i % 2 ? '#F2A93B' : '#F4F5F7' })),
+      mosaic: [['01', 'Inspecție la fața locului', 'photo-1600596542815-ffad4c1539a9'], ['02', 'Analiză documentară și de piață', 'photo-1554224155-6726b3ff858f'], ['03', 'Raport semnat, gata de depus', 'photo-1560448204-e02f11c3d0e2']].map(([n, t, id]) => ({ n, t, img: IMGU(id, 900) })),
+      flow: ['Proprietate', 'Date', 'Analiză', 'Valoare'].map((label, i) => ({ label, bg: i === flowIdx ? 'var(--acc,#F2A93B)' : i < flowIdx ? 'var(--acc-soft,#FDF1DC)' : '#F7F8FA', color: i === flowIdx ? '#FFFFFF' : i < flowIdx ? 'var(--acc,#F2A93B)' : '#626771', arrow: i < 3 ? 'block' : 'none' })),
+      heroStages: stagesDef.map(([label, sub], i) => { const d = i < hs, a = i === hs; return { label, sub, mark: d ? '✓' : '', state: d ? 'Finalizat' : a ? 'În curs…' : 'În așteptare', dotBg: d ? 'var(--acc,#F2A93B)' : '#FFFFFF', dotBorder: d || a ? 'var(--acc,#F2A93B)' : '#D5D8DE', labelColor: d || a ? '#17173A' : '#9A9FA8', bar: d || a ? '100%' : '0%', trans: a ? 'width 1.6s cubic-bezier(.4,0,.2,1)' : 'none' }; }),
+      doneBg: hs >= 3 ? 'var(--acc-soft,#FDF1DC)' : '#F7F8FA', doneIconBg: hs >= 3 ? 'var(--acc,#F2A93B)' : '#D5D8DE', doneColor: hs >= 3 ? '#17173A' : '#9A9FA8', doneLabel: hs >= 3 ? 'Raport semnat de evaluator' : 'Raport în pregătire',
+      types: TYPES.map((t, i) => { const h = s.hoverT === i; return { label: t.k, caps: t.k.toUpperCase(), icon: t.icon, img: IMGU(TYPE_IMG[t.k], 600), imgT: h ? 'scale(1.1)' : 'scale(1)', pick: () => this.open({ type: t.k }), enter: () => this.setState({ hoverT: i }), border: h ? 'var(--acc,#F2A93B)' : '#E7E9ED', shadow: h ? '0 16px 32px -16px rgba(242,169,59,.35)' : 'none', lift: h ? 'translateY(-3px)' : 'none', iconBg: h ? 'var(--acc-soft,#FDF1DC)' : '#FFFFFF', iconT: h ? 'translateY(-2px) scale(1.08)' : 'none', arrowO: h ? 1 : 0, arrowT: h ? 'translateX(4px)' : 'translateX(0)' }; }),
+      hoverOut: () => this.setState({ hoverT: -1 }),
+      purposes: PURPOSES.map((p, i) => { const on = s.hoverP === i; const d = ['Raport pentru garantarea unui credit ipotecar sau de investiții.', 'Afli valoarea de piață înainte de negociere.', 'Evaluarea clădirilor pentru calculul impozitului local.', 'Active evaluate pentru situațiile financiare și contabilitate.', 'Valoarea bunurilor pentru moștenire sau partaj.', 'Rapoarte pentru instanță, executări și proceduri.', 'Asigurare, aport la capital sau alt scop specific.'][i]; return { label: p, d, n: String(i + 1).padStart(2, '0'), pick: () => this.open({ purpose: p }), enter: () => this.setState({ hoverP: i }), leave: () => this.setState({ hoverP: -1 }), bg: on ? '#FBF8F2' : 'transparent', pad: on ? '20px' : '8px', arrowBg: on ? 'var(--acc,#F2A93B)' : '#FFFFFF', arrowBorder: on ? 'var(--acc,#F2A93B)' : '#E2DACA', arrowT: on ? 'translateX(4px)' : 'none' }; }),
+      steps: [{ n: '01', t: 'Spune-ne ce trebuie evaluat', d: 'Completezi câteva informații despre proprietate.' }, { n: '02', t: 'Primești oferta', d: 'Stabilim documentele necesare, costul și termenul.' }, { n: '03', t: 'Primești raportul', d: 'Realizăm inspecția, analiza și raportul de evaluare.' }],
+      services: [svc('01', 'Evaluări imobiliare', 'Apartamente, case, terenuri și alte proprietăți.', {}, 'photo-1564013799919-ab600027ffc6'), svc('02', 'Evaluări pentru creditare', 'Rapoarte de evaluare pentru garantarea creditelor.', { purpose: 'Credit bancar' }, 'photo-1582407947304-fd86f028f716'), svc('03', 'Evaluări pentru impozitare', 'Evaluarea clădirilor în scop fiscal.', { purpose: 'Impozitare' }, 'photo-1512917774080-9991f1c4c750'), svc('04', 'Raportare financiară', 'Evaluarea activelor pentru raportare financiară și contabilitate.', { purpose: 'Raportare financiară' }, 'photo-1554224155-6726b3ff858f'), svc('05', 'Proprietăți comerciale', 'Retail, birouri, hale, industrial și alte proprietăți specializate.', { type: 'Spațiu comercial' }, 'photo-1497366216548-37526070297c'), svc('06', 'Expertize și consultanță', 'Analize și servicii specializate de evaluare.', { purpose: 'Expertiză / litigiu' }, 'photo-1565793298595-6a879b1d9492')],
+      dash: [['Solicitare primită', 'done', ''], ['Documente încărcate', 'done', '2 fișiere'], ['Inspecție realizată', 'done', ''], ['Analiză în desfășurare', 'active', ''], ['Raport', 'todo', '']].map(([label, k, meta]) => ({ label, meta, mark: k === 'done' ? '✓' : '', ring: k === 'todo' ? '#3A3A66' : '#F2A93B', fill: k === 'done' ? '#F2A93B' : 'transparent', color: k === 'todo' ? '#8A8BA8' : '#F4F5F7', bg: k === 'active' ? 'rgba(242,169,59,.08)' : 'transparent', anim: k === 'active' ? 'vfRing 1.8s infinite' : 'none' })),
+      trust: [[ICONS.badge, 'Evaluator autorizat', 'Servicii de evaluare realizate de profesioniști autorizați.'], [ICONS.std, 'Standarde profesionale', 'Rapoarte realizate conform standardelor de evaluare aplicabile.'], [ICONS.eye, 'Proces transparent', 'Știi ce informații sunt necesare și care sunt etapele evaluării.'], [ICONS.lock, 'Date protejate', 'Documentele și informațiile clienților sunt tratate în mod responsabil.']].map(([icon, t, d]) => ({ icon, t, d })),
+      clientCards: [
+        ['Persoane fizice', 'Credite ipotecare, vânzare-cumpărare, succesiuni și partaje.', '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>'],
+        ['Companii', 'Garanții bancare, reevaluări și raportare financiară.', '<rect x="4" y="3" width="16" height="18" rx="1"/><path d="M8 7h2M14 7h2M8 11h2M14 11h2M8 15h2M14 15h2"/>'],
+        ['Investitori', 'Analiza valorii înainte de achiziție sau vânzare.', '<path d="M4 19l5-6 4 3 7-9"/><path d="M15 7h5v5"/>'],
+        ['Dezvoltatori', 'Terenuri, proiecte în dezvoltare și finanțare.', '<path d="M3 21h18"/><path d="M6 21V9l6-5 6 5v12"/><path d="M10 21v-5h4v5"/>'],
+        ['Instituții financiare', 'Rapoarte pentru garantarea creditelor, conform cerințelor băncii.', '<path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8"/><path d="M3 21h18"/>'],
+        ['Juriști și contabili', 'Expertize, litigii și evaluări pentru raportare.', '<path d="M12 4v16M7 20h10"/><path d="M5 8h14"/><path d="M5 8l-3 6a3 3 0 006 0zM19 8l-3 6a3 3 0 006 0z"/>']
+      ].map(([t, d, p]) => ({ t, d, icon: svg(p, '#F2A93B') })),
+      faqs: [
+        ['Cât costă o evaluare?', 'Costul depinde de tipul proprietății, scopul evaluării, localizare și complexitate. Trimite-ne câteva informații și îți comunicăm oferta.'],
+        ['În cât timp este gata raportul?', 'Termenul depinde de tipul proprietății, de complexitate și de disponibilitatea documentelor. Îl comunicăm în ofertă, înainte de începerea lucrării.'],
+        ['Ce documente sunt necesare?', 'De regulă: extras de carte funciară, actul de proprietate și documentația cadastrală. Lista exactă depinde de proprietate și de scop — asistentul te ghidează, iar specialistul o confirmă în ofertă.'],
+        ['Este necesară inspecția proprietății?', 'În majoritatea cazurilor, da. Inspecția face parte din procesul de evaluare și se programează împreună cu tine.'],
+        ['Pot transmite documentele online?', 'Da. Le poți încărca direct din asistent sau le poți trimite după ce primești oferta.'],
+        ['În ce localități realizați evaluări?', 'Lucrăm în principal în Timișoara și în vestul României. Pentru alte localități, trimite solicitarea și îți confirmăm disponibilitatea.'],
+        ['Pot solicita o evaluare pentru o companie?', 'Da. Realizăm evaluări pentru companii — imobile, active pentru raportare financiară, garanții și alte scopuri.'],
+        ['Cum solicit o ofertă?', 'Alege tipul proprietății sau deschide asistentul. În câteva minute trimiți solicitarea, iar un specialist revine cu oferta.']
+      ].map(([q, a], i) => { const o = s.faq === i; return { q, a, n: String(i + 1).padStart(2, '0'), open: o, rot: o ? 'rotate(45deg)' : 'none', bg: o ? '#FFFFFF' : '#FBF8F2', border: o ? 'var(--acc,#F2A93B)' : '#EDE6D8', shadow: o ? '0 18px 40px -24px rgba(23,23,58,.35)' : 'none', iconBg: o ? 'var(--acc,#F2A93B)' : '#FFFFFF', iconColor: '#17173A', toggle: () => this.setState({ faq: o ? -1 : i }) }; }),
+      phone, email, phoneHref: phone.replace(/\s/g, ''),
+      footerPad: showSticky ? '76px' : '0px',
+      footerCols: [
+        { t: 'SERVICII', links: [['Evaluări imobiliare', '/evaluare-apartament'], ['Creditare', '/evaluare-pentru-credit'], ['Impozitare', '/evaluare-pentru-impozitare'], ['Raportare financiară', '/servicii/raportare-financiara'], ['Proprietăți comerciale', '/evaluare-spatiu-comercial']].map(([label, href]) => ({ label, href: '#servicii', path: href })) },
+        { t: 'COMPANIE', links: [['Portal client', 'Valuefy Portal Client v2.dc.html'], ['Despre noi', '#despre'], ['Contact', '#contact'], ['Întrebări frecvente', '#faq']].map(([label, href]) => ({ label, href })) },
+        { t: 'LEGAL', links: [['Politica de confidențialitate', '/politica-de-confidentialitate'], ['Politica cookies', '/politica-cookies'], ['Termeni și condiții', '/termeni-si-conditii']].map(([label, href]) => ({ label, href })) }
+      ],
+      showFab: !s.open && !showSticky && !(isMobile && s.menu),
+      showSticky,
+      chatHidden: !s.open, dr,
+      progressLabel: done ? 'Solicitare trimisă' : `Pasul ${group} din 6`, progressName: GROUP_NAMES[group - 1], progressNow: done ? 6 : group - 1,
+      progressSegs: GROUP_NAMES.map((_, i) => ({ bg: done || i < group - 1 ? 'var(--acc,#F2A93B)' : i === group - 1 ? 'var(--acc-soft,#FDF1DC)' : '#E7E9ED' })),
+      scrollRef: this.scrollRef, inputRef: this.inputRef, fileRef: this.fileRef,
+      msgs: s.msgs.map(m => ({ ...m, isBot: m.kind === 'text' && m.role === 'assistant', isUser: m.kind === 'text' && m.role === 'user', isFile: m.kind === 'file' })),
+      typing: s.typing,
+      w: { chips: !!chipSets[st] && !s.busy, city: st === 'city', details: st === 'details', date: st === 'date', upload: st === 'documents' || (st === 'customer' && s.docs.length > 0), contact: st === 'contact', summary: st === 'summary', done: st === 'done' },
+      chips: (chipSets[st] || []).map(v => ({ label: v, pick: pick(chipField[st], v) })),
+      f: { city: f.city || '', address: f.address || '', surface: f.surface || '', rooms: f.rooms || '', land: f.land || '', notes: f.notes || '', date: f.date || '', name: f.name || '', phone: f.phone || '', email: f.email || '', consent: !!f.consent },
+      today: new Date().toISOString().slice(0, 10),
+      hasCitySugg: citySugg.length > 0,
+      citySugg: citySugg.map(c => ({ label: c, pick: () => this.setState(st2 => ({ f: { ...st2.f, city: c } })) })),
+      det: { surface: typeK !== 'Teren', rooms: ['Apartament', 'Casă'].includes(typeK), land: ['Casă', 'Teren'].includes(typeK), notesPh: typeK === 'Teren' ? 'ex. intravilan, deschidere 20 m' : typeK === 'Apartament' ? 'ex. etaj 3, an construcție 2015' : 'ex. an construcție, stare' },
+      hasContactErr: !!s.contactErr, contactErr: s.contactErr,
+      editMode: s.editMode,
+      editChips: editMap.map(([label, keys]) => ({ label, pick: () => { this.setState(st2 => { const nl = { ...st2.lead }; keys.forEach(k => delete nl[k]); return { lead: nl, editMode: false, stepAsked: null }; }, () => this.advance()); } })),
+      sum: { icon: tObj.icon, caps: (typeK || '').toUpperCase(), line: [l.city, l.surface_area ? l.surface_area + ' m²' : l.land_area ? l.land_area + ' m²' : '', l.rooms ? l.rooms + ' camere' : ''].filter(Boolean).join(' · '), rows: sumRows },
+      submitting: s.submitting, submitLabel: s.submitting ? 'Se trimite…' : 'Trimite solicitarea',
+      leadId: s.record ? s.record.lead_id : '',
+      showCrm: !!(this.props.showCrmPreview ?? false), crmJson: s.record ? JSON.stringify(s.record, null, 2) : '',
+      input: s.input,
+      on: {
+        input: e => this.setState({ input: e.target.value }),
+        inputKey: e => { if (e.key === 'Enter') this.ask(s.input); },
+        send: () => this.ask(s.input),
+        pickFile: () => this.fileRef.current && this.fileRef.current.click(),
+        files: e => this.onFiles(e),
+        city: setF('city'), address: setF('address'),
+        cityKey: e => { if (e.key === 'Enter') this.renderVals().on.citySubmit(); },
+        citySubmit: () => { const c = (f.city || '').trim(); if (!c) return; this.setLead({ city: c, address: (f.address || '').trim() || undefined }, [c, (f.address || '').trim()].filter(Boolean).join(', ')); },
+        surface: setF('surface'), rooms: setF('rooms'), land: setF('land'), notes: setF('notes'),
+        detailsSubmit: () => { const p = { details_done: true }; if (f.surface) p.surface_area = f.surface; if (f.rooms) p.rooms = f.rooms; if (f.land) p.land_area = f.land; if (f.notes) p.notes = f.notes; const txt = [f.surface && f.surface + ' m²', f.rooms && f.rooms + ' camere', f.land && f.land + ' m² teren', f.notes].filter(Boolean).join(' · ') || 'Continuă'; this.setLead(p, txt); },
+        detailsSkip: () => this.setLead({ details_done: true }, 'Nu știu exact', 'Nicio problemă — specialistul le va clarifica la inspecție.'),
+        date: setF('date'),
+        dateSubmit: () => { if (!f.date) return; this.setLead({ deadline: 'Termen specific', deadline_date: f.date }, new Date(f.date).toLocaleDateString('ro-RO')); },
+        name: setF('name'), phone: setF('phone'), email: setF('email'), consent: setF('consent'),
+        contactSubmit: () => {
+          const name = (f.name || '').trim(), phone = (f.phone || '').trim(), email = (f.email || '').trim();
+          let err = '';
+          if (!name) err = 'Te rog completează numele.';
+          else if (!phone && !email) err = 'Adaugă un număr de telefon sau o adresă de email.';
+          else if (email && !/^\S+@\S+\.\S+$/.test(email)) err = 'Adresa de email nu pare validă.';
+          else if (phone && phone.replace(/\D/g, '').length < 9) err = 'Numărul de telefon pare incomplet.';
+          else if (!f.consent) err = 'Este necesar acordul pentru a putea trimite oferta.';
+          this.setState({ contactErr: err }); if (err) return;
+          this.setLead({ name, phone: phone || undefined, email: email || undefined }, [name, phone, email].filter(Boolean).join(' · '));
+        },
+        toggleEdit: () => this.setState({ editMode: !s.editMode }),
+        submit: () => this.submit()
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>
