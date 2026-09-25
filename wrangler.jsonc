@@ -8,5 +8,13 @@
 		"directory": ".open-next/assets",
 		"binding": "ASSETS"
 	},
+	"d1_databases": [
+		{
+			// Created automatically on the first deploy if it doesn't exist yet.
+			"binding": "DB",
+			"database_name": "valuefy-db",
+			"migrations_dir": "migrations"
+		}
+	],
 	"observability": { "enabled": true }
 }

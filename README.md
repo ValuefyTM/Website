@@ -28,7 +28,22 @@ Without email configured, requests are only logged in development; in production
 
 1. The visitor picks a type, purpose or service → the assistant opens pre-filled (`src/components/Assistant.tsx`).
 2. Free-text messages go to `POST /api/assistant`, where Claude extracts fields (`set_lead_fields`) and replies briefly.
-3. After "Trimite solicitarea", `POST /api/leads` builds the CRM record (`lead_id`, `source: WEBSITE_AI`, `lead_status: NEW`, internal priority NORMAL/PRIORITY/URGENT, AI summary) and emails it with the JSON and the attached documents (max 4 MB total).
+3. After "Trimite solicitarea", `POST /api/leads` builds the CRM record (`lead_id`, `source: WEBSITE_AI`, `lead_status: NEW`, internal priority NORMAL/PRIORITY/URGENT, AI summary), **saves it to the D1 database** and emails it with the JSON and the attached documents (max 4 MB total). The request counts as received if it reached at least one of the two.
+
+## Database (Cloudflare D1)
+
+Binding `DB`, database `valuefy-db`, schema in `migrations/` — shared with the future CRM and client portal.
+
+| Table | Holds |
+|---|---|
+| `clients` | One row per client, matched by email, then by phone digits |
+| `properties` | The property of each request |
+| `leads` | Each request (`id` = the VF-… number), status, internal priority, summary, full JSON payload |
+| `lead_files` | Names/sizes of files attached to a request (the files themselves go by email for now) |
+
+- New schema change: add `migrations/000N_name.sql`; it is applied on the next deploy.
+- Local: `npm run db:migrate:local` once, then `npm run preview`.
+- Browse the data: Cloudflare dashboard → Storage & Databases → D1 → `valuefy-db` → Explore / Console.
 
 ## Deploy — Cloudflare Workers
 
@@ -39,7 +54,7 @@ so no R2/KV bucket is needed; images are served unoptimized (the Unsplash URLs a
 **Git integration (recommended)** — Cloudflare dashboard → Workers & Pages → Create → Import a repository → `ValuefyTM/Website`:
 
 - Build command: `npx opennextjs-cloudflare build`
-- Deploy command: `npx opennextjs-cloudflare deploy`
+- Deploy command: `npm run cf:deploy` (deploys, then applies pending D1 migrations)
 - **Build variables** (inlined at build time): `NEXT_PUBLIC_PHONE`, `NEXT_PUBLIC_EMAIL`, `NEXT_PUBLIC_ANEVAR_NO`, `NEXT_PUBLIC_PORTAL_URL`
 - **Runtime variables** (Worker → Settings → Variables and Secrets): `ANTHROPIC_API_KEY` and `RESEND_API_KEY` as *secrets*; `LEAD_EMAIL_FROM`, `LEAD_EMAIL_TO`, `ASSISTANT_MODEL` as plain text
 

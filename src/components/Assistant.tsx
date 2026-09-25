@@ -167,7 +167,7 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ messages: history, step: stepRef.current, lead: leadRef.current }),
       });
       if (res.ok) {
-        const data: { reply?: string; fields?: Lead } = await res.json();
+        const data = (await res.json()) as { reply?: string; fields?: Lead };
         if (gen !== genRef.current) return;
         if (data.fields && Object.keys(data.fields).length) setLead({ ...leadRef.current, ...data.fields });
         reply = (data.reply || "").trim() || "Am notat.";
@@ -224,7 +224,7 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
     filesRef.current.forEach((file) => body.append("files", file));
     try {
       const res = await fetch("/api/leads", { method: "POST", body });
-      const data: { ok?: boolean; lead_id?: string } = await res.json().catch(() => ({}));
+      const data = (await res.json().catch(() => ({}))) as { ok?: boolean; lead_id?: string };
       if (!res.ok || !data.lead_id) throw new Error(String(res.status));
       setLeadId(data.lead_id);
       setStep("done");

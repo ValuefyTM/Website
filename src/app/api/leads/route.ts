@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
 import { buildRecord, fallbackSummary, type Lead, type LeadRecord } from "@/lib/lead";
+import { getDb, markLeadEmailed, saveLead } from "@/lib/db";
 
 export const runtime = "nodejs";
 
@@ -103,37 +104,67 @@ export async function POST(req: Request) {
   const summary = (await aiSummary(lead)) || fallbackSummary(lead);
   const record = buildRecord(lead, { id, summary, documents: files.map((f) => f.name) });
 
+  // 1. Save to the database (the future CRM reads from here).
+  const db = await getDb();
+  let saved = false;
+  if (db) {
+    try {
+      await saveLead(db, record, files.map((f) => ({ name: f.name, size: f.size, type: f.type })));
+      saved = true;
+    } catch (error) {
+      console.error("[leads] database save failed", error, JSON.stringify(record));
+    }
+  }
+
+  // 2. Notify by email.
+  const emailed = await sendLeadEmail(record, files, attachFiles);
+  if (emailed && saved && db) {
+    await markLeadEmailed(db, id).catch((error) => console.error("[leads] could not mark lead as emailed", error));
+  }
+
+  // The request is safe as long as it reached at least one of the two.
+  if (saved || emailed) return NextResponse.json({ ok: true, lead_id: id });
+  if (process.env.NODE_ENV !== "production") {
+    console.warn("[leads] no database or email available — lead only logged:", JSON.stringify(record));
+    return NextResponse.json({ ok: true, lead_id: id });
+  }
+  return NextResponse.json({ error: "lead_not_stored" }, { status: 503 });
+}
+
+async function sendLeadEmail(record: LeadRecord, files: File[], attachFiles: boolean): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.LEAD_EMAIL_FROM;
   const to = process.env.LEAD_EMAIL_TO || process.env.NEXT_PUBLIC_EMAIL || "contact@valuefy.ro";
-
   if (!apiKey || !from) {
-    console.warn("[leads] RESEND_API_KEY / LEAD_EMAIL_FROM not set — lead only logged:", JSON.stringify(record));
-    if (process.env.NODE_ENV === "production") return NextResponse.json({ error: "email_not_configured" }, { status: 503 });
-    return NextResponse.json({ ok: true, lead_id: id, record });
+    console.warn("[leads] RESEND_API_KEY / LEAD_EMAIL_FROM not set — email skipped");
+    return false;
   }
 
   const attachments = attachFiles
     ? await Promise.all(files.map(async (f) => ({ filename: f.name, content: Buffer.from(await f.arrayBuffer()).toString("base64") })))
     : [];
-  const subject = `[${record.priority}] ${id} · ${record.property_type}${record.city ? " · " + record.city : ""}`;
+  const subject = `[${record.priority}] ${record.lead_id} · ${record.property_type}${record.city ? " · " + record.city : ""}`;
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      from,
-      to: to.split(",").map((s) => s.trim()),
-      reply_to: record.email || undefined,
-      subject,
-      html: emailHtml(record) + (files.length && !attachFiles ? `<p style="color:#C2362B">Fișierele depășesc ${MAX_FILES_BYTES / 1048576} MB și nu au fost atașate — cere-le clientului.</p>` : ""),
-      attachments,
-    }),
-  });
-  if (!res.ok) {
-    console.error("[leads] email failed", res.status, await res.text(), JSON.stringify(record));
-    return NextResponse.json({ error: "email_failed" }, { status: 502 });
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from,
+        to: to.split(",").map((s) => s.trim()),
+        reply_to: record.email || undefined,
+        subject,
+        html: emailHtml(record) + (files.length && !attachFiles ? `<p style="color:#C2362B">Fișierele depășesc ${MAX_FILES_BYTES / 1048576} MB și nu au fost atașate — cere-le clientului.</p>` : ""),
+        attachments,
+      }),
+    });
+    if (!res.ok) {
+      console.error("[leads] email failed", res.status, await res.text());
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("[leads] email failed", error);
+    return false;
   }
-
-  return NextResponse.json({ ok: true, lead_id: id });
 }
