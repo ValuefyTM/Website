@@ -10,10 +10,10 @@ const STEPS = [
   { n: "03", t: "Primești raportul", d: "Realizăm inspecția, analiza și raportul de evaluare." },
 ];
 
-const SERVICES: { n: string; t: string; d: string; img: string; type?: string; purpose?: string }[] = [
+const SERVICES: { n: string; t: string; d: string; img: string; type?: string; purpose?: string; href?: string }[] = [
   { n: "01", t: "Evaluări imobiliare", d: "Apartamente, case, terenuri și alte proprietăți.", img: "photo-1564013799919-ab600027ffc6" },
   { n: "02", t: "Evaluări pentru creditare", d: "Rapoarte de evaluare pentru garantarea creditelor.", img: "photo-1582407947304-fd86f028f716", purpose: "Credit bancar" },
-  { n: "03", t: "Evaluări pentru impozitare", d: "Evaluarea clădirilor în scop fiscal.", img: "photo-1512917774080-9991f1c4c750", purpose: "Impozitare" },
+  { n: "03", t: "Evaluări pentru impozitare", d: "Evaluarea clădirilor în scop fiscal.", img: "photo-1512917774080-9991f1c4c750", purpose: "Impozitare", href: "/evaluare-pentru-impozitare" },
   { n: "04", t: "Raportare financiară", d: "Evaluarea activelor pentru raportare financiară și contabilitate.", img: "photo-1554224155-6726b3ff858f", purpose: "Raportare financiară" },
   { n: "05", t: "Proprietăți comerciale", d: "Retail, birouri, hale, industrial și alte proprietăți specializate.", img: "photo-1497366216548-37526070297c", type: "Spațiu comercial" },
   { n: "06", t: "Expertize și consultanță", d: "Analize și servicii specializate de evaluare.", img: "photo-1565793298595-6a879b1d9492", purpose: "Expertiză / litigiu" },
@@ -71,9 +71,12 @@ export function Services() {
               <span className={s.svcN}>{sv.n}</span>
             </div>
             <div className={s.svcBody}>
-              <h3>{sv.t}</h3>
+              <h3>{sv.href ? <a href={sv.href}>{sv.t}</a> : sv.t}</h3>
               <p>{sv.d}</p>
-              <AssistantButton type_={sv.type} purpose={sv.purpose} className={s.svcCta}>Solicită evaluare →</AssistantButton>
+              <div className={s.svcActions}>
+                <AssistantButton type_={sv.type} purpose={sv.purpose} className={s.svcCta}>Solicită evaluare →</AssistantButton>
+                {sv.href && <a href={sv.href} className={s.svcMore}>Detalii</a>}
+              </div>
             </div>
           </article>
         ))}

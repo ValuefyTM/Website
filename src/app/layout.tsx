@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   description:
     "Servicii profesionale de evaluare pentru apartamente, case, terenuri și proprietăți comerciale. Solicită rapid o ofertă prin VALUEFY.",
   openGraph: {
+    siteName: "VALUEFY",
     title: "VALUEFY | Evaluări imobiliare",
     description: "Evaluări imobiliare. Simplu, rapid și profesionist. Firmă autorizată ANEVAR.",
     locale: "ro_RO",

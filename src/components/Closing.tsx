@@ -7,11 +7,11 @@ import s from "./Closing.module.css";
 const FOOTER_COLS = [
   {
     t: "SERVICII",
-    links: [["Evaluări imobiliare", "#servicii"], ["Creditare", "#servicii"], ["Impozitare", "#servicii"], ["Raportare financiară", "#servicii"], ["Proprietăți comerciale", "#servicii"]],
+    links: [["Evaluări imobiliare", "/#servicii"], ["Creditare", "/#servicii"], ["Impozitare", "/evaluare-pentru-impozitare"], ["Raportare financiară", "/#servicii"], ["Proprietăți comerciale", "/#servicii"]],
   },
   {
     t: "COMPANIE",
-    links: [["Portal client", site.portalUrl], ["Despre noi", "#despre"], ["Contact", "#contact"], ["Întrebări frecvente", "#faq"]],
+    links: [["Portal client", site.portalUrl], ["Despre noi", "/#despre"], ["Contact", "/#contact"], ["Întrebări frecvente", "/#faq"]],
   },
   {
     t: "LEGAL",

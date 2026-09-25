@@ -41,6 +41,11 @@
   color: var(--acc-text); font-size: 15px; font-weight: 700; cursor: pointer;
 }
 .svcCta:hover { color: var(--ink); }
+.svcActions { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.svcMore { font-size: 14px; font-weight: 600; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+.svcMore:hover { color: var(--ink); }
+.svcBody h3 a { color: inherit; }
+.svcBody h3 a:hover { color: var(--acc-text); }
 
 /* Portal showcase */
 .portal { position: relative; overflow: hidden; background: var(--navy-deep); color: #f4f5f7; }

@@ -7,12 +7,12 @@ import { useAssistant } from "./Assistant";
 import s from "./Header.module.css";
 
 const mobileLinks = [
-  ["Servicii", "#servicii"],
-  ["Cum funcționează", "#cum-functioneaza"],
-  ["Despre noi", "#despre"],
-  ["Întrebări frecvente", "#faq"],
+  ["Servicii", "/#servicii"],
+  ["Cum funcționează", "/#cum-functioneaza"],
+  ["Despre noi", "/#despre"],
+  ["Întrebări frecvente", "/#faq"],
   ["Portal client", site.portalUrl],
-  ["Contact", "#contact"],
+  ["Contact", "/#contact"],
 ];
 
 export function Header() {
@@ -30,13 +30,13 @@ export function Header() {
     <>
       <header className={`${s.header} ${scrolled ? s.scrolled : ""}`}>
         <div className={s.bar}>
-          <a href="#top" aria-label="VALUEFY — acasă" className={s.logo}>
+          <a href="/" aria-label="VALUEFY — acasă" className={s.logo}>
             <Image src="/valuefy-logo.png" alt="VALUEFY" width={137} height={28} priority />
           </a>
           <nav aria-label="Navigare principală" className={s.nav}>
-            <a href="#servicii">Servicii</a>
-            <a href="#cum-functioneaza">Cum funcționează</a>
-            <a href="#faq">Întrebări</a>
+            <a href="/#servicii">Servicii</a>
+            <a href="/#cum-functioneaza">Cum funcționează</a>
+            <a href="/#faq">Întrebări</a>
           </nav>
           <div className={s.actions}>
             <a href={site.portalUrl} className={s.portal}>

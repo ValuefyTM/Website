@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { site } from "@/config/site";
 import { AssistantProvider } from "@/components/Assistant";
 import { Header } from "@/components/Header";
@@ -9,6 +10,10 @@ import { Faq } from "@/components/Faq";
 import { FAQS } from "@/lib/faqs";
 import { FinalCta, Footer } from "@/components/Closing";
 import { RevealOnScroll } from "@/components/RevealOnScroll";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 const jsonLd = {
   "@context": "https://schema.org",
