@@ -5,7 +5,7 @@ import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { PropertyTypes, Purposes } from "@/components/Selectors";
 import { HowItWorks, PortalShowcase, Services } from "@/components/Process";
-import { Clients, Trust } from "@/components/Trust";
+import { Clients, Coverage, Trust } from "@/components/Trust";
 import { Faq } from "@/components/Faq";
 import { FAQS } from "@/lib/faqs";
 import { FinalCta, Footer } from "@/components/Closing";
@@ -26,7 +26,7 @@ const jsonLd = {
       telephone: site.phone,
       email: site.email,
       description: "Servicii profesionale de evaluare imobiliară. Firmă autorizată ANEVAR.",
-      areaServed: ["Timișoara", "Vestul României", "România"],
+      areaServed: ["Timișoara", "Cluj-Napoca", "România"],
     },
     {
       "@type": "FAQPage",
@@ -47,6 +47,7 @@ export default function Home() {
         <Services />
         <PortalShowcase />
         <Trust />
+        <Coverage />
         <Clients />
         <Faq />
         <FinalCta />

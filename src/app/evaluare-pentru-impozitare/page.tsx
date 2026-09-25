@@ -63,7 +63,7 @@ const FAQ = [
   ],
   [
     "Evaluați și în afara Timișoarei?",
-    "Da. Lucrăm în principal în Timișoara și vestul României, dar realizăm evaluări și în alte localități. Trimite solicitarea și îți confirmăm disponibilitatea.",
+    "Da, evaluăm oriunde în România. Avem birouri în Timișoara și Cluj-Napoca, iar în restul țării lucrăm cu evaluatori colaboratori autorizați ANEVAR, cu același proces și standard de calitate.",
   ],
 ];
 
@@ -76,7 +76,7 @@ const jsonLd = {
       serviceType: "Evaluare imobiliară în scop fiscal",
       description: DESCRIPTION,
       url: `${site.url}${PATH}`,
-      areaServed: ["Timișoara", "Vestul României", "România"],
+      areaServed: ["Timișoara", "Cluj-Napoca", "România"],
       provider: { "@type": "ProfessionalService", name: site.name, url: site.url, telephone: site.phone, email: site.email },
     },
     {

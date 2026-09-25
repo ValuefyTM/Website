@@ -57,7 +57,45 @@
 .card p { margin: 0; font-size: 15px; line-height: 1.6; color: var(--muted); }
 
 /* Client types */
-.clients { background: var(--cream); border-top: 1px solid var(--line-warm); margin-top: clamp(64px, 8vw, 112px); }
+.clients { background: var(--cream); border-top: 1px solid var(--line-warm); }
+
+/* National coverage */
+.coverage { background: #fff; border-top: 1px solid var(--line-warm); margin-top: clamp(64px, 8vw, 112px); }
+.coverageInner {
+  padding-top: clamp(64px, 8vw, 112px); padding-bottom: clamp(64px, 8vw, 112px);
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: clamp(32px, 5vw, 64px); align-items: center;
+}
+.coverageCopy { display: flex; flex-direction: column; gap: 22px; }
+.coverageCopy > p { margin: 0; font-size: 16px; line-height: 1.7; color: var(--muted-2); max-width: 30em; text-wrap: pretty; }
+.offices { display: flex; flex-direction: column; gap: 10px; }
+.office { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 16px; background: var(--navy); color: #fff; }
+.officeCode {
+  width: 40px; height: 40px; flex-shrink: 0; border-radius: 12px; background: var(--acc); color: var(--ink);
+  font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+}
+.officeText { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.officeText b { font-size: 16px; font-weight: 700; }
+.officeText span { font-size: 13px; color: #c9cae0; }
+.officeNetwork { background: var(--cream); border: 1px solid var(--line-warm); color: var(--ink); }
+.officeNetwork .officeText span { color: var(--muted-2); }
+.networkIcon {
+  width: 40px; height: 40px; flex-shrink: 0; border-radius: 12px; background: #fff; border: 2px solid var(--acc);
+  display: flex; align-items: center; justify-content: center;
+}
+.networkIcon span { width: 10px; height: 10px; border-radius: 50%; background: #fff; border: 2px solid var(--acc); display: block; }
+.map {
+  position: relative; border-radius: 24px; overflow: hidden; background: #f6f2ea; border: 1px solid var(--line-warm);
+  width: 100%; aspect-ratio: 4 / 3; min-height: 280px;
+}
+.map img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
+.legend {
+  position: absolute; left: 14px; bottom: 12px; display: flex; gap: 14px; flex-wrap: wrap;
+  font-size: 12px; font-weight: 700; color: var(--ink); pointer-events: none;
+}
+.legend span { display: flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.9); padding: 5px 10px; border-radius: 999px; }
+.legend i { display: block; border-radius: 50%; }
+.legendOffice { width: 10px; height: 10px; background: var(--acc); }
+.legendPartner { width: 9px; height: 9px; background: #fff; border: 2px solid var(--acc); }
 .clientsInner { padding-top: clamp(64px, 8vw, 112px); padding-bottom: clamp(64px, 8vw, 112px); display: flex; flex-direction: column; gap: 40px; }
 .clientsHead { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 24px; align-items: end; }
 .clientsTitle { display: flex; flex-direction: column; gap: 12px; }

@@ -4,7 +4,7 @@ export const FAQS = [
   ["Ce documente sunt necesare?", "De regulă: extras de carte funciară, actul de proprietate și documentația cadastrală. Lista exactă depinde de proprietate și de scop — asistentul te ghidează, iar specialistul o confirmă în ofertă."],
   ["Este necesară inspecția proprietății?", "În majoritatea cazurilor, da. Inspecția face parte din procesul de evaluare și se programează împreună cu tine."],
   ["Pot transmite documentele online?", "Da. Le poți încărca direct din asistent sau le poți trimite după ce primești oferta."],
-  ["În ce localități realizați evaluări?", "Lucrăm în principal în Timișoara și în vestul României. Pentru alte localități, trimite solicitarea și îți confirmăm disponibilitatea."],
+  ["În ce localități realizați evaluări?", "Oriunde în România. Avem birouri în Timișoara și Cluj-Napoca, iar în restul țării lucrăm printr-o rețea de evaluatori colaboratori autorizați ANEVAR, cu același proces și standard de calitate."],
   ["Pot solicita o evaluare pentru o companie?", "Da. Realizăm evaluări pentru companii — imobile, active pentru raportare financiară, garanții și alte scopuri."],
   ["Cum solicit o ofertă?", "Alege tipul proprietății sau deschide asistentul. În câteva minute trimiți solicitarea, iar un specialist revine cu oferta."],
 ];

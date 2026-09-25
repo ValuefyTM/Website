@@ -76,6 +76,51 @@ export function Trust() {
   );
 }
 
+const OFFICES = [
+  ["TM", "Timișoara", "Sediu central · Vestul României"],
+  ["CJ", "Cluj-Napoca", "Birou regional · Transilvania și Nord-Vest"],
+];
+
+export function Coverage() {
+  return (
+    <section id="acoperire" aria-labelledby="cov-title" className={`anchor ${s.coverage}`}>
+      <div className={`container ${s.coverageInner}`}>
+        <div className={s.coverageCopy}>
+          <div className="eyebrow">Acoperire națională</div>
+          <h2 id="cov-title" className="h2">Evaluăm oriunde în România.</h2>
+          <p>
+            Birourile din Timișoara și Cluj-Napoca coordonează fiecare dosar. În restul țării lucrăm printr-o rețea de evaluatori colaboratori autorizați ANEVAR, cu același proces și același standard de calitate.
+          </p>
+          <div className={s.offices}>
+            {OFFICES.map(([code, city, d]) => (
+              <div key={city} className={s.office}>
+                <span className={s.officeCode}>{code}</span>
+                <span className={s.officeText}><b>{city}</b><span>{d}</span></span>
+              </div>
+            ))}
+            <div className={`${s.office} ${s.officeNetwork}`}>
+              <span className={s.networkIcon} aria-hidden="true"><span /></span>
+              <span className={s.officeText}><b>Rețea de colaboratori</b><span>Evaluatori autorizați în toate regiunile țării</span></span>
+            </div>
+          </div>
+        </div>
+        <div data-rv className={s.map}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/romania-map.svg"
+            alt="Harta acoperirii VALUEFY în România: birouri în Timișoara și Cluj-Napoca, colaboratori în restul țării"
+            loading="lazy"
+          />
+          <div className={s.legend} aria-hidden="true">
+            <span><i className={s.legendOffice} />Birou VALUEFY</span>
+            <span><i className={s.legendPartner} />Colaborator</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function Clients() {
   return (
     <section aria-labelledby="clients-title" className={s.clients}>
