@@ -48,7 +48,8 @@ const esc = (s: unknown) => String(s ?? "—").replace(/[&<>"]/g, (c) => ({ "&":
 function emailHtml(r: LeadRecord) {
   const rows: [string, unknown][] = [
     ["Prioritate", r.priority],
-    ["Tip proprietate", r.property_type],
+    ["Ce se evaluează", r.property_type],
+    ["Descriere", r.property_description],
     ["Localitate", r.city],
     ["Adresă", r.address],
     ["Suprafață (m²)", r.surface_area],

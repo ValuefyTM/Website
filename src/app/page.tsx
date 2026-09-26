@@ -25,7 +25,7 @@ const jsonLd = {
       logo: `${site.url}/valuefy-logo.png`,
       telephone: site.phone,
       email: site.email,
-      description: "Servicii profesionale de evaluare imobiliară. Firmă autorizată ANEVAR.",
+      description: "Evaluări imobiliare și de bunuri mobile. Firmă autorizată ANEVAR.",
       areaServed: ["Timișoara", "Cluj-Napoca", "România"],
     },
     {

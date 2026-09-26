@@ -5,6 +5,6 @@ export const FAQS = [
   ["Este necesară inspecția proprietății?", "În majoritatea cazurilor, da. Inspecția face parte din procesul de evaluare și se programează împreună cu tine."],
   ["Pot transmite documentele online?", "Da. Le poți încărca direct din asistent sau le poți trimite după ce primești oferta."],
   ["În ce localități realizați evaluări?", "Oriunde în România. Avem birouri în Timișoara și Cluj-Napoca, iar în restul țării lucrăm printr-o rețea de evaluatori colaboratori autorizați ANEVAR, cu același proces și standard de calitate."],
-  ["Pot solicita o evaluare pentru o companie?", "Da. Realizăm evaluări pentru companii — imobile, active pentru raportare financiară, garanții și alte scopuri."],
+  ["Pot solicita o evaluare pentru o companie?", "Da. Realizăm evaluări pentru companii — imobile, bunuri mobile (utilaje, echipamente, autovehicule, mijloace fixe), active pentru raportare financiară, garanții și alte scopuri."],
   ["Cum solicit o ofertă?", "Alege tipul proprietății sau deschide asistentul. În câteva minute trimiți solicitarea, iar un specialist revine cu oferta."],
 ];

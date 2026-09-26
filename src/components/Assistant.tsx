@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { site } from "@/config/site";
 import {
-  CITIES, CUSTOMERS, DEADLINES, DOCS, DOC_HELP, GREETING, GROUPS, GROUP_NAMES, PURPOSES, TYPES,
+  ASSET_TYPES, CITIES, CUSTOMERS, DEADLINES, DOCS, DOC_HELP, GREETING, GROUPS, GROUP_NAMES, MOBILE, PURPOSES,
   nextStep, question, typeObj, type Lead, type Step,
 } from "@/lib/lead";
 import { useMediaQuery } from "@/lib/useMediaQuery";
@@ -27,8 +27,8 @@ const TYPING_MS = 650;
 const greetingMsg = (): Msg => ({ kind: "text", role: "assistant", text: GREETING });
 const fold = (v: string) => v.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 
-type Form = { city: string; address: string; surface: string; rooms: string; land: string; notes: string; date: string; name: string; phone: string; email: string; consent: boolean };
-const emptyForm: Form = { city: "", address: "", surface: "", rooms: "", land: "", notes: "", date: "", name: "", phone: "", email: "", consent: false };
+type Form = { describe: string; city: string; address: string; surface: string; rooms: string; land: string; notes: string; date: string; name: string; phone: string; email: string; consent: boolean };
+const emptyForm: Form = { describe: "", city: "", address: "", surface: "", rooms: "", land: "", notes: "", date: "", name: "", phone: "", email: "", consent: false };
 
 export function AssistantProvider({ children }: { children: React.ReactNode }) {
   const isMobile = useMediaQuery("(max-width: 1079px)");
@@ -129,7 +129,12 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
     if (Object.keys(patch).length) {
       const fresh = wasDone || msgsRef.current.length <= 1;
       if (fresh) setMsgs([]);
-      const l = { ...(wasDone ? {} : leadRef.current), ...patch };
+      const prev: Lead = wasDone ? {} : { ...leadRef.current };
+      // A different asset type makes the previous description/size irrelevant.
+      if (ctx.type && prev.property_type && prev.property_type !== ctx.type) {
+        for (const k of ["property_description", "details_done", "surface_area", "land_area", "rooms"] as const) delete prev[k];
+      }
+      const l = { ...prev, ...patch };
       setLead(l);
       const next = nextStep(l);
       const pre = ctx.purpose && !ctx.type ? `Am notat: evaluare pentru ${ctx.purpose.toLowerCase()}. ` : "";
@@ -271,7 +276,7 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
   const typeK = lead.property_type;
   const tObj = typeObj(typeK);
 
-  const chipSets: Partial<Record<Step, string[]>> = { type: TYPES.map((t) => t.k), purpose: PURPOSES, deadline: DEADLINES, documents: DOCS, customer: CUSTOMERS };
+  const chipSets: Partial<Record<Step, string[]>> = { type: ASSET_TYPES.map((t) => t.k), purpose: PURPOSES, deadline: DEADLINES, documents: DOCS, customer: CUSTOMERS };
   const chipField: Partial<Record<Step, keyof Lead>> = { type: "property_type", purpose: "valuation_purpose", deadline: "deadline", documents: "documents_status", customer: "customer_type" };
   const pick = (field: keyof Lead, v: string) => {
     if (field === "deadline" && v === "Termen specific") {
@@ -294,6 +299,11 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
   const setField = <K extends keyof Form>(k: K) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setF((prev) => ({ ...prev, [k]: (e.target.type === "checkbox" ? e.target.checked : e.target.value) as Form[K] }));
 
+  const describeSubmit = () => {
+    const d = f.describe.trim();
+    if (!d) return;
+    patchLead({ property_description: d }, d);
+  };
   const citySubmit = () => {
     const c = f.city.trim();
     if (!c) return;
@@ -323,8 +333,11 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
   };
 
   const sumRows: [string, string | undefined][] = [
+    ...(lead.property_description ? ([["Descriere", lead.property_description]] as [string, string][]) : []),
     ["Localitate", [lead.city, lead.address].filter(Boolean).join(", ")],
-    ["Suprafață", lead.surface_area ? lead.surface_area + " m²" : lead.land_area ? lead.land_area + " m² teren" : "—"],
+    ...(typeK === MOBILE
+      ? []
+      : ([["Suprafață", lead.surface_area ? lead.surface_area + " m²" : lead.land_area ? lead.land_area + " m² teren" : "—"]] as [string, string][])),
     ["Scop", lead.valuation_purpose],
     ["Termen", lead.deadline_date ? new Date(lead.deadline_date).toLocaleDateString("ro-RO") : lead.deadline],
     ["Documente", lead.documents_status === DOCS[2] ? "De clarificat" : lead.documents_status === "Da" ? "Disponibile" : lead.documents_status],
@@ -333,7 +346,7 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
     ["Telefon / email", [lead.phone, lead.email].filter(Boolean).join(" · ")],
   ];
   const editMap: [string, (keyof Lead)[]][] = [
-    ["Proprietate", ["property_type", "details_done", "surface_area", "land_area", "rooms"]],
+    ["Proprietate", ["property_type", "property_description", "details_done", "surface_area", "land_area", "rooms"]],
     ["Localizare", ["city", "address"]],
     ["Detalii", ["details_done", "surface_area", "land_area", "rooms"]],
     ["Scop", ["valuation_purpose"]],
@@ -445,6 +458,23 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
             </div>
           )}
 
+          {st === "describe" && (
+            <div className={s.card}>
+              <label className={s.label}>{typeK === MOBILE ? "Ce bunuri dorești să evaluezi?" : "Ce proprietate dorești să evaluezi?"}
+                <textarea
+                  className={`${s.input} ${s.textarea}`}
+                  value={f.describe}
+                  onChange={(e) => setF((p) => ({ ...p, describe: e.target.value }))}
+                  onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); describeSubmit(); } }}
+                  placeholder={typeK === MOBILE ? "ex. 3 utilaje CNC și un stivuitor" : "ex. pensiune cu 12 camere"}
+                  rows={3}
+                  maxLength={500}
+                />
+              </label>
+              <button type="button" className={s.primary} onClick={describeSubmit}>Continuă</button>
+            </div>
+          )}
+
           {st === "city" && (
             <div className={s.card}>
               <label className={s.label}>Localitate
@@ -538,7 +568,7 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
                   <div>
                     <div className={s.caps}>{(typeK || "").toUpperCase()}</div>
                     <div className={s.summaryLine}>
-                      {[lead.city, lead.surface_area ? lead.surface_area + " m²" : lead.land_area ? lead.land_area + " m²" : "", lead.rooms ? lead.rooms + " camere" : ""].filter(Boolean).join(" · ")}
+                      {[lead.property_description, lead.city, lead.surface_area ? lead.surface_area + " m²" : lead.land_area ? lead.land_area + " m²" : "", lead.rooms ? lead.rooms + " camere" : ""].filter(Boolean).join(" · ")}
                     </div>
                   </div>
                 </div>

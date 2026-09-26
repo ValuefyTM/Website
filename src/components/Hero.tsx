@@ -24,7 +24,7 @@ export function Hero() {
             <span className={s.line2}>Simplu, rapid și profesionist.</span>
           </h1>
           <p className={s.lead}>
-            Rapoarte de evaluare pentru proprietăți rezidențiale, comerciale și industriale, printr-un proces simplu și digital.
+            Rapoarte de evaluare pentru proprietăți rezidențiale, comerciale și industriale, dar și pentru bunuri mobile, printr-un proces simplu și digital.
           </p>
           <div>
             <AssistantButton className={s.cta}>Solicită o evaluare →</AssistantButton>

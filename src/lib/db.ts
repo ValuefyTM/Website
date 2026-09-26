@@ -56,9 +56,9 @@ export async function saveLead(db: D1Database, r: LeadRecord, files: FileMeta[])
   await db.batch([
     db
       .prepare(
-        "INSERT INTO properties (id, client_id, property_type, city, address, surface_area, land_area, rooms, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO properties (id, client_id, property_type, description, city, address, surface_area, land_area, rooms, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
       )
-      .bind(propertyId, clientId, r.property_type, r.city, r.address, numOrNull(r.surface_area), numOrNull(r.land_area), rooms === null ? null : Math.round(rooms), r.notes),
+      .bind(propertyId, clientId, r.property_type, r.property_description, r.city, r.address, numOrNull(r.surface_area), numOrNull(r.land_area), rooms === null ? null : Math.round(rooms), r.notes),
     db
       .prepare(
         `INSERT INTO leads (id, created_at, source, status, priority, client_id, property_id, valuation_purpose,

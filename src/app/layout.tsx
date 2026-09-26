@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: "VALUEFY | Evaluări imobiliare",
   description:
-    "Servicii profesionale de evaluare pentru apartamente, case, terenuri și proprietăți comerciale. Solicită rapid o ofertă prin VALUEFY.",
+    "Evaluări pentru apartamente, case, terenuri, proprietăți comerciale și bunuri mobile, realizate de firmă autorizată ANEVAR. Solicită rapid o ofertă prin VALUEFY.",
   openGraph: {
     siteName: "VALUEFY",
     title: "VALUEFY | Evaluări imobiliare",

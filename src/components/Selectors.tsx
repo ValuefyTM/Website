@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { unsplash } from "@/lib/icons";
-import { PURPOSES, TYPES } from "@/lib/lead";
+import { ICONS } from "@/lib/icons";
+import { MOBILE, PURPOSES, TYPES } from "@/lib/lead";
 import { AssistantButton } from "./AssistantButton";
 import s from "./Selectors.module.css";
 
@@ -38,6 +39,17 @@ export function PropertyTypes() {
             </div>
           </AssistantButton>
         ))}
+      </div>
+      <div data-rv className={s.mobileBanner}>
+        <span className={s.mobileIcon} aria-hidden="true">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={ICONS.mobileGold} alt="" width={26} height={26} />
+        </span>
+        <span className={s.mobileText}>
+          <b>Evaluăm și bunuri mobile</b>
+          <span>Utilaje, echipamente, autovehicule și mijloace fixe — pentru credit, raportare financiară, vânzare sau alte scopuri.</span>
+        </span>
+        <AssistantButton type_={MOBILE} className={s.mobileCta}>Solicită evaluare →</AssistantButton>
       </div>
     </section>
   );

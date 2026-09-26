@@ -126,6 +126,7 @@
   font-size: 16px; color: var(--ink); background: #fff; outline: none; min-width: 0;
 }
 .input:focus { border-color: var(--acc-text); }
+.textarea { height: auto; min-height: 84px; padding: 12px 14px; line-height: 1.5; resize: vertical; font-family: inherit; }
 .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .sugg { display: flex; flex-wrap: wrap; gap: 6px; }
 .suggBtn {
