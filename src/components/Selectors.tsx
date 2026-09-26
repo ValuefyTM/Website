@@ -1,7 +1,5 @@
-import Image from "next/image";
-import { unsplash } from "@/lib/icons";
-import { ICONS } from "@/lib/icons";
-import { MOBILE, PURPOSES, TYPES } from "@/lib/lead";
+import { ICONS, unsplash } from "@/lib/icons";
+import { ASSET_TYPES, MOBILE, PURPOSES } from "@/lib/lead";
 import { AssistantButton } from "./AssistantButton";
 import s from "./Selectors.module.css";
 
@@ -15,31 +13,41 @@ const PURPOSE_DESC = [
   "Asigurare, aport la capital sau alt scop specific.",
 ];
 
+// Property types + movable assets. Movable assets use an illustration instead of a photo.
+const CARDS = ASSET_TYPES.map((t) => ({
+  k: t.k,
+  icon: t.icon,
+  photo: t.k === MOBILE ? "/illustrations/excavator.svg" : unsplash(t.img, 600),
+}));
+
 export function PropertyTypes() {
   return (
     <section aria-labelledby="sel-title" className={`container ${s.types}`}>
       <div className={s.typesHead}>
         <h2 id="sel-title" className="h2">Ce dorești să evaluezi?</h2>
-        <p>Selectează tipul proprietății și te ghidăm mai departe.</p>
+        <p>Selectează tipul proprietății sau al bunului și te ghidăm mai departe.</p>
       </div>
-      <div data-rv className={s.typeGrid}>
-        {TYPES.map((t) => (
-          <AssistantButton key={t.k} type_={t.k} className={s.typeCard} aria-label={`Evaluare ${t.k}`}>
+      <ul data-rv className={s.typeGrid}>
+        {CARDS.map((c) => (
+          <li key={c.k} className={`${s.typeCard} ${c.k === MOBILE ? s.typeWide : ""}`}>
             <div className={s.typeImg}>
-              <Image src={unsplash(t.img, 600)} alt="" fill sizes="(max-width: 560px) 50vw, 220px" />
-              <div className={s.typeShade} />
+              {/* Plain <img> in normal flow (not inside the button) so every browser paints it. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className={s.typePhoto} src={c.photo} alt="" loading="lazy" decoding="async" />
               <div className={s.typeIcon}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={t.icon} alt="" width={24} height={24} />
+                <img src={c.icon} alt="" width={24} height={24} />
               </div>
             </div>
             <div className={s.typeFoot}>
-              <span>{t.k.toUpperCase()}</span>
+              <span>{c.k.toUpperCase()}</span>
               <span className={s.typeArrow} aria-hidden="true">→</span>
             </div>
-          </AssistantButton>
+            {/* Transparent button covering the whole card. */}
+            <AssistantButton type_={c.k} className={s.typeHit} aria-label={`Evaluare ${c.k}`} />
+          </li>
         ))}
-      </div>
+      </ul>
       <div data-rv className={s.mobileBanner}>
         <span className={s.mobileIcon} aria-hidden="true">
           {/* eslint-disable-next-line @next/next/no-img-element */}

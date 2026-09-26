@@ -2,32 +2,50 @@
 .types { padding-top: clamp(64px, 8vw, 104px); display: flex; flex-direction: column; gap: 36px; }
 .typesHead { display: flex; flex-direction: column; gap: 10px; }
 .typesHead p { margin: 0; font-size: 17px; color: var(--muted); }
-.typeGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(calc(50% - 8px), 180px), 1fr)); gap: 16px; }
-.typeCard {
-  text-align: left; padding: 0; border-radius: 18px; overflow: hidden; background: #fff;
-  border: 1px solid var(--line); cursor: pointer; display: flex; flex-direction: column; color: var(--ink);
-  transition: all 0.3s var(--ease);
+.typeGrid {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 16px;
 }
-.typeImg { position: relative; height: 150px; overflow: hidden; background: var(--line); }
+@media (max-width: 1079px) { .typeGrid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 559px) { .typeGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } }
+/* Movable assets: wide card where it would otherwise sit alone on the last row. */
+@media (max-width: 1079px) { .typeWide { grid-column: span 2; } }
+
+.typeCard {
+  position: relative; border-radius: 18px; overflow: hidden; background: #fff;
+  border: 1px solid var(--line); display: flex; flex-direction: column; color: var(--ink);
+  transition: border-color 0.3s var(--ease), box-shadow 0.3s var(--ease), transform 0.3s var(--ease);
+}
+.typeImg { position: relative; height: 150px; overflow: hidden; background: var(--navy); }
 @media (max-width: 559px) { .typeImg { height: 112px; } }
-.typeImg img { object-fit: cover; transition: transform 0.9s var(--ease); }
-.typeShade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(17, 17, 48, 0) 35%, rgba(17, 17, 48, 0.45)); }
+.typePhoto { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 0.9s var(--ease); }
+.typeImg::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(17, 17, 48, 0) 35%, rgba(17, 17, 48, 0.45));
+}
 .typeIcon {
-  position: absolute; left: 14px; bottom: 14px; width: 44px; height: 44px; border-radius: 12px; background: #fff;
+  position: absolute; z-index: 1; left: 14px; bottom: 14px; width: 44px; height: 44px; border-radius: 12px; background: #fff;
   display: flex; align-items: center; justify-content: center; transition: background 0.25s;
   box-shadow: 0 6px 16px -6px rgba(0, 0, 0, 0.35);
 }
 .typeIcon img { display: block; transition: transform 0.35s var(--ease); }
 .typeFoot { padding: 16px 18px 18px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .typeFoot span:first-child { font-size: 13px; font-weight: 800; letter-spacing: 0.06em; }
+@media (max-width: 559px) { .typeFoot { padding: 14px 14px 16px; } .typeFoot span:first-child { font-size: 12px; } }
 .typeArrow { color: var(--acc-text); font-weight: 700; opacity: 0; transition: all 0.25s; }
-.typeCard:hover, .typeCard:focus-visible {
+.typeHit {
+  position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; margin: 0; padding: 0;
+  border: 0; border-radius: inherit; background: transparent; cursor: pointer;
+  -webkit-appearance: none; appearance: none; -webkit-tap-highlight-color: transparent;
+}
+.typeHit:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+.typeCard:hover, .typeCard:focus-within {
   border-color: var(--acc); box-shadow: 0 16px 32px -16px rgba(242, 169, 59, 0.35); transform: translateY(-3px);
 }
-.typeCard:hover .typeImg img, .typeCard:focus-visible .typeImg img { transform: scale(1.1); }
-.typeCard:hover .typeIcon, .typeCard:focus-visible .typeIcon { background: var(--acc-soft); }
-.typeCard:hover .typeIcon img, .typeCard:focus-visible .typeIcon img { transform: translateY(-2px) scale(1.08); }
-.typeCard:hover .typeArrow, .typeCard:focus-visible .typeArrow { opacity: 1; transform: translateX(4px); }
+.typeCard:hover .typePhoto, .typeCard:focus-within .typePhoto { transform: scale(1.1); }
+.typeCard:hover .typeIcon, .typeCard:focus-within .typeIcon { background: var(--acc-soft); }
+.typeCard:hover .typeIcon img, .typeCard:focus-within .typeIcon img { transform: translateY(-2px) scale(1.08); }
+.typeCard:hover .typeArrow, .typeCard:focus-within .typeArrow { opacity: 1; transform: translateX(4px); }
 
 .mobileBanner {
   display: flex; align-items: center; gap: 18px; flex-wrap: wrap; padding: 18px 20px; border-radius: 18px;
