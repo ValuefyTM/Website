@@ -17,6 +17,7 @@ npm run dev                  # http://localhost:3000
 | `ANTHROPIC_API_KEY` | AI assistant (free-text answers) and the internal request summary |
 | `ASSISTANT_MODEL` | Model used, default `claude-haiku-4-5` |
 | `RESEND_API_KEY`, `LEAD_EMAIL_FROM`, `LEAD_EMAIL_TO` | Sending requests by email (Resend). The sender domain must be verified in Resend |
+| `CLIENT_CONFIRMATION` | Set to `off` to stop the confirmation email sent to the visitor (on by default when the visitor gives an email) |
 | `NEXT_PUBLIC_PHONE`, `NEXT_PUBLIC_EMAIL` | Contact details shown on the site |
 | `NEXT_PUBLIC_ANEVAR_NO` | ANEVAR authorization number; hidden while empty |
 | `NEXT_PUBLIC_PORTAL_URL` | Client portal link (default `/client`, a placeholder page) |

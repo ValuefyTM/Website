@@ -190,6 +190,7 @@
   width: 56px; height: 56px; border-radius: 50%; background: var(--green); color: #fff;
   display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 800;
 }
+.doneMail { font-size: 13px !important; color: var(--green) !important; font-weight: 600; }
 .doneTitle { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
 .doneId { font-size: 13px; color: var(--muted); }
 .doneId code {

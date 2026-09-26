@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
 import { buildRecord, fallbackSummary, type Lead, type LeadRecord } from "@/lib/lead";
 import { getDb, markLeadEmailed, saveLead } from "@/lib/db";
+import { confirmationEmail } from "@/lib/confirmationEmail";
 
 export const runtime = "nodejs";
 
@@ -124,7 +125,11 @@ export async function POST(req: Request) {
   }
 
   // The request is safe as long as it reached at least one of the two.
-  if (saved || emailed) return NextResponse.json({ ok: true, lead_id: id });
+  if (saved || emailed) {
+    // 3. Confirmation to the visitor (best effort — never fails the request).
+    const confirmed = await sendClientConfirmation(record, new URL(req.url).origin);
+    return NextResponse.json({ ok: true, lead_id: id, confirmation_sent: confirmed });
+  }
   if (process.env.NODE_ENV !== "production") {
     console.warn("[leads] no database or email available — lead only logged:", JSON.stringify(record));
     return NextResponse.json({ ok: true, lead_id: id });
@@ -166,6 +171,30 @@ async function sendLeadEmail(record: LeadRecord, files: File[], attachFiles: boo
     return true;
   } catch (error) {
     console.error("[leads] email failed", error);
+    return false;
+  }
+}
+
+async function sendClientConfirmation(record: LeadRecord, baseUrl: string): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.LEAD_EMAIL_FROM;
+  const replyTo = (process.env.LEAD_EMAIL_TO || process.env.NEXT_PUBLIC_EMAIL || "").split(",")[0].trim();
+  if (!apiKey || !from || !record.email || process.env.CLIENT_CONFIRMATION === "off") return false;
+
+  const { subject, html, text } = confirmationEmail(record, baseUrl);
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ from, to: [record.email], reply_to: replyTo || undefined, subject, html, text }),
+    });
+    if (!res.ok) {
+      console.error("[leads] client confirmation failed", res.status, await res.text());
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("[leads] client confirmation failed", error);
     return false;
   }
 }

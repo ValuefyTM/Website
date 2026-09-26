@@ -47,6 +47,7 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
   const [submitting, setSubmitting] = useState(false);
   const [submitErr, setSubmitErr] = useState("");
   const [leadId, setLeadId] = useState("");
+  const [confirmed, setConfirmed] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
 
   // Refs mirror state that async callbacks (timers, fetches) must read fresh.
@@ -229,9 +230,10 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
     filesRef.current.forEach((file) => body.append("files", file));
     try {
       const res = await fetch("/api/leads", { method: "POST", body });
-      const data = (await res.json().catch(() => ({}))) as { ok?: boolean; lead_id?: string };
+      const data = (await res.json().catch(() => ({}))) as { ok?: boolean; lead_id?: string; confirmation_sent?: boolean };
       if (!res.ok || !data.lead_id) throw new Error(String(res.status));
       setLeadId(data.lead_id);
+      setConfirmed(!!data.confirmation_sent);
       setStep("done");
     } catch {
       setSubmitErr(`Nu am putut trimite solicitarea. Încearcă din nou sau sună-ne la ${site.phone}.`);
@@ -599,6 +601,7 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
               <div className={s.doneTitle}>Solicitarea a fost trimisă.</div>
               <p>Un specialist VALUEFY va verifica informațiile și te va contacta pentru ofertă și pașii următori.</p>
               <div className={s.doneId}>Număr solicitare <code>{leadId}</code></div>
+              {confirmed && <p className={s.doneMail}>Ți-am trimis o confirmare pe email, la {lead.email}.</p>}
               <button type="button" className={s.secondary} onClick={reset}>Solicitare nouă</button>
             </div>
           )}
