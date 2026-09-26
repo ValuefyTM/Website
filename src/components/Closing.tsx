@@ -7,7 +7,7 @@ import s from "./Closing.module.css";
 const FOOTER_COLS = [
   {
     t: "SERVICII",
-    links: [["Evaluări imobiliare", "/#servicii"], ["Creditare", "/#servicii"], ["Impozitare", "/evaluare-pentru-impozitare"], ["Raportare financiară", "/#servicii"], ["Proprietăți comerciale", "/#servicii"]],
+    links: [["Evaluări imobiliare", "/#servicii"], ["Creditare", "/#servicii"], ["Impozitare", "/evaluare-pentru-impozitare"], ["Raportare financiară", "/#servicii"], ["Proprietăți comerciale", "/#servicii"], ["Bunuri mobile", "/evaluare-bunuri-mobile"]],
   },
   {
     t: "COMPANIE",

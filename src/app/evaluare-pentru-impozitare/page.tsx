@@ -7,7 +7,7 @@ import { AssistantButton } from "@/components/AssistantButton";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Closing";
 import { RevealOnScroll } from "@/components/RevealOnScroll";
-import s from "./page.module.css";
+import s from "@/components/Landing.module.css";
 
 const PATH = "/evaluare-pentru-impozitare";
 const TITLE = "Evaluare clădiri pentru impozitare | VALUEFY";

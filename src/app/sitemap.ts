@@ -5,6 +5,7 @@ import { site } from "@/config/site";
 const PAGES: { path: string; priority: number }[] = [
   { path: "/", priority: 1 },
   { path: "/evaluare-pentru-impozitare", priority: 0.8 },
+  { path: "/evaluare-bunuri-mobile", priority: 0.8 },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

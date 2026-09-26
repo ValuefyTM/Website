@@ -49,7 +49,10 @@ export function PropertyTypes() {
           <b>Evaluăm și bunuri mobile</b>
           <span>Utilaje, echipamente, autovehicule și mijloace fixe — pentru credit, raportare financiară, vânzare sau alte scopuri.</span>
         </span>
-        <AssistantButton type_={MOBILE} className={s.mobileCta}>Solicită evaluare →</AssistantButton>
+        <span className={s.mobileActions}>
+          <a href="/evaluare-bunuri-mobile" className={s.mobileMore}>Ce evaluăm</a>
+          <AssistantButton type_={MOBILE} className={s.mobileCta}>Solicită evaluare →</AssistantButton>
+        </span>
       </div>
     </section>
   );

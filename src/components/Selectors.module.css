@@ -45,7 +45,10 @@
   font-size: 15px; font-weight: 700; cursor: pointer; white-space: nowrap;
 }
 .mobileCta:hover { background: var(--acc-ink); }
-@media (max-width: 559px) { .mobileCta { width: 100%; } }
+.mobileActions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.mobileMore { font-size: 14px; font-weight: 700; color: #fff; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--acc); }
+.mobileMore:hover { color: var(--acc); }
+@media (max-width: 559px) { .mobileActions { width: 100%; } .mobileCta { width: 100%; } }
 
 /* Purpose selector */
 .purposes { padding-top: clamp(56px, 7vw, 96px); padding-bottom: clamp(64px, 8vw, 112px); }
