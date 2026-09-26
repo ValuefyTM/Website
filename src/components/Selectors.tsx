@@ -13,11 +13,11 @@ const PURPOSE_DESC = [
   "Asigurare, aport la capital sau alt scop specific.",
 ];
 
-// Property types + movable assets. Movable assets use an illustration instead of a photo.
+// Property types + movable assets (movable assets use a photo hosted on the site).
 const CARDS = ASSET_TYPES.map((t) => ({
   k: t.k,
   icon: t.icon,
-  photo: t.k === MOBILE ? "/illustrations/excavator.svg" : unsplash(t.img, 600),
+  photo: t.k === MOBILE ? "/photos/bunuri-mobile.jpg" : unsplash(t.img, 600),
 }));
 
 export function PropertyTypes() {
@@ -33,7 +33,7 @@ export function PropertyTypes() {
             <div className={s.typeImg}>
               {/* Plain <img> in normal flow (not inside the button) so every browser paints it. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className={s.typePhoto} src={c.photo} alt="" loading="lazy" decoding="async" />
+              <img className={s.typePhoto} src={c.photo} alt="" loading="lazy" decoding="async" style={c.k === MOBILE ? { objectPosition: "50% 78%" } : undefined} />
               <div className={s.typeIcon}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={c.icon} alt="" width={24} height={24} />
