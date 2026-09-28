@@ -10,6 +10,13 @@ import { Faq } from "@/components/Faq";
 import { FAQS } from "@/lib/faqs";
 import { FinalCta, Footer } from "@/components/Closing";
 import { RevealOnScroll } from "@/components/RevealOnScroll";
+import { EstateBand, ListingsCarousel } from "@/components/ListingsCarousel";
+import { getDb } from "@/lib/db";
+import { listPublished } from "@/lib/listings-db";
+import type { Listing } from "@/lib/listing-format";
+
+// The property carousel reads the database, so the page renders per request.
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -35,7 +42,18 @@ const jsonLd = {
   ],
 };
 
-export default function Home() {
+async function featured(): Promise<Listing[]> {
+  try {
+    const db = await getDb();
+    return db ? (await listPublished(db)).slice(0, 12) : [];
+  } catch (error) {
+    console.error("[home] could not load listings", error);
+    return [];
+  }
+}
+
+export default async function Home() {
+  const listings = await featured();
   return (
     <AssistantProvider>
       <Header />
@@ -43,6 +61,7 @@ export default function Home() {
         <Hero />
         <PropertyTypes />
         <Purposes />
+        {listings.length ? <ListingsCarousel listings={listings} /> : <EstateBand />}
         <HowItWorks />
         <Services />
         <PortalShowcase />

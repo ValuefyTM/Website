@@ -11,7 +11,7 @@ const FOOTER_COLS = [
   },
   {
     t: "COMPANIE",
-    links: [["Portal client", site.portalUrl], ["Despre noi", "/#despre"], ["Contact", "/#contact"], ["Întrebări frecvente", "/#faq"]],
+    links: [["Portal client", site.portalUrl], ["Portal Imobiliar", "/imobiliare"], ["Despre noi", "/#despre"], ["Contact", "/#contact"], ["Întrebări frecvente", "/#faq"]],
   },
   {
     t: "LEGAL",
