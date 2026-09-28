@@ -11,7 +11,7 @@ import s from "./imobiliare.module.css";
 
 export const metadata: Metadata = {
   title: "Proprietăți de vânzare | VALUEFY",
-  description: "Apartamente, case, terenuri și spații comerciale de vânzare, prezentate transparent de echipa VALUEFY.",
+  description: "Apartamente, case, terenuri și spații comerciale de vânzare, cu comision 0% la cumpărare, prezentate transparent de echipa VALUEFY.",
   alternates: { canonical: "/imobiliare" },
 };
 
@@ -41,9 +41,10 @@ export default async function ListingsPage() {
               Proprietăți de vânzare, <span>prezentate transparent.</span>
             </h1>
             <p className={s.lead}>
-              Vindem proprietăți pentru clienții noștri, cu documentele verificate și informații clare despre fiecare imobil — fără surprize la vizionare.
+              Vindem proprietăți pentru clienții noștri, cu documentele verificate și informații clare despre fiecare imobil — fără surprize la vizionare și fără comision la cumpărare.
             </p>
             <ul className={s.trustRow}>
+              <li className={s.zeroFeeHero}><span>0</span>Comision 0% la toate proprietățile</li>
               <li><span>✓</span>Documente verificate înainte de publicare</li>
               <li><span>✓</span>Informații complete și fotografii reale</li>
               <li><span>✓</span>Vizionări programate rapid</li>

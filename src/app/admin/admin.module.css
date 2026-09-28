@@ -113,3 +113,4 @@
 }
 .photoBtns button:disabled { opacity: 0.4; cursor: default; }
 .photoBtns button:last-child { color: #a4281e; }
+

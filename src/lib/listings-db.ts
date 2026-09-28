@@ -1,14 +1,15 @@
 // Server-only: listings stored in D1.
-import { photoUrl, slugify, type Listing } from "./listing-format";
+import { photoUrl, slugify, socialUrl, type Listing } from "./listing-format";
 
 type Row = {
   id: string; slug: string; title: string; type: string; city: string; zone: string; price: number;
   surface: number | null; land: number | null; rooms: number | null; baths: number | null; floor: string | null; year: number | null;
   status: string | null; features: string; description: string; report_date: string | null; published: number; updated_at: string;
-  photo_ids: string | null;
+  photo_ids: string | null; social_v: string | null;
 };
 
-const SELECT = `SELECT l.*, (SELECT group_concat(id, ',') FROM (SELECT id FROM listing_photos p WHERE p.listing_id = l.id ORDER BY position, created_at)) AS photo_ids FROM listings l`;
+const SELECT = `SELECT l.*, (SELECT group_concat(id, ',') FROM (SELECT id FROM listing_photos p WHERE p.listing_id = l.id ORDER BY position, created_at)) AS photo_ids,
+  (SELECT updated_at FROM listing_social s WHERE s.listing_id = l.id) AS social_v FROM listings l`;
 
 function toListing(r: Row): Listing {
   const photoIds = r.photo_ids ? r.photo_ids.split(",") : [];
@@ -21,6 +22,7 @@ function toListing(r: Row): Listing {
     description: r.description.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean),
     report: r.report_date ? { date: r.report_date } : undefined,
     published: r.published === 1, photoIds, photos: photoIds.map(photoUrl), updatedAt: r.updated_at,
+    socialImage: r.social_v ? socialUrl(r.id, r.social_v) : undefined,
   };
 }
 
@@ -117,7 +119,7 @@ export async function createListing(db: D1Database, v: ListingInput): Promise<st
   return id;
 }
 
-export async function updateListing(db: D1Database, id: string, v: ListingInput): Promise<void> {
+export async function updateListing(db: D1Database, id: string, v: ListingInput): Promise<string> {
   const slug = await uniqueSlug(db, v.title, v.city, id);
   await db
     .prepare(
@@ -126,6 +128,7 @@ export async function updateListing(db: D1Database, id: string, v: ListingInput)
     )
     .bind(slug, ...cols(v), id)
     .run();
+  return slug;
 }
 
 export async function setPublished(db: D1Database, id: string, published: boolean) {
@@ -135,6 +138,7 @@ export async function setPublished(db: D1Database, id: string, published: boolea
 export async function deleteListing(db: D1Database, id: string) {
   await db.batch([
     db.prepare("DELETE FROM listing_photos WHERE listing_id = ?").bind(id),
+    db.prepare("DELETE FROM listing_social WHERE listing_id = ?").bind(id),
     db.prepare("UPDATE listing_inquiries SET listing_id = NULL WHERE listing_id = ?").bind(id),
     db.prepare("DELETE FROM listings WHERE id = ?").bind(id),
   ]);
@@ -176,4 +180,28 @@ export type Inquiry = {
 export async function listInquiries(db: D1Database, limit = 100): Promise<Inquiry[]> {
   const { results } = await db.prepare("SELECT * FROM listing_inquiries ORDER BY created_at DESC LIMIT ?").bind(limit).all<Inquiry>();
   return results;
+}
+
+// ---------- share image ----------
+
+export const MAX_SOCIAL_BYTES = 900_000;
+
+export async function setSocialImage(db: D1Database, listingId: string, data: ArrayBuffer, contentType: string) {
+  await db
+    .prepare(
+      `INSERT INTO listing_social (listing_id, content_type, data, updated_at) VALUES (?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+       ON CONFLICT(listing_id) DO UPDATE SET content_type = excluded.content_type, data = excluded.data, updated_at = excluded.updated_at`,
+    )
+    .bind(listingId, contentType, data)
+    .run();
+}
+
+/** Share image of a listing; drafts only for admins. */
+export async function getSocialImage(db: D1Database, listingId: string, includeUnpublished = false) {
+  return db
+    .prepare(
+      `SELECT s.content_type, s.data FROM listing_social s JOIN listings l ON l.id = s.listing_id WHERE s.listing_id = ?${includeUnpublished ? "" : " AND l.published = 1"}`,
+    )
+    .bind(listingId)
+    .first<{ content_type: string; data: ArrayBuffer | number[] }>();
 }

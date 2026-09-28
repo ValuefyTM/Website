@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { site, phoneHref } from "@/config/site";
 import { AssistantProvider } from "@/components/Assistant";
@@ -6,9 +7,11 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Closing";
 import { getDb } from "@/lib/db";
 import { getBySlug, listPublished } from "@/lib/listings-db";
-import { formatEur, pricePerSqm, reportDate } from "@/lib/listing-format";
+import { COMMISSION_NOTE, formatEur, pricePerSqm, reportDate, specLine } from "@/lib/listing-format";
 import { isAdmin } from "@/lib/admin-auth";
 import { ViewingForm } from "./ViewingForm";
+import { Gallery } from "./Gallery";
+import { ShareButton } from "./ShareButton";
 import s from "./listing.module.css";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -22,14 +25,39 @@ async function load(slug: string) {
   return { db, listing: await getBySlug(db, slug, await isAdmin()) };
 }
 
+/** Origin the visitor used (workers.dev today, the own domain later), so shared links and previews point to this site. */
+async function origin() {
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host");
+  return host ? `${h.get("x-forwarded-proto") ?? "https"}://${host}` : undefined;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { listing: l } = await load((await params).slug);
   if (!l) return {};
+  const base = await origin();
+  const abs = (p: string) => (base ? new URL(p, base).toString() : p);
+  const where = [l.zone, l.city].filter(Boolean).join(", ");
+  const description = [`${formatEur(l.price)} · ${where}`, specLine(l), `${COMMISSION_NOTE} la cumpărare`, l.report ? "raport de evaluare ANEVAR disponibil" : ""]
+    .filter(Boolean)
+    .join(" · ");
+  const image = l.socialImage
+    ? { url: abs(l.socialImage), width: 1200, height: 630, alt: l.title }
+    : { url: abs(l.photos[0] ?? "/opengraph-image.png"), alt: l.title };
   return {
     title: `${l.title} | VALUEFY`,
-    description: `${l.type} de vânzare în ${l.city}${l.zone ? ", " + l.zone : ""} — ${formatEur(l.price)}.`,
+    description,
     alternates: { canonical: `/imobiliare/${l.slug}` },
-    openGraph: { title: l.title, images: l.photos[0] ? [l.photos[0]] : ["/opengraph-image.png"] },
+    openGraph: {
+      type: "website",
+      siteName: "VALUEFY",
+      locale: "ro_RO",
+      title: `${l.title} — ${formatEur(l.price)}`,
+      description,
+      url: abs(`/imobiliare/${l.slug}`),
+      images: [image],
+    },
+    twitter: { card: "summary_large_image", title: `${l.title} — ${formatEur(l.price)}`, description, images: [image.url] },
     robots: l.published ? undefined : { index: false, follow: false },
   };
 }
@@ -49,7 +77,6 @@ export default async function ListingPage({ params }: Props) {
     ["Localizare", `${l.zone}, ${l.city}`],
   ];
   const similar = (await listPublished(db)).filter((x) => x.slug !== l.slug).sort((a, b) => Number(b.type === l.type) - Number(a.type === l.type)).slice(0, 3);
-  const [main, ...rest] = l.photos;
 
   return (
     <AssistantProvider>
@@ -62,14 +89,7 @@ export default async function ListingPage({ params }: Props) {
             <span aria-current="page">{l.city}</span>
           </nav>
 
-          <div className={s.gallery} data-count={Math.max(1, Math.min(l.photos.length, 3))}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            {main ? <img src={main} alt={l.title} className={s.mainPhoto} /> : <div className={`${s.mainPhoto} ${s.noPhoto}`}>Fotografiile vor fi adăugate în curând</div>}
-            {rest.slice(0, 2).map((src, i) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img key={src} src={src} alt={`${l.title} — fotografia ${i + 2}`} loading="lazy" />
-            ))}
-          </div>
+          <Gallery photos={l.photos} title={l.title} />
 
           <div className={s.layout}>
             <div className={s.content}>
@@ -82,9 +102,16 @@ export default async function ListingPage({ params }: Props) {
                 </div>
                 <h1 className={s.title}>{l.title}</h1>
                 <p className={s.loc}>{[l.zone, l.city].filter(Boolean).join(", ")}</p>
-                <div className={s.price}>
-                  <b>{formatEur(l.price)}</b>
-                  {ppsm && <span>{formatEur(ppsm)}/m²</span>}
+                <div className={s.priceRow}>
+                  <div className={s.price}>
+                    <b>{formatEur(l.price)}</b>
+                    {ppsm && <span>{formatEur(ppsm)}/m²</span>}
+                  </div>
+                  <ShareButton listing={l} />
+                </div>
+                <div className={s.commission}>
+                  <b>{COMMISSION_NOTE}</b>
+                  <span>Nu plătești comision de intermediere când cumperi această proprietate.</span>
                 </div>
               </div>
 
@@ -122,6 +149,7 @@ export default async function ListingPage({ params }: Props) {
               <section aria-labelledby="why-title" className={s.why}>
                 <h2 id="why-title">Vândut prin VALUEFY</h2>
                 <ul>
+                  <li><b>{COMMISSION_NOTE}</b><span>Toate proprietățile noastre se vând fără comision pentru cumpărător.</span></li>
                   <li><b>Documente verificate</b><span>Extrasul de carte funciară și actele de proprietate sunt verificate înainte de publicare.</span></li>
                   <li><b>Informații complete</b><span>Suprafețe, an de construcție și dotări, prezentate corect — fără surprize la vizionare.</span></li>
                   <li><b>Asistență până la notar</b><span>Te ajutăm cu documentele, programarea la notar și, dacă e cazul, cu evaluarea pentru credit.</span></li>

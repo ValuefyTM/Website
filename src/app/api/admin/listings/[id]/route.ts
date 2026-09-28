@@ -12,8 +12,8 @@ export async function PUT(req: Request, { params }: Ctx) {
   if (!(await getById(a.db, id))) return NextResponse.json({ error: "Anunțul nu există." }, { status: 404 });
   const v = validateInput(await req.json().catch(() => null));
   if (!v.ok) return NextResponse.json({ error: v.error }, { status: 400 });
-  await updateListing(a.db, id, v.value);
-  return NextResponse.json({ ok: true });
+  const slug = await updateListing(a.db, id, v.value);
+  return NextResponse.json({ ok: true, slug });
 }
 
 /** Quick publish / unpublish from the admin list. */

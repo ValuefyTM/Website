@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { LISTING_STATUSES, LISTING_TYPES, photoUrl, type Listing } from "@/lib/listing-format";
+import { uploadShareImage } from "@/lib/social-card";
 import a from "../admin.module.css";
 
 type Form = {
@@ -38,8 +39,35 @@ export function ListingEditor({ listing }: { listing?: Listing }) {
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [upload, setUpload] = useState("");
+  const [slug, setSlug] = useState(listing?.slug ?? "");
   const set = (k: keyof Form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setF((p) => ({ ...p, [k]: e.target.type === "checkbox" ? (e.target as HTMLInputElement).checked : e.target.value }));
+
+  // The listing with the current form values — used to draw the link-preview image.
+  const current = useMemo<Listing | null>(() => {
+    if (!listing) return null;
+    const num = (v: string) => (v.trim() ? Number(v.replace(",", ".")) || undefined : undefined);
+    return {
+      ...listing,
+      slug,
+      title: f.title, type: f.type, city: f.city, zone: f.zone, price: num(f.price) ?? 0, surface: num(f.surface), land: num(f.land),
+      rooms: num(f.rooms), baths: num(f.baths), floor: f.floor || undefined, year: num(f.year), status: f.status || undefined,
+      features: f.features.split(/\n|,/).map((x) => x.trim()).filter(Boolean),
+      description: f.description.split(/\n\s*\n/).map((x) => x.trim()).filter(Boolean),
+      report: f.hasReport && f.report_date ? { date: f.report_date } : undefined, published: f.published,
+      photoIds: photos, photos: photos.map(photoUrl),
+    };
+  }, [listing, f, photos, slug]);
+
+  // Keep the stored link-preview image in sync: on first open when missing, and whenever the cover photo changes.
+  const syncedCover = useRef<string | undefined>(listing?.socialImage ? listing.photoIds[0] : "__none__");
+  const syncShare = () => { if (current) uploadShareImage(current).catch(() => {}); };
+  useEffect(() => {
+    if (!current || syncedCover.current === photos[0]) return;
+    syncedCover.current = photos[0];
+    syncShare();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [photos[0]]);
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,11 +83,15 @@ export function ListingEditor({ listing }: { listing?: Listing }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
-    const d = (await r.json().catch(() => ({}))) as { error?: string; id?: string };
+    const d = (await r.json().catch(() => ({}))) as { error?: string; id?: string; slug?: string };
     setBusy(false);
     if (!r.ok) return setMsg({ ok: false, text: d.error || "Nu am putut salva." });
     if (!listing && d.id) location.href = `/admin/proprietati/${d.id}?nou=1`;
-    else setMsg({ ok: true, text: "Salvat." });
+    else {
+      setMsg({ ok: true, text: "Salvat." });
+      if (d.slug) setSlug(d.slug);
+      syncShare();
+    }
   };
 
   const addPhotos = async (files: FileList | null) => {
@@ -114,7 +146,7 @@ export function ListingEditor({ listing }: { listing?: Listing }) {
         <div>
           <a href="/admin" className={a.back}>← Proprietăți</a>
           <h1>{listing ? "Editează proprietatea" : "Proprietate nouă"}</h1>
-          {listing && <p>Adresa pe site: <a href={`/imobiliare/${listing.slug}`} target="_blank" rel="noopener">/imobiliare/{listing.slug} ↗</a></p>}
+          {listing && <p>Adresa pe site: <a href={`/imobiliare/${slug}`} target="_blank" rel="noopener">/imobiliare/{slug} ↗</a></p>}
         </div>
       </div>
       {isNew && <div className={a.ok}>Anunțul a fost creat ca ciornă. Adaugă fotografiile mai jos, apoi bifează „Publicat” și salvează.</div>}

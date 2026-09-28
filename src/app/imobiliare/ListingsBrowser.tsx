@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { LISTING_TYPES, formatEur, pricePerSqm, type Listing } from "@/lib/listing-format";
+import { LISTING_TYPES, formatEur, pricePerSqm, type Listing, COMMISSION_NOTE } from "@/lib/listing-format";
 import s from "./imobiliare.module.css";
 
 const TYPES = LISTING_TYPES;
@@ -88,6 +88,7 @@ export function ListingsBrowser({ listings, cities }: { listings: Listing[]; cit
                     <b>{formatEur(l.price)}</b>
                     {pricePerSqm(l) && <span>{formatEur(pricePerSqm(l)!)}/m²</span>}
                   </div>
+                  <span className={s.zeroFee}>{COMMISSION_NOTE}</span>
                   <h3>{l.title}</h3>
                   <p className={s.loc}>{l.zone}, {l.city}</p>
                   <ul className={s.facts}>
