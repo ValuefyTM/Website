@@ -26,7 +26,7 @@ async function aiSummary(l: Lead): Promise<string | null> {
         messages: [
           {
             role: "user",
-            content: `Scrie un rezumat intern de o singură propoziție, în română, pentru dashboard-ul VALUEFY, despre această solicitare de evaluare. Stil: "Client solicită evaluarea unui apartament de 72 m² din Timișoara pentru garantarea unui credit. Documentele sunt disponibile. Termen standard." Fără markdown. Date: ${JSON.stringify(l)}`,
+            content: `Scrie un rezumat intern de o singură propoziție, în română, pentru dashboard-ul VALUEFY, despre această solicitare (request_kind "sale" = clientul vrea să vândă proprietatea prin VALUEFY; altfel e o solicitare de evaluare). Stil: "Client solicită evaluarea unui apartament de 72 m² din Timișoara pentru garantarea unui credit. Documentele sunt disponibile. Termen standard." Fără markdown. Date: ${JSON.stringify(l)}`,
           },
         ],
       },
@@ -47,17 +47,20 @@ async function aiSummary(l: Lead): Promise<string | null> {
 const esc = (s: unknown) => String(s ?? "—").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 
 function emailHtml(r: LeadRecord) {
+  const sale = r.request_type === "SALE";
   const rows: [string, unknown][] = [
+    ["Solicitare", sale ? "VÂNZARE prin VALUEFY" : "Evaluare"],
     ["Prioritate", r.priority],
-    ["Ce se evaluează", r.property_type],
+    [sale ? "Proprietate de vândut" : "Ce se evaluează", r.property_type],
     ["Descriere", r.property_description],
     ["Localitate", r.city],
     ["Adresă", r.address],
     ["Suprafață (m²)", r.surface_area],
     ["Teren (m²)", r.land_area],
     ["Camere", r.rooms],
-    ["Scop", r.valuation_purpose],
-    ["Termen", r.deadline],
+    ...(sale
+      ? ([["Preț dorit (€)", r.asking_price ?? "De stabilit"]] as [string, unknown][])
+      : ([["Scop", r.valuation_purpose], ["Termen", r.deadline]] as [string, unknown][])),
     ["Documente", r.documents_status],
     ["Client", r.customer_type],
     ["Nume", r.name],
@@ -67,7 +70,7 @@ function emailHtml(r: LeadRecord) {
     ["Fișiere", r.documents.join(", ") || "—"],
   ];
   return `<div style="font-family:Verdana,sans-serif;color:#17173A">
-<h2 style="margin:0 0 4px">Solicitare nouă ${esc(r.lead_id)}</h2>
+<h2 style="margin:0 0 4px">${sale ? "Proprietate de vânzare" : "Solicitare nouă"} ${esc(r.lead_id)}</h2>
 <p style="margin:0 0 16px;color:#626771">${esc(r.conversation_summary)}</p>
 <table cellpadding="6" style="border-collapse:collapse;font-size:14px">${rows
     .map(([k, v]) => `<tr><td style="color:#626771;border-bottom:1px solid #E7E9ED">${esc(k)}</td><td style="font-weight:bold;border-bottom:1px solid #E7E9ED">${esc(v ?? "—")}</td></tr>`)
@@ -149,7 +152,7 @@ async function sendLeadEmail(record: LeadRecord, files: File[], attachFiles: boo
   const attachments = attachFiles
     ? await Promise.all(files.map(async (f) => ({ filename: f.name, content: Buffer.from(await f.arrayBuffer()).toString("base64") })))
     : [];
-  const subject = `[${record.priority}] ${record.lead_id} · ${record.property_type}${record.city ? " · " + record.city : ""}`;
+  const subject = `${record.request_type === "SALE" ? "[VÂNZARE] " : ""}[${record.priority}] ${record.lead_id} · ${record.property_type}${record.city ? " · " + record.city : ""}`;
 
   try {
     const res = await fetch("https://api.resend.com/emails", {

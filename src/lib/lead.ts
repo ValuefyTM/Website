@@ -28,12 +28,20 @@ export const PURPOSES = [
   "Expertiză / litigiu",
   "Alt scop",
 ];
+/** Set (hidden) when the visitor wants to sell a property through VALUEFY instead of ordering a valuation. */
+export const SALE_PURPOSE = "Vânzare prin VALUEFY";
+export const isSale = (l: Lead) => l.request_kind === "sale";
+/** Property types offered when selling — movable assets are valuation-only. */
+export const SALE_TYPES = TYPES.map((t) => t.k);
+
 export const DEADLINES = ["Standard", "Urgent", "Termen specific"];
 export const DOCS = ["Da", "Parțial", "Nu știu ce documente sunt necesare"];
 export const CUSTOMERS = ["Persoană fizică", "Companie"];
 export const CITIES = ["Timișoara", "Dumbrăvița", "Giroc", "Chișoda", "Moșnița Nouă", "Ghiroda", "Sânandrei", "Săcălaz", "Remetea Mare", "Lugoj", "Jimbolia", "Buziaș", "Făget", "Deta", "Sânnicolau Mare", "Arad", "Reșița", "Caransebeș", "Deva", "Hunedoara", "Oradea", "Cluj-Napoca", "București", "Sibiu", "Brașov", "Craiova", "Iași", "Constanța"];
 
 export type Lead = {
+  request_kind?: "sale"; // undefined = valuation request
+  asking_price?: string; // sale only, EUR
   property_type?: string;
   property_description?: string;
   city?: string;
@@ -54,7 +62,7 @@ export type Lead = {
 };
 
 // Fields the AI may fill from free text.
-export const LEAD_TEXT_FIELDS = ["property_type", "property_description", "city", "address", "surface_area", "land_area", "rooms", "valuation_purpose", "deadline", "documents_status", "customer_type", "name", "phone", "email", "notes"] as const;
+export const LEAD_TEXT_FIELDS = ["property_type", "property_description", "city", "address", "surface_area", "land_area", "rooms", "asking_price", "valuation_purpose", "deadline", "documents_status", "customer_type", "name", "phone", "email", "notes"] as const;
 export const LEAD_ENUMS: Partial<Record<(typeof LEAD_TEXT_FIELDS)[number], readonly string[]>> = {
   property_type: ASSET_TYPES.map((t) => t.k),
   valuation_purpose: PURPOSES,
@@ -66,9 +74,16 @@ export type Step = "type" | "describe" | "city" | "details" | "purpose" | "deadl
 
 export const GROUPS: Record<string, number> = { type: 1, describe: 1, city: 2, details: 3, purpose: 4, deadline: 4, date: 4, documents: 5, customer: 6, contact: 6, summary: 6, done: 6 };
 export const GROUP_NAMES = ["Proprietate", "Localizare", "Detalii", "Scop și termen", "Documente", "Contact"];
+// Selling skips "Scop și termen".
+const SALE_GROUPS: Record<string, number> = { type: 1, describe: 1, city: 2, details: 3, documents: 4, customer: 5, contact: 5, summary: 5, done: 5 };
+const SALE_GROUP_NAMES = ["Proprietate", "Localizare", "Detalii", "Documente", "Contact"];
+export const groupOf = (step: Step, l: Lead) => (isSale(l) ? SALE_GROUPS : GROUPS)[step];
+export const groupNames = (l: Lead) => (isSale(l) ? SALE_GROUP_NAMES : GROUP_NAMES);
 
 export const DOC_HELP =
   "De regulă sunt necesare:\n• extras de carte funciară (recent)\n• actul de proprietate\n• documentația cadastrală / releveul\n• autorizația de construire, dacă e cazul\n\nLista exactă depinde de proprietate și de scop — specialistul ți-o confirmă în ofertă. Le poți trimite și ulterior.";
+
+export const SALE_GREETING = "Bună! 👋\n\nVrei să vinzi o proprietate? Te ajutăm cu evaluarea, prezentarea și găsirea cumpărătorului — cu documentele verificate și un preț argumentat.\n\nCe proprietate vrei să vinzi?";
 
 export const GREETING = "Bună! 👋\n\nTe pot ajuta să afli ce presupune evaluarea proprietății sau a bunurilor tale și să soliciți o ofertă.\n\nCe dorești să evaluezi?";
 
@@ -80,7 +95,7 @@ export function nextStep(l: Lead): Step {
   if (!l.city) return "city";
   if (l.property_type !== MOBILE && !l.details_done && !l.surface_area && !l.land_area) return "details";
   if (!l.valuation_purpose) return "purpose";
-  if (!l.deadline) return "deadline";
+  if (!isSale(l) && !l.deadline) return "deadline";
   if (!l.documents_status) return "documents";
   if (!l.customer_type) return "customer";
   if (!l.name || !(l.phone || l.email)) return "contact";
@@ -90,6 +105,19 @@ export function nextStep(l: Lead): Step {
 export function question(step: Step, l: Lead): string {
   const t = typeObj(l.property_type);
   const mobile = l.property_type === MOBILE;
+  if (isSale(l)) {
+    const sq: Partial<Record<Step, string>> = {
+      type: "Ce proprietate vrei să vinzi?",
+      describe: "Ce proprietate vrei să vinzi? Descrie-o pe scurt — de exemplu clădire de birouri, pensiune sau teren cu construcții.",
+      city: "Perfect. În ce localitate se află proprietatea pe care vrei să o vinzi?",
+      details: `Câteva detalii despre ${l.property_type === "Altă proprietate" ? "proprietate" : t.k.toLowerCase()} ne ajută să pregătim estimarea prețului și planul de vânzare.`,
+      documents: "Ai documentele proprietății disponibile (extras de carte funciară, act de proprietate, cadastru)?",
+      customer: "Proprietatea este deținută de o persoană fizică sau de o companie?",
+      contact: "Aproape gata. Ca un consultant VALUEFY să te contacteze pentru evaluare și planul de vânzare, am nevoie de datele tale de contact. Le folosim doar pentru această solicitare.",
+      summary: "Mulțumesc! Verifică te rog datele de mai jos înainte de trimitere.",
+    };
+    return sq[step] || "";
+  }
   const q: Partial<Record<Step, string>> = {
     type: "Ce dorești să evaluezi?",
     describe: mobile
@@ -127,6 +155,11 @@ export function priority(l: Lead): "URGENT" | "PRIORITY" | "NORMAL" {
 
 export function fallbackSummary(l: Lead): string {
   const t = typeObj(l.property_type);
+  if (isSale(l)) {
+    const size = l.surface_area ? ` de ${l.surface_area} m²` : l.land_area ? ` de ${l.land_area} m² teren` : "";
+    const price = l.asking_price ? ` Preț dorit: ${l.asking_price} €.` : "";
+    return `Client (${(l.customer_type || "").toLowerCase()}) vrea să vândă ${t.k.toLowerCase()}${l.property_description ? ` (${l.property_description})` : ""}${size} din ${l.city} prin VALUEFY.${price} Documente: ${(l.documents_status || "").toLowerCase()}.`;
+  }
   const what = l.property_description ? ` (${l.property_description})` : "";
   const size = l.surface_area ? ` de ${l.surface_area} m²` : l.land_area ? ` de ${l.land_area} m² teren` : "";
   return `Client (${(l.customer_type || "").toLowerCase()}) solicită evaluarea ${t.g}${what}${size} din ${l.city} pentru ${(l.valuation_purpose || "").toLowerCase()}. Documente: ${(l.documents_status || "").toLowerCase()}. Termen: ${(l.deadline_date ? new Date(l.deadline_date).toLocaleDateString("ro-RO") : l.deadline || "").toLowerCase()}.`;
@@ -143,7 +176,8 @@ export function buildRecord(l: Lead, opts: { id: string; summary: string; docume
   return {
     lead_id: opts.id,
     created_at: new Date().toISOString(),
-    source: "WEBSITE_AI",
+    source: isSale(l) ? "WEBSITE_AI_SALE" : "WEBSITE_AI",
+    request_type: isSale(l) ? "SALE" : "VALUATION",
     property_type: l.property_type || null,
     property_description: l.property_description || null,
     city: l.city || null,
@@ -151,6 +185,7 @@ export function buildRecord(l: Lead, opts: { id: string; summary: string; docume
     surface_area: num(l.surface_area),
     land_area: num(l.land_area),
     rooms: num(l.rooms),
+    asking_price: num(l.asking_price),
     valuation_purpose: l.valuation_purpose || null,
     deadline: l.deadline_date || l.deadline || null,
     customer_type: l.customer_type || null,

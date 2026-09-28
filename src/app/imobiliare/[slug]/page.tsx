@@ -79,7 +79,7 @@ export default async function ListingPage({ params }: Props) {
   const similar = (await listPublished(db)).filter((x) => x.slug !== l.slug).sort((a, b) => Number(b.type === l.type) - Number(a.type === l.type)).slice(0, 3);
 
   return (
-    <AssistantProvider>
+    <AssistantProvider saleCta>
       <Header />
       <main id="top" className={s.page}>
         <div className="container">

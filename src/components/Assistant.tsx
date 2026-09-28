@@ -3,13 +3,14 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { site } from "@/config/site";
 import {
-  ASSET_TYPES, CITIES, CUSTOMERS, DEADLINES, DOCS, DOC_HELP, GREETING, GROUPS, GROUP_NAMES, MOBILE, PURPOSES,
-  nextStep, question, typeObj, type Lead, type Step,
+  ASSET_TYPES, CITIES, CUSTOMERS, DEADLINES, DOCS, DOC_HELP, GREETING, MOBILE, PURPOSES, SALE_GREETING, SALE_PURPOSE, SALE_TYPES,
+  groupNames, groupOf, isSale, nextStep, question, typeObj, type Lead, type Step,
 } from "@/lib/lead";
 import { useMediaQuery } from "@/lib/useMediaQuery";
 import s from "./Assistant.module.css";
 
-type Ctx = { type?: string; purpose?: string };
+/** `sale`: the visitor wants to sell a property through VALUEFY (no valuation purpose / deadline questions). */
+type Ctx = { type?: string; purpose?: string; sale?: boolean };
 type Msg =
   | { kind: "text"; role: "user" | "assistant"; text: string }
   | { kind: "file"; id: string; name: string; ext: string; status: string; pct: number; color: string };
@@ -24,13 +25,15 @@ export const useAssistant = () => {
 
 const MAX_UPLOAD = 4 * 1024 * 1024;
 const TYPING_MS = 650;
-const greetingMsg = (): Msg => ({ kind: "text", role: "assistant", text: GREETING });
+const greetingMsg = (sale = false): Msg => ({ kind: "text", role: "assistant", text: sale ? SALE_GREETING : GREETING });
+const baseLead = (sale = false): Lead => (sale ? { request_kind: "sale", valuation_purpose: SALE_PURPOSE } : {});
 const fold = (v: string) => v.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 
-type Form = { describe: string; city: string; address: string; surface: string; rooms: string; land: string; notes: string; date: string; name: string; phone: string; email: string; consent: boolean };
-const emptyForm: Form = { describe: "", city: "", address: "", surface: "", rooms: "", land: "", notes: "", date: "", name: "", phone: "", email: "", consent: false };
+type Form = { describe: string; city: string; address: string; surface: string; rooms: string; land: string; price: string; notes: string; date: string; name: string; phone: string; email: string; consent: boolean };
+const emptyForm: Form = { describe: "", city: "", address: "", surface: "", rooms: "", land: "", price: "", notes: "", date: "", name: "", phone: "", email: "", consent: false };
 
-export function AssistantProvider({ children }: { children: React.ReactNode }) {
+/** `saleCta`: on phones, the floating / sticky button reads "Vinde și tu" and starts a sale request (listing pages). */
+export function AssistantProvider({ children, saleCta = false }: { children: React.ReactNode; saleCta?: boolean }) {
   const isMobile = useMediaQuery("(max-width: 1079px)");
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -103,12 +106,13 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
     advance(extra);
   }, [advance]);
 
-  const reset = useCallback(() => {
+  const reset = useCallback((sale = isSale(leadRef.current)) => {
     genRef.current++;
-    setMsgs([greetingMsg()]);
+    setMsgs([greetingMsg(sale)]);
+    msgsRef.current = [greetingMsg(sale)];
     setStep("type");
     stepAskedRef.current = "type";
-    setLead({});
+    setLead(baseLead(sale));
     setF(emptyForm);
     setLeadId("");
     setEditMode(false);
@@ -125,14 +129,18 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
     setOpen(true);
     setMenuOpen(false);
     const wasDone = stepRef.current === "done";
-    if (wasDone) reset();
+    // Switching between selling and a valuation request starts a fresh conversation.
+    const curSale = isSale(leadRef.current);
+    const switching = ctx.sale ? !curSale : curSale && !!(ctx.type || ctx.purpose);
+    const fresh0 = wasDone || switching;
+    if (fresh0) reset(!!ctx.sale);
     const patch: Lead = {};
     if (ctx.type) patch.property_type = ctx.type;
     if (ctx.purpose) patch.valuation_purpose = ctx.purpose;
     if (Object.keys(patch).length) {
-      const fresh = wasDone || msgsRef.current.length <= 1;
+      const fresh = fresh0 || msgsRef.current.length <= 1;
       if (fresh) setMsgs([]);
-      const prev: Lead = wasDone ? {} : { ...leadRef.current };
+      const prev: Lead = { ...leadRef.current };
       // A different asset type makes the previous description/size irrelevant.
       if (ctx.type && prev.property_type && prev.property_type !== ctx.type) {
         for (const k of ["property_description", "details_done", "surface_area", "land_area", "rooms"] as const) delete prev[k];
@@ -298,12 +306,14 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
   // ---------- derived view ----------
   const st: Step = typing ? "wait" : step;
   const done = step === "done";
-  if (GROUPS[step]) lastGroup.current = GROUPS[step];
-  const group = lastGroup.current;
+  const sale = isSale(lead);
+  const names = groupNames(lead);
+  if (groupOf(step, lead)) lastGroup.current = groupOf(step, lead);
+  const group = Math.min(lastGroup.current, names.length);
   const typeK = lead.property_type;
   const tObj = typeObj(typeK);
 
-  const chipSets: Partial<Record<Step, string[]>> = { type: ASSET_TYPES.map((t) => t.k), purpose: PURPOSES, deadline: DEADLINES, documents: DOCS, customer: CUSTOMERS };
+  const chipSets: Partial<Record<Step, string[]>> = { type: sale ? SALE_TYPES : ASSET_TYPES.map((t) => t.k), purpose: PURPOSES, deadline: DEADLINES, documents: DOCS, customer: CUSTOMERS };
   const chipField: Partial<Record<Step, keyof Lead>> = { type: "property_type", purpose: "valuation_purpose", deadline: "deadline", documents: "documents_status", customer: "customer_type" };
   const pick = (field: keyof Lead, v: string) => {
     if (field === "deadline" && v === "Termen specific") {
@@ -342,8 +352,9 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
     if (f.surface) p.surface_area = f.surface;
     if (f.rooms) p.rooms = f.rooms;
     if (f.land) p.land_area = f.land;
+    if (sale && f.price) p.asking_price = f.price.replace(/[^\d]/g, "");
     if (f.notes) p.notes = f.notes;
-    const txt = [f.surface && f.surface + " m²", f.rooms && f.rooms + " camere", f.land && f.land + " m² teren", f.notes].filter(Boolean).join(" · ") || "Continuă";
+    const txt = [f.surface && f.surface + " m²", f.rooms && f.rooms + " camere", f.land && f.land + " m² teren", sale && f.price && "preț dorit " + f.price + " €", f.notes].filter(Boolean).join(" · ") || "Continuă";
     patchLead(p, txt);
   };
   const contactSubmit = () => {
@@ -365,8 +376,12 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
     ...(typeK === MOBILE
       ? []
       : ([["Suprafață", lead.surface_area ? lead.surface_area + " m²" : lead.land_area ? lead.land_area + " m² teren" : "—"]] as [string, string][])),
-    ["Scop", lead.valuation_purpose],
-    ["Termen", lead.deadline_date ? new Date(lead.deadline_date).toLocaleDateString("ro-RO") : lead.deadline],
+    ...(sale
+      ? ([["Solicitare", "Vânzare prin VALUEFY"], ["Preț dorit", lead.asking_price ? Number(lead.asking_price).toLocaleString("ro-RO") + " €" : "De stabilit"]] as [string, string][])
+      : ([
+          ["Scop", lead.valuation_purpose],
+          ["Termen", lead.deadline_date ? new Date(lead.deadline_date).toLocaleDateString("ro-RO") : lead.deadline],
+        ] as [string, string | undefined][])),
     ["Documente", lead.documents_status === DOCS[2] ? "De clarificat" : lead.documents_status === "Da" ? "Disponibile" : lead.documents_status],
     ["Client", lead.customer_type],
     ["Contact", lead.name],
@@ -375,9 +390,13 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
   const editMap: [string, (keyof Lead)[]][] = [
     ["Proprietate", ["property_type", "property_description", "details_done", "surface_area", "land_area", "rooms"]],
     ["Localizare", ["city", "address"]],
-    ["Detalii", ["details_done", "surface_area", "land_area", "rooms"]],
-    ["Scop", ["valuation_purpose"]],
-    ["Termen", ["deadline", "deadline_date"]],
+    ["Detalii", ["details_done", "surface_area", "land_area", "rooms", "asking_price"]],
+    ...(sale
+      ? []
+      : ([
+          ["Scop", ["valuation_purpose"]],
+          ["Termen", ["deadline", "deadline_date"]],
+        ] as [string, (keyof Lead)[]][])),
     ["Documente", ["documents_status"]],
     ["Client", ["customer_type"]],
     ["Contact", ["name", "phone", "email"]],
@@ -391,6 +410,7 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
     advance();
   };
 
+  const sellHere = saleCta && isMobile;
   const showSticky = isMobile && !open && scrolled;
   const showFab = !open && !showSticky && !(isMobile && menuOpen);
   const chips = !busy ? chipSets[st] : undefined;
@@ -407,18 +427,25 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
       {children}
 
       {showFab && (
-        <button type="button" className={s.fab} onClick={() => openAssistant()} aria-label="Deschide asistentul de evaluare">
+        <button
+          type="button"
+          className={s.fab}
+          onClick={() => openAssistant(sellHere ? { sale: true } : undefined)}
+          aria-label={sellHere ? "Vinde și tu o proprietate" : "Deschide asistentul de evaluare"}
+        >
           <span className={s.fabIcon}>
             {logoMark}
             <span className={s.fabDot} style={{ background: aiOnline ? "var(--green)" : "#9A9FA8" }} />
           </span>
-          Asistent evaluare
+          {sellHere ? "Vinde și tu" : "Asistent evaluare"}
         </button>
       )}
 
       {showSticky && (
         <div className={s.sticky}>
-          <button type="button" className={s.stickyCta} onClick={() => openAssistant()}>Solicită evaluare</button>
+          {sellHere
+            ? <button type="button" className={s.stickyCta} onClick={() => openAssistant({ sale: true })}>Vinde și tu</button>
+            : <button type="button" className={s.stickyCta} onClick={() => openAssistant()}>Solicită evaluare</button>}
           <button type="button" className={s.stickyAi} onClick={() => openAssistant()} aria-label="Asistent evaluare">{logoMark}</button>
         </div>
       )}
@@ -426,7 +453,7 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
       <div
         role="dialog"
         aria-modal={isMobile}
-        aria-label="Asistent evaluare VALUEFY"
+        aria-label={sale ? "Asistent vânzare VALUEFY" : "Asistent evaluare VALUEFY"}
         aria-hidden={!open}
         inert={!open}
         className={`${s.drawer} ${open ? s.drawerOpen : ""}`}
@@ -436,23 +463,23 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
           <div className={s.headText}>
             <div className={s.headEyebrow}>VALUEFY AI</div>
             <div className={s.headTitle}>
-              Asistent evaluare{" "}
+              {sale ? "Asistent vânzare" : "Asistent evaluare"}{" "}
               <span className={`${s.online} ${aiOnline ? "" : s.offline}`} title={aiOnline === false ? "Asistentul AI nu este disponibil momentan. Poți folosi opțiunile ghidate." : undefined}>
                 <span />{aiOnline === null ? "Se verifică…" : aiOnline ? "Online" : "Offline"}
               </span>
             </div>
           </div>
-          <button type="button" className={s.iconBtn} onClick={reset} aria-label="Solicitare nouă" title="Solicitare nouă">↺</button>
+          <button type="button" className={s.iconBtn} onClick={() => reset()} aria-label="Solicitare nouă" title="Solicitare nouă">↺</button>
           <button type="button" className={`${s.iconBtn} ${s.closeBtn}`} onClick={close} aria-label="Închide asistentul">×</button>
         </div>
 
         <div className={s.progress}>
           <div className={s.progressText}>
-            <span>{done ? "Solicitare trimisă" : `Pasul ${group} din 6`}</span>
-            <span className={s.progressName}>{GROUP_NAMES[group - 1]}</span>
+            <span>{done ? "Solicitare trimisă" : `Pasul ${group} din ${names.length}`}</span>
+            <span className={s.progressName}>{names[group - 1]}</span>
           </div>
-          <div role="progressbar" aria-valuemin={0} aria-valuemax={6} aria-valuenow={done ? 6 : group - 1} aria-label="Progresul solicitării" className={s.segs}>
-            {GROUP_NAMES.map((n, i) => (
+          <div role="progressbar" aria-valuemin={0} aria-valuemax={names.length} aria-valuenow={done ? names.length : group - 1} aria-label="Progresul solicitării" className={s.segs}>
+            {names.map((n, i) => (
               <span key={n} style={{ background: done || i < group - 1 ? "var(--acc)" : i === group - 1 ? "var(--acc-soft)" : "#E7E9ED" }} />
             ))}
           </div>
@@ -542,6 +569,11 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
                     <input className={s.input} inputMode="decimal" value={f.land} onChange={setField("land")} placeholder="ex. 500" />
                   </label>
                 )}
+                {sale && (
+                  <label className={s.label}><span>Preț dorit (€) <span className={s.opt}>(opțional)</span></span>
+                    <input className={s.input} inputMode="numeric" value={f.price} onChange={setField("price")} placeholder="ex. 145000" />
+                  </label>
+                )}
               </div>
               <label className={s.label}><span>Alte detalii utile <span className={s.opt}>(opțional)</span></span>
                 <input className={s.input} value={f.notes} onChange={setField("notes")} placeholder={typeK === "Teren" ? "ex. intravilan, deschidere 20 m" : typeK === "Apartament" ? "ex. etaj 3, an construcție 2015" : "ex. an construcție, stare"} />
@@ -579,7 +611,7 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
               </label>
               <label className={s.consent}>
                 <input type="checkbox" checked={f.consent} onChange={setField("consent")} />
-                <span>Sunt de acord ca datele să fie folosite pentru a primi oferta, conform <a href="/politica-de-confidentialitate">Politicii de confidențialitate</a>.</span>
+                <span>Sunt de acord ca datele să fie folosite {sale ? "pentru a fi contactat de un consultant VALUEFY" : "pentru a primi oferta"}, conform <a href="/politica-de-confidentialitate">Politicii de confidențialitate</a>.</span>
               </label>
               {contactErr && <div role="alert" className={s.err}>{contactErr}</div>}
               <button type="button" className={s.primary} onClick={contactSubmit}>Continuă spre verificare</button>
@@ -627,10 +659,12 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
             <div className={s.done}>
               <div className={s.doneCheck}>✓</div>
               <div className={s.doneTitle}>Solicitarea a fost trimisă.</div>
-              <p>Un specialist VALUEFY va verifica informațiile și te va contacta pentru ofertă și pașii următori.</p>
+              <p>{sale
+                ? "Un consultant VALUEFY va analiza informațiile și te va contacta pentru evaluare și planul de vânzare."
+                : "Un specialist VALUEFY va verifica informațiile și te va contacta pentru ofertă și pașii următori."}</p>
               <div className={s.doneId}>Număr solicitare <code>{leadId}</code></div>
               {confirmed && <p className={s.doneMail}>Ți-am trimis o confirmare pe email, la {lead.email}.</p>}
-              <button type="button" className={s.secondary} onClick={reset}>Solicitare nouă</button>
+              <button type="button" className={s.secondary} onClick={() => reset()}>Solicitare nouă</button>
             </div>
           )}
         </div>

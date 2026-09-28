@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
-import { LEAD_ENUMS, LEAD_TEXT_FIELDS, type Lead } from "@/lib/lead";
+import { LEAD_ENUMS, LEAD_TEXT_FIELDS, MOBILE, isSale, type Lead } from "@/lib/lead";
 
 export const runtime = "nodejs";
 
@@ -24,15 +24,18 @@ const tools: Anthropic.Tool[] = [
 
 type InMsg = { role: "user" | "assistant"; content: string };
 
+const SALE_NOTE = `
+MOD VÂNZARE: vizitatorul vrea să VÂNDĂ o proprietate imobiliară prin VALUEFY (VALUEFY o evaluează, o prezintă și găsește cumpărătorul). Nu întreba și nu completa scopul evaluării sau termenul raportului. Colectează doar date despre proprietate, documente și contact. Dacă spune un preț dorit, pune-l în asking_price (doar număr, în euro). Nu estima prețul și nu promite un termen de vânzare; nu face afirmații despre comisionul vânzătorului — le discută consultantul.`;
+
 function systemPrompt(step: string, lead: Lead) {
-  return `Ești asistentul de evaluare VALUEFY — firmă de evaluare autorizată ANEVAR — evaluează proprietăți imobiliare (apartamente, case, terenuri, spații comerciale, hale) și bunuri mobile (utilaje, echipamente, autovehicule, mijloace fixe) — cu birouri în Timișoara (sediu central) și Cluj-Napoca și o rețea de evaluatori colaboratori autorizați ANEVAR, deci evaluează oriunde în România. Funcționezi ca un formular conversațional ghidat.
+  return `${isSale(lead) ? SALE_NOTE + "\n" : ""}Ești asistentul de evaluare VALUEFY — firmă de evaluare autorizată ANEVAR — evaluează proprietăți imobiliare (apartamente, case, terenuri, spații comerciale, hale) și bunuri mobile (utilaje, echipamente, autovehicule, mijloace fixe) — cu birouri în Timișoara (sediu central) și Cluj-Napoca și o rețea de evaluatori colaboratori autorizați ANEVAR, deci evaluează oriunde în România. Funcționezi ca un formular conversațional ghidat.
 Pasul curent în interfață: ${step}. Date colectate: ${JSON.stringify(lead)}.
 Dacă utilizatorul oferă informații, apelează set_lead_fields cu valori normalizate (pentru câmpurile enum folosește exact una dintre opțiuni; suprafețele doar ca număr; deadline: "Standard", "Urgent" sau o dată). Pentru utilaje, echipamente, autovehicule sau alte bunuri mobile folosește property_type "Bunuri mobile"; pentru "Bunuri mobile" și "Altă proprietate" pune în property_description o descriere scurtă a ce vrea să evalueze.
 Apoi răspunde în română, cald și profesionist, în maxim 2 propoziții scurte. NU pune următoarea întrebare — interfața o afișează automat. Nu oferi prețuri, valori estimate sau termene exacte: costul și termenul sunt comunicate în ofertă, pentru că depind de tipul proprietății, scop, localizare și complexitate. Nu afirma că ai verificat autenticitatea documentelor. Fără markdown.`;
 }
 
 // Normalise what the model extracted: keep non-empty strings, respect enums.
-function cleanFields(input: unknown): Lead {
+function cleanFields(input: unknown, sale = false): Lead {
   const out: Record<string, string | boolean> = {};
   if (!input || typeof input !== "object") return {};
   for (const [k, v] of Object.entries(input as Record<string, unknown>)) {
@@ -44,6 +47,12 @@ function cleanFields(input: unknown): Lead {
     out[k] = s.slice(0, 300);
   }
   if (out.surface_area || out.land_area) out.details_done = true;
+  if (out.asking_price) out.asking_price = String(out.asking_price).replace(/[^\d]/g, "");
+  if (sale) {
+    delete out.valuation_purpose;
+    delete out.deadline;
+    if (out.property_type === MOBILE) delete out.property_type;
+  } else delete out.asking_price;
   return out as Lead;
 }
 
@@ -90,7 +99,7 @@ export async function POST(req: Request) {
         .join("")
         .trim();
       const toolUses = response.content.filter((b): b is Anthropic.ToolUseBlock => b.type === "tool_use");
-      for (const t of toolUses) fields = { ...fields, ...cleanFields(t.input) };
+      for (const t of toolUses) fields = { ...fields, ...cleanFields(t.input, isSale(body.lead || {})) };
 
       if (response.stop_reason !== "tool_use" || !toolUses.length) {
         return NextResponse.json({ reply: text || "Am notat.", fields });
