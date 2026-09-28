@@ -8,11 +8,11 @@ import s from "./Header.module.css";
 
 const mobileLinks = [
   ["Servicii", "/#servicii"],
-  ["Proprietăți de vânzare", "/imobiliare"],
   ["Cum funcționează", "/#cum-functioneaza"],
   ["Despre noi", "/#despre"],
   ["Întrebări frecvente", "/#faq"],
   ["Portal client", site.portalUrl],
+  ["Portal Imobiliar", "/imobiliare"],
   ["Contact", "/#contact"],
 ];
 
@@ -36,13 +36,20 @@ export function Header() {
           </a>
           <nav aria-label="Navigare principală" className={s.nav}>
             <a href="/#servicii">Servicii</a>
-            <a href="/imobiliare">Proprietăți</a>
             <a href="/#cum-functioneaza">Cum funcționează</a>
             <a href="/#faq">Întrebări</a>
           </nav>
           <div className={s.actions}>
             <a href={site.portalUrl} className={s.portal}>
               <span className={s.portalIcon}><span /></span>Portal client
+            </a>
+            <a href="/imobiliare" className={`${s.portal} ${s.estate}`}>
+              <span className={s.estateIcon} aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 11 12 4l9 7" /><path d="M5 10v10h14V10" /><path d="M10 20v-5h4v5" />
+                </svg>
+              </span>
+              Portal Imobiliar
             </a>
             <button type="button" className={s.cta} onClick={() => open()}>
               Solicită evaluare<span className={s.ctaArrow} aria-hidden="true">→</span>
