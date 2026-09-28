@@ -60,3 +60,4 @@
 }
 .previewNote { font-size: 13px !important; background: var(--acc-soft); border-radius: 10px; padding: 10px 12px; }
 .back { font-size: 14px; font-weight: 700; color: var(--acc-text); }
+.thumbEmpty { width: 96px; height: 72px; border-radius: 10px; background: var(--navy); flex-shrink: 0; }

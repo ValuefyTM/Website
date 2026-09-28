@@ -3,7 +3,9 @@ import { AssistantProvider } from "@/components/Assistant";
 import { AssistantButton } from "@/components/AssistantButton";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Closing";
-import { LISTINGS } from "@/lib/listings";
+import { getDb } from "@/lib/db";
+import { listPublished } from "@/lib/listings-db";
+import type { Listing } from "@/lib/listing-format";
 import { ListingsBrowser } from "./ListingsBrowser";
 import s from "./imobiliare.module.css";
 
@@ -11,12 +13,20 @@ export const metadata: Metadata = {
   title: "Proprietăți de vânzare | VALUEFY",
   description: "Apartamente, case, terenuri și spații comerciale de vânzare, prezentate transparent de echipa VALUEFY.",
   alternates: { canonical: "/imobiliare" },
-  // Demo listings — keep out of search results until real listings are published.
-  robots: { index: false, follow: false },
 };
 
-export default function ListingsPage() {
-  const cities = [...new Set(LISTINGS.map((l) => l.city))].sort((a, b) => a.localeCompare(b, "ro"));
+// Listings come from the database, so render on every request.
+export const dynamic = "force-dynamic";
+
+export default async function ListingsPage() {
+  const db = await getDb();
+  let listings: Listing[] = [];
+  try {
+    if (db) listings = await listPublished(db);
+  } catch (error) {
+    console.error("[imobiliare] could not load listings", error);
+  }
+  const cities = [...new Set(listings.map((l) => l.city))].sort((a, b) => a.localeCompare(b, "ro"));
   return (
     <AssistantProvider>
       <Header />
@@ -42,7 +52,14 @@ export default function ListingsPage() {
         </section>
 
         <section aria-label="Lista proprietăților" className={`container ${s.listSection}`}>
-          <ListingsBrowser listings={LISTINGS} cities={cities} />
+          {listings.length ? (
+            <ListingsBrowser listings={listings} cities={cities} />
+          ) : (
+            <div className={s.none}>
+              <b>Momentan nu avem proprietăți listate.</b>
+              <span>Revino în curând sau scrie-ne dacă vrei să vinzi o proprietate prin VALUEFY.</span>
+            </div>
+          )}
         </section>
 
         <section aria-labelledby="sell-title" className={s.sellBand}>

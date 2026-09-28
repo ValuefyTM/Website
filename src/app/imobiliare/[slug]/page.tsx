@@ -4,31 +4,39 @@ import { site, phoneHref } from "@/config/site";
 import { AssistantProvider } from "@/components/Assistant";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Closing";
-import { LISTINGS, findListing, formatEur, pricePerSqm, reportDate } from "@/lib/listings";
+import { getDb } from "@/lib/db";
+import { getBySlug, listPublished } from "@/lib/listings-db";
+import { formatEur, pricePerSqm, reportDate } from "@/lib/listing-format";
+import { isAdmin } from "@/lib/admin-auth";
 import { ViewingForm } from "./ViewingForm";
 import s from "./listing.module.css";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export const dynamicParams = false;
-export function generateStaticParams() {
-  return LISTINGS.map((l) => ({ slug: l.slug }));
+export const dynamic = "force-dynamic";
+
+/** Published listing, or an unpublished one when an admin previews it. */
+async function load(slug: string) {
+  const db = await getDb();
+  if (!db) return { db: null, listing: null };
+  return { db, listing: await getBySlug(db, slug, await isAdmin()) };
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const l = findListing((await params).slug);
+  const { listing: l } = await load((await params).slug);
   if (!l) return {};
   return {
     title: `${l.title} | VALUEFY`,
-    description: `${l.type} de vânzare în ${l.city}, ${l.zone} — ${formatEur(l.price)}.`,
+    description: `${l.type} de vânzare în ${l.city}${l.zone ? ", " + l.zone : ""} — ${formatEur(l.price)}.`,
     alternates: { canonical: `/imobiliare/${l.slug}` },
-    robots: { index: false, follow: false }, // demo listing
+    openGraph: { title: l.title, images: l.photos[0] ? [l.photos[0]] : ["/opengraph-image.png"] },
+    robots: l.published ? undefined : { index: false, follow: false },
   };
 }
 
 export default async function ListingPage({ params }: Props) {
-  const l = findListing((await params).slug);
-  if (!l) notFound();
+  const { db, listing: l } = await load((await params).slug);
+  if (!db || !l) notFound();
   const ppsm = pricePerSqm(l);
   const facts: [string, string][] = [
     ["Tip", l.type],
@@ -40,7 +48,7 @@ export default async function ListingPage({ params }: Props) {
     ...(l.year ? ([["An construcție", String(l.year)]] as [string, string][]) : []),
     ["Localizare", `${l.zone}, ${l.city}`],
   ];
-  const similar = LISTINGS.filter((x) => x.slug !== l.slug).sort((a, b) => Number(b.type === l.type) - Number(a.type === l.type)).slice(0, 3);
+  const similar = (await listPublished(db)).filter((x) => x.slug !== l.slug).sort((a, b) => Number(b.type === l.type) - Number(a.type === l.type)).slice(0, 3);
   const [main, ...rest] = l.photos;
 
   return (
@@ -48,14 +56,15 @@ export default async function ListingPage({ params }: Props) {
       <Header />
       <main id="top" className={s.page}>
         <div className="container">
+          {!l.published && <div className={s.draft}>Previzualizare admin — acest anunț nu este publicat și nu e vizibil pentru vizitatori.</div>}
           <nav aria-label="Breadcrumb" className={s.crumbs}>
             <a href="/">Acasă</a><span aria-hidden="true">/</span><a href="/imobiliare">Proprietăți de vânzare</a><span aria-hidden="true">/</span>
             <span aria-current="page">{l.city}</span>
           </nav>
 
-          <div className={s.gallery} data-count={Math.min(l.photos.length, 3)}>
+          <div className={s.gallery} data-count={Math.max(1, Math.min(l.photos.length, 3))}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={main} alt={l.title} className={s.mainPhoto} />
+            {main ? <img src={main} alt={l.title} className={s.mainPhoto} /> : <div className={`${s.mainPhoto} ${s.noPhoto}`}>Fotografiile vor fi adăugate în curând</div>}
             {rest.slice(0, 2).map((src, i) => (
               // eslint-disable-next-line @next/next/no-img-element
               <img key={src} src={src} alt={`${l.title} — fotografia ${i + 2}`} loading="lazy" />
@@ -72,7 +81,7 @@ export default async function ListingPage({ params }: Props) {
                   <span className={s.tag}>Vânzare</span>
                 </div>
                 <h1 className={s.title}>{l.title}</h1>
-                <p className={s.loc}>{l.zone}, {l.city}</p>
+                <p className={s.loc}>{[l.zone, l.city].filter(Boolean).join(", ")}</p>
                 <div className={s.price}>
                   <b>{formatEur(l.price)}</b>
                   {ppsm && <span>{formatEur(ppsm)}/m²</span>}
@@ -128,29 +137,29 @@ export default async function ListingPage({ params }: Props) {
                 </div>
                 <a href={phoneHref(site.phone)} className={s.call}>Sună: {site.phone}</a>
                 {l.report && <a href={`/imobiliare/${l.slug}/raport`} className={s.reportSide}><span aria-hidden="true">✓</span>Solicită raportul de evaluare</a>}
-                <ViewingForm listingTitle={l.title} />
+                <ViewingForm listingTitle={l.title} slug={l.slug} />
               </div>
             </aside>
           </div>
 
-          <section aria-labelledby="similar-title" className={s.similar}>
+          {similar.length > 0 && <section aria-labelledby="similar-title" className={s.similar}>
             <h2 id="similar-title">Alte proprietăți</h2>
             <ul>
               {similar.map((x) => (
                 <li key={x.slug}>
                   <a href={`/imobiliare/${x.slug}`}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={x.photos[0]} alt="" loading="lazy" />
+                    {x.photos[0] ? <img src={x.photos[0]} alt="" loading="lazy" /> : <span className={s.simNoPhoto} />}
                     <span className={s.simBody}>
                       <b>{formatEur(x.price)}</b>
                       <span>{x.title}</span>
-                      <small>{x.zone}, {x.city}</small>
+                      <small>{[x.zone, x.city].filter(Boolean).join(", ")}</small>
                     </span>
                   </a>
                 </li>
               ))}
             </ul>
-          </section>
+          </section>}
         </div>
       </main>
       <Footer />

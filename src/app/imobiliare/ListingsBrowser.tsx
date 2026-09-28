@@ -1,10 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { formatEur, pricePerSqm, type Listing } from "@/lib/listings";
+import { LISTING_TYPES, formatEur, pricePerSqm, type Listing } from "@/lib/listing-format";
 import s from "./imobiliare.module.css";
 
-const TYPES = ["Apartament", "Casă", "Teren", "Spațiu comercial", "Hală / industrial"];
+const TYPES = LISTING_TYPES;
 const MAX_PRICES = [100000, 150000, 250000, 500000];
 const SORTS = { recent: "Cele mai noi", asc: "Preț crescător", desc: "Preț descrescător" } as const;
 
@@ -77,7 +77,7 @@ export function ListingsBrowser({ listings, cities }: { listings: Listing[]; cit
               <a href={`/imobiliare/${l.slug}`} className={s.cardLink}>
                 <div className={s.cardImg}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={l.photos[0]} alt={l.title} loading="lazy" decoding="async" />
+                  {l.photos[0] ? <img src={l.photos[0]} alt={l.title} loading="lazy" decoding="async" /> : <span className={s.noPhoto}>Fără fotografii</span>}
                   <span className={s.typeTag}>{l.type}</span>
                   {l.status && <span className={`${s.statusTag} ${l.status === "Rezervat" ? s.reserved : ""}`}>{l.status}</span>}
                   {l.photos.length > 1 && <span className={s.photoCount}>{l.photos.length} foto</span>}

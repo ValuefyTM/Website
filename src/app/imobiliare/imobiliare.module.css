@@ -56,6 +56,7 @@
 .cardImg { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--navy); }
 .cardImg img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 0.9s var(--ease); }
 .card:hover .cardImg img { transform: scale(1.06); }
+.noPhoto { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #8a8ba8; font-size: 13px; font-weight: 600; }
 .typeTag, .statusTag, .photoCount {
   position: absolute; font-size: 12px; font-weight: 700; border-radius: 999px; padding: 6px 10px;
 }
@@ -96,3 +97,8 @@
   font-size: 16px; font-weight: 700; cursor: pointer; white-space: nowrap;
 }
 .sellCta:hover { background: var(--acc-ink); }
+.none {
+  margin-top: 40px; padding: 48px 24px; text-align: center; border: 1px dashed var(--line-warm); border-radius: 20px; background: var(--cream);
+  display: flex; flex-direction: column; gap: 8px; align-items: center; font-size: 15px; color: var(--muted-2);
+}
+.none b { font-size: 18px; color: var(--ink); }

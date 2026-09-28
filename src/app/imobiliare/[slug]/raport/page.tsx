@@ -3,24 +3,28 @@ import { notFound } from "next/navigation";
 import { AssistantProvider } from "@/components/Assistant";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Closing";
-import { LISTINGS, findListing, formatEur, reportDate } from "@/lib/listings";
+import { getDb } from "@/lib/db";
+import { getBySlug } from "@/lib/listings-db";
+import { formatEur, reportDate } from "@/lib/listing-format";
 import { ReportRequestForm } from "./ReportRequestForm";
 import s from "./raport.module.css";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export const dynamicParams = false;
-export function generateStaticParams() {
-  return LISTINGS.filter((l) => l.report).map((l) => ({ slug: l.slug }));
+export const dynamic = "force-dynamic";
+
+async function load(slug: string) {
+  const db = await getDb();
+  return db ? getBySlug(db, slug) : null;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const l = findListing((await params).slug);
+  const l = await load((await params).slug);
   return l ? { title: `Solicită raportul de evaluare — ${l.title} | VALUEFY`, robots: { index: false, follow: false } } : {};
 }
 
 export default async function ReportRequestPage({ params }: Props) {
-  const l = findListing((await params).slug);
+  const l = await load((await params).slug);
   if (!l || !l.report) notFound();
 
   return (
@@ -45,10 +49,10 @@ export default async function ReportRequestPage({ params }: Props) {
 
               <a href={`/imobiliare/${l.slug}`} className={s.property}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={l.photos[0]} alt="" />
+                {l.photos[0] ? <img src={l.photos[0]} alt="" /> : <span className={s.thumbEmpty} />}
                 <span>
                   <b>{l.title}</b>
-                  <small>{l.zone}, {l.city} · {formatEur(l.price)}</small>
+                  <small>{[l.zone, l.city].filter(Boolean).join(", ")} · {formatEur(l.price)}</small>
                   <em>✓ Raport ANEVAR · {reportDate(l.report.date)}</em>
                 </span>
               </a>
@@ -60,7 +64,7 @@ export default async function ReportRequestPage({ params }: Props) {
               </ol>
             </div>
 
-            <ReportRequestForm listingTitle={l.title} />
+            <ReportRequestForm listingTitle={l.title} slug={l.slug} />
           </div>
         </div>
       </main>

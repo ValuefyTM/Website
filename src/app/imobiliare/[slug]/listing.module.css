@@ -125,3 +125,6 @@
 .simBody b { font-size: 18px; }
 .simBody span { font-size: 14px; font-weight: 600; line-height: 1.4; }
 .simBody small { font-size: 13px; color: var(--muted); }
+.draft { margin-top: 16px; padding: 10px 14px; border-radius: 10px; background: #fdecea; color: #a4281e; font-size: 14px; font-weight: 700; }
+.noPhoto { display: flex; align-items: center; justify-content: center; color: #8a8ba8; font-size: 15px; font-weight: 600; min-height: 240px; }
+.simNoPhoto { display: block; width: 100%; aspect-ratio: 16 / 10; background: var(--navy); }

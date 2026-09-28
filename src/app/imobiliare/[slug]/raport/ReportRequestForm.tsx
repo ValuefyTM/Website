@@ -5,11 +5,12 @@ import s from "./raport.module.css";
 
 const ROLES = ["Sunt interesat să cumpăr", "Cumpăr cu credit bancar", "Reprezint o bancă sau un investitor", "Sunt agent imobiliar", "Alt motiv"];
 
-/** Report request form. PREVIEW: not connected yet — shows the confirmation screen only. */
-export function ReportRequestForm({ listingTitle }: { listingTitle: string }) {
+/** Report request form — sends to /api/inquiries; the office reviews it and sends the report. */
+export function ReportRequestForm({ listingTitle, slug }: { listingTitle: string; slug: string }) {
   const [f, setF] = useState({ name: "", email: "", phone: "", role: "", message: "", consent: false, confidential: false });
   const [err, setErr] = useState("");
   const [sent, setSent] = useState(false);
+  const [busy, setBusy] = useState(false);
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setF((p) => ({ ...p, [k]: e.target.type === "checkbox" ? (e.target as HTMLInputElement).checked : e.target.value }));
 
@@ -23,7 +24,20 @@ export function ReportRequestForm({ listingTitle }: { listingTitle: string }) {
     else if (!f.confidential) m = "Este necesar acordul privind folosirea raportului.";
     else if (!f.consent) m = "Este necesar acordul privind prelucrarea datelor.";
     setErr(m);
-    if (!m) setSent(true);
+    if (m) return;
+    setBusy(true);
+    fetch("/api/inquiries", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind: "report", slug, name: f.name, email: f.email, phone: f.phone, reason: f.role, message: f.message, consent: f.consent && f.confidential }),
+    })
+      .then(async (r) => {
+        const d = (await r.json().catch(() => ({}))) as { error?: string };
+        if (!r.ok) throw new Error(d.error || "Nu am putut trimite solicitarea. Încearcă din nou.");
+        setSent(true);
+      })
+      .catch((e: Error) => setErr(e.message))
+      .finally(() => setBusy(false));
   };
 
   if (sent) {
@@ -33,7 +47,6 @@ export function ReportRequestForm({ listingTitle }: { listingTitle: string }) {
           <div className={s.doneCheck}>✓</div>
           <h2>Solicitarea a fost trimisă.</h2>
           <p>Verificăm datele și îți trimitem raportul de evaluare pentru „{listingTitle}” la <b>{f.email}</b>.</p>
-          <p className={s.previewNote}>Previzualizare: formularul nu este încă legat. În versiunea finală, cererea ajunge la voi pe email și în baza de date, iar solicitantul primește confirmare.</p>
           <a href="/imobiliare" className={s.back}>← Înapoi la proprietăți</a>
         </div>
       </div>
@@ -62,7 +75,7 @@ export function ReportRequestForm({ listingTitle }: { listingTitle: string }) {
         <span>Sunt de acord cu prelucrarea datelor pentru această solicitare, conform <a href="/politica-de-confidentialitate">Politicii de confidențialitate</a>.</span>
       </label>
       {err && <div role="alert" className={s.err}>{err}</div>}
-      <button type="submit" className={s.submit}>Trimite solicitarea</button>
+      <button type="submit" className={s.submit} disabled={busy}>{busy ? "Se trimite…" : "Trimite solicitarea"}</button>
     </form>
   );
 }
