@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { isAdmin } from "@/lib/admin-auth";
 import { getDb } from "@/lib/db";
 import { listAll, listInquiries } from "@/lib/listings-db";
+import { countNewLeads } from "@/lib/leads-admin";
 import { formatEur } from "@/lib/listing-format";
 import { AdminShell } from "./AdminShell";
 import { PublishToggle, InquiryStatus } from "./AdminControls";
@@ -13,11 +14,16 @@ export default async function AdminHome() {
   if (!(await isAdmin())) redirect("/admin/login");
   const db = await getDb();
   if (!db) return <AdminShell><p className={a.warn}>Baza de date nu este disponibilă.</p></AdminShell>;
-  const [listings, inquiries] = await Promise.all([listAll(db), listInquiries(db)]);
+  const [listings, inquiries, newLeads] = await Promise.all([listAll(db), listInquiries(db), countNewLeads(db).catch(() => 0)]);
   const newCount = inquiries.filter((i) => i.status === "NEW").length;
 
   return (
     <AdminShell active="listings">
+      {newLeads > 0 && (
+        <a href="/admin/solicitari" className={a.leadBanner}>
+          <b>{newLeads === 1 ? "1 solicitare nouă" : `${newLeads} solicitări noi`}</b> de evaluare sau vânzare prin asistent <span aria-hidden="true">→</span>
+        </a>
+      )}
       <div className={a.pageHead}>
         <div>
           <h1>Proprietăți</h1>
