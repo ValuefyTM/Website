@@ -48,6 +48,8 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
   const [submitErr, setSubmitErr] = useState("");
   const [leadId, setLeadId] = useState("");
   const [confirmed, setConfirmed] = useState(false);
+  // AI availability: null = checking, true = online, false = offline.
+  const [aiOnline, setAiOnline] = useState<boolean | null>(null);
   const [files, setFiles] = useState<File[]>([]);
 
   // Refs mirror state that async callbacks (timers, fetches) must read fresh.
@@ -173,10 +175,13 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ messages: history, step: stepRef.current, lead: leadRef.current }),
       });
       if (res.ok) {
-        const data = (await res.json()) as { reply?: string; fields?: Lead };
+        const data = (await res.json()) as { reply?: string; fields?: Lead; ai?: boolean };
         if (gen !== genRef.current) return;
         if (data.fields && Object.keys(data.fields).length) setLead({ ...leadRef.current, ...data.fields });
         reply = (data.reply || "").trim() || "Am notat.";
+        setAiOnline(data.ai !== false);
+      } else {
+        setAiOnline(false);
       }
     } catch {
       /* network error → fallback reply */
@@ -241,6 +246,26 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
       setSubmitting(false);
     }
   };
+
+  // Is the AI actually reachable? Checked once per page (cached 5 min per tab).
+  useEffect(() => {
+    const KEY = "vf_ai_status";
+    try {
+      const c = JSON.parse(sessionStorage.getItem(KEY) || "null") as { online: boolean; at: number } | null;
+      if (c && Date.now() - c.at < 5 * 60 * 1000) { setAiOnline(c.online); return; }
+    } catch { /* storage unavailable */ }
+    const id = setTimeout(() => {
+      fetch("/api/assistant/status")
+        .then(async (r) => (r.ok ? ((await r.json()) as { online?: boolean }) : { online: false }))
+        .then((d) => {
+          const online = !!d.online;
+          setAiOnline(online);
+          try { sessionStorage.setItem(KEY, JSON.stringify({ online, at: Date.now() })); } catch { /* ignore */ }
+        })
+        .catch(() => setAiOnline(false));
+    }, 1200);
+    return () => clearTimeout(id);
+  }, []);
 
   // Page scroll → mobile sticky CTA.
   useEffect(() => {
@@ -385,7 +410,7 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
         <button type="button" className={s.fab} onClick={() => openAssistant()} aria-label="Deschide asistentul de evaluare">
           <span className={s.fabIcon}>
             {logoMark}
-            <span className={s.fabDot} />
+            <span className={s.fabDot} style={{ background: aiOnline ? "var(--green)" : "#9A9FA8" }} />
           </span>
           Asistent evaluare
         </button>
@@ -411,7 +436,10 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
           <div className={s.headText}>
             <div className={s.headEyebrow}>VALUEFY AI</div>
             <div className={s.headTitle}>
-              Asistent evaluare <span className={s.online}><span />Online</span>
+              Asistent evaluare{" "}
+              <span className={`${s.online} ${aiOnline ? "" : s.offline}`} title={aiOnline === false ? "Asistentul AI nu este disponibil momentan. Poți folosi opțiunile ghidate." : undefined}>
+                <span />{aiOnline === null ? "Se verifică…" : aiOnline ? "Online" : "Offline"}
+              </span>
             </div>
           </div>
           <button type="button" className={s.iconBtn} onClick={reset} aria-label="Solicitare nouă" title="Solicitare nouă">↺</button>
@@ -616,7 +644,7 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && ask(input)}
-              placeholder="Scrie un mesaj sau pune o întrebare…"
+              placeholder={aiOnline === false ? "Asistentul AI e offline — alege din opțiunile de mai sus" : "Scrie un mesaj sau pune o întrebare…"}
               maxLength={2000}
             />
           </label>

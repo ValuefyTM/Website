@@ -105,7 +105,7 @@ export async function POST(req: Request) {
   } catch (error) {
     if (error instanceof Anthropic.APIError) console.error(`[assistant] API error ${error.status}:`, error.message);
     else console.error("[assistant]", error);
-    return NextResponse.json({ reply: FALLBACK, fields });
+    return NextResponse.json({ reply: FALLBACK, fields, ai: false });
   }
   return NextResponse.json({ reply: "Am notat.", fields });
 }
