@@ -1,0 +1,62 @@
+.page { background: linear-gradient(180deg, #fdfbf7 0%, #f7f1e4 60%, #fff 100%); padding-bottom: clamp(48px, 6vw, 88px); }
+.inner { display: flex; flex-direction: column; }
+.crumbs { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--muted); padding: 24px 0 18px; }
+.crumbs a { color: var(--muted-2); font-weight: 600; }
+.crumbs a:hover { color: var(--acc-text); }
+.crumbs [aria-current] { color: var(--acc-text); font-weight: 700; }
+
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 440px; gap: clamp(24px, 5vw, 64px); align-items: start; padding-top: 12px; }
+@media (max-width: 979px) { .layout { grid-template-columns: 1fr; } }
+.intro { display: flex; flex-direction: column; gap: 18px; }
+.title { margin: 0; font-size: clamp(30px, 4vw, 48px); line-height: 1.08; letter-spacing: -0.045em; text-wrap: balance; }
+.lead { margin: 0; font-size: 17px; line-height: 1.65; color: var(--muted-2); max-width: 34em; }
+
+.property {
+  display: flex; gap: 14px; align-items: center; padding: 12px; border-radius: 16px; background: #fff; border: 1px solid var(--line-warm);
+  color: var(--ink); max-width: 520px;
+}
+.property:hover { border-color: var(--acc); color: var(--ink); }
+.property img { width: 96px; height: 72px; border-radius: 10px; object-fit: cover; background: var(--navy); flex-shrink: 0; }
+.property > span { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.property b { font-size: 15px; line-height: 1.35; }
+.property small { font-size: 13px; color: var(--muted); }
+.property em { font-style: normal; font-size: 12px; font-weight: 800; color: var(--acc-text); }
+
+.steps { list-style: none; counter-reset: s; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; max-width: 520px; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 34px 1fr; column-gap: 12px; }
+.steps li::before {
+  content: "0" counter(s); grid-row: span 2; width: 34px; height: 34px; border-radius: 10px; background: var(--navy); color: #f2a93b;
+  font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+}
+.steps b { font-size: 15px; }
+.steps span { font-size: 14px; color: var(--muted-2); }
+
+.card {
+  background: #fff; border: 1px solid var(--line-warm); border-radius: 22px; padding: 22px; display: flex; flex-direction: column; gap: 12px;
+  box-shadow: 0 30px 60px -36px rgba(23, 23, 58, 0.45);
+}
+.formTitle { font-size: 17px; font-weight: 800; }
+.card label { display: flex; flex-direction: column; gap: 6px; font-size: 12px; font-weight: 700; color: var(--muted); }
+.opt { font-weight: 500; }
+.card input:not([type="checkbox"]), .card select, .card textarea {
+  border: 1px solid var(--line); border-radius: 10px; font-size: 16px; font-family: inherit; color: var(--ink); background: #fff;
+}
+.card input:not([type="checkbox"]), .card select { height: 48px; padding: 0 14px; }
+.card textarea { padding: 12px 14px; line-height: 1.5; resize: vertical; }
+.card input:focus, .card select:focus, .card textarea:focus { outline: none; border-color: var(--acc-text); }
+.card .check { flex-direction: row; align-items: flex-start; gap: 10px; font-size: 13px; font-weight: 500; line-height: 1.45; color: var(--muted-2); cursor: pointer; }
+.check input { width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--acc-ink); flex-shrink: 0; }
+.check a { color: var(--acc-text); font-weight: 600; }
+.err { font-size: 13px; font-weight: 600; color: #c2362b; }
+.submit { height: 52px; border: 0; border-radius: 12px; background: var(--acc); color: var(--ink); font-size: 16px; font-weight: 700; cursor: pointer; }
+.submit:hover { background: var(--acc-ink); }
+
+.done { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; padding: 12px 4px; }
+.done h2 { margin: 0; font-size: 20px; letter-spacing: -0.02em; }
+.done p { margin: 0; font-size: 15px; line-height: 1.6; color: var(--muted-2); }
+.doneCheck {
+  width: 56px; height: 56px; border-radius: 50%; background: var(--green); color: #fff; font-size: 26px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+.previewNote { font-size: 13px !important; background: var(--acc-soft); border-radius: 10px; padding: 10px 12px; }
+.back { font-size: 14px; font-weight: 700; color: var(--acc-text); }

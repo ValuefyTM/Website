@@ -26,6 +26,37 @@
 .tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .tag { font-size: 12px; font-weight: 700; padding: 6px 10px; border-radius: 999px; background: var(--cream); border: 1px solid var(--line-warm); }
 .tagAcc { background: var(--acc); border-color: var(--acc); }
+.tagNavy { background: var(--navy); border-color: var(--navy); color: #fff; }
+
+/* Valuation report highlight */
+.report {
+  display: flex; align-items: center; gap: 18px; flex-wrap: wrap; padding: 20px 22px; border-radius: 20px;
+  background: linear-gradient(135deg, #fdf1dc, #fbf8f2); border: 1px solid #f0d6a4;
+}
+.reportSeal {
+  width: 64px; height: 64px; border-radius: 50%; flex-shrink: 0; background: radial-gradient(circle at 30% 30%, #f7c465, #d98e12);
+  border: 2px solid rgba(255, 255, 255, 0.6); box-shadow: 0 0 0 3px rgba(242, 169, 59, 0.25);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--ink); line-height: 1;
+}
+.reportSeal b { font-size: 24px; }
+.reportSeal small { font-size: 9px; font-weight: 800; letter-spacing: 0.04em; }
+.reportText { flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 6px; }
+.reportText h2 { margin: 0; font-size: 18px; letter-spacing: -0.02em; }
+.reportText p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--muted-2); }
+.reportBtn {
+  height: 50px; padding: 0 20px; border-radius: 12px; background: var(--navy); color: #fff; font-size: 15px; font-weight: 700;
+  display: flex; align-items: center; white-space: nowrap;
+}
+.reportBtn:hover { background: #24245a; color: #fff; }
+@media (max-width: 559px) { .reportBtn { width: 100%; justify-content: center; } }
+.reportSide {
+  height: 48px; border-radius: 12px; border: 1.5px solid var(--acc); background: var(--acc-soft); color: var(--ink);
+  font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.reportSide:hover { background: var(--acc); color: var(--ink); }
+.reportSide span {
+  width: 18px; height: 18px; border-radius: 50%; background: var(--acc); font-size: 10px; display: flex; align-items: center; justify-content: center;
+}
 .title { margin: 0; font-size: clamp(26px, 3.2vw, 38px); line-height: 1.12; letter-spacing: -0.035em; text-wrap: balance; }
 .loc { margin: 0; font-size: 16px; color: var(--muted-2); }
 .price { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-top: 4px; }

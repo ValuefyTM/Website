@@ -4,7 +4,7 @@ import { site, phoneHref } from "@/config/site";
 import { AssistantProvider } from "@/components/Assistant";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Closing";
-import { LISTINGS, findListing, formatEur, pricePerSqm } from "@/lib/listings";
+import { LISTINGS, findListing, formatEur, pricePerSqm, reportDate } from "@/lib/listings";
 import { ViewingForm } from "./ViewingForm";
 import s from "./listing.module.css";
 
@@ -68,6 +68,7 @@ export default async function ListingPage({ params }: Props) {
                 <div className={s.tags}>
                   <span className={s.tag}>{l.type}</span>
                   {l.status && <span className={`${s.tag} ${s.tagAcc}`}>{l.status}</span>}
+                  {l.report && <span className={`${s.tag} ${s.tagNavy}`}>✓ Raport de evaluare</span>}
                   <span className={s.tag}>Vânzare</span>
                 </div>
                 <h1 className={s.title}>{l.title}</h1>
@@ -77,6 +78,20 @@ export default async function ListingPage({ params }: Props) {
                   {ppsm && <span>{formatEur(ppsm)}/m²</span>}
                 </div>
               </div>
+
+              {l.report && (
+                <section aria-labelledby="report-title" className={s.report}>
+                  <div className={s.reportSeal} aria-hidden="true"><b>✓</b><small>ANEVAR</small></div>
+                  <div className={s.reportText}>
+                    <h2 id="report-title">Proprietatea are raport de evaluare</h2>
+                    <p>
+                      Raport întocmit de evaluator autorizat ANEVAR, conform Standardelor de Evaluare ({reportDate(l.report.date)}).
+                      Îl poți consulta înainte de vizionare sau de o ofertă — util și pentru discuția cu banca.
+                    </p>
+                  </div>
+                  <a href={`/imobiliare/${l.slug}/raport`} className={s.reportBtn}>Solicită raportul →</a>
+                </section>
+              )}
 
               <section aria-labelledby="facts-title" className={s.block}>
                 <h2 id="facts-title">Detalii</h2>
@@ -112,6 +127,7 @@ export default async function ListingPage({ params }: Props) {
                   <span><b>Echipa VALUEFY</b><small>Consultant vânzări</small></span>
                 </div>
                 <a href={phoneHref(site.phone)} className={s.call}>Sună: {site.phone}</a>
+                {l.report && <a href={`/imobiliare/${l.slug}/raport`} className={s.reportSide}><span aria-hidden="true">✓</span>Solicită raportul de evaluare</a>}
                 <ViewingForm listingTitle={l.title} />
               </div>
             </aside>

@@ -13,19 +13,20 @@ export function ListingsBrowser({ listings, cities }: { listings: Listing[]; cit
   const [city, setCity] = useState("");
   const [maxPrice, setMaxPrice] = useState(0);
   const [minRooms, setMinRooms] = useState(0);
+  const [withReport, setWithReport] = useState(false);
   const [sort, setSort] = useState<keyof typeof SORTS>("recent");
 
   const shown = useMemo(() => {
     const r = listings.filter(
-      (l) => (!type || l.type === type) && (!city || l.city === city) && (!maxPrice || l.price <= maxPrice) && (!minRooms || (l.rooms ?? 0) >= minRooms),
+      (l) => (!type || l.type === type) && (!city || l.city === city) && (!maxPrice || l.price <= maxPrice) && (!minRooms || (l.rooms ?? 0) >= minRooms) && (!withReport || !!l.report),
     );
     if (sort === "asc") r.sort((a, b) => a.price - b.price);
     if (sort === "desc") r.sort((a, b) => b.price - a.price);
     return r;
-  }, [listings, type, city, maxPrice, minRooms, sort]);
+  }, [listings, type, city, maxPrice, minRooms, withReport, sort]);
 
-  const reset = () => { setType(""); setCity(""); setMaxPrice(0); setMinRooms(0); };
-  const filtered = type || city || maxPrice || minRooms;
+  const reset = () => { setType(""); setCity(""); setMaxPrice(0); setMinRooms(0); setWithReport(false); };
+  const filtered = type || city || maxPrice || minRooms || withReport;
 
   return (
     <>
@@ -54,6 +55,10 @@ export function ListingsBrowser({ listings, cities }: { listings: Listing[]; cit
             {[1, 2, 3, 4].map((n) => <option key={n} value={n}>{n}+ camere</option>)}
           </select>
         </label>
+        <label className={s.reportFilter}>
+          <input type="checkbox" checked={withReport} onChange={(e) => setWithReport(e.target.checked)} />
+          <span><b>Doar cu raport de evaluare</b><small>Proprietăți cu raport întocmit de evaluator autorizat ANEVAR</small></span>
+        </label>
       </form>
 
       <div className={s.listHead}>
@@ -76,6 +81,7 @@ export function ListingsBrowser({ listings, cities }: { listings: Listing[]; cit
                   <span className={s.typeTag}>{l.type}</span>
                   {l.status && <span className={`${s.statusTag} ${l.status === "Rezervat" ? s.reserved : ""}`}>{l.status}</span>}
                   {l.photos.length > 1 && <span className={s.photoCount}>{l.photos.length} foto</span>}
+                  {l.report && <span className={s.reportTag}><i aria-hidden="true">✓</i>Raport de evaluare</span>}
                 </div>
                 <div className={s.cardBody}>
                   <div className={s.priceRow}>

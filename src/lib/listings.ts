@@ -16,6 +16,8 @@ export type Listing = {
   floor?: string;
   year?: number;
   status?: "Nou" | "Rezervat" | "Preț redus";
+  /** Valuation report available on request (date = report date, YYYY-MM). */
+  report?: { date: string };
   features: string[];
   description: string[];
   photos: string[];
@@ -26,6 +28,7 @@ const p = (id: string, w = 1200) => unsplash(id, w);
 export const LISTINGS: Listing[] = [
   {
     slug: "apartament-3-camere-complex-studentesc-timisoara",
+    report: { date: "2026-08" },
     title: "Apartament 3 camere, renovat, zona Complex Studențesc",
     type: "Apartament",
     city: "Timișoara",
@@ -46,6 +49,7 @@ export const LISTINGS: Listing[] = [
   },
   {
     slug: "casa-individuala-dumbravita",
+    report: { date: "2026-07" },
     title: "Casă individuală P+1, teren 500 m², Dumbrăvița",
     type: "Casă",
     city: "Dumbrăvița",
@@ -97,6 +101,7 @@ export const LISTINGS: Listing[] = [
   },
   {
     slug: "hala-logistica-ghiroda",
+    report: { date: "2026-06" },
     title: "Hală logistică 1.800 m² cu birouri, Ghiroda",
     type: "Hală / industrial",
     city: "Ghiroda",
@@ -115,6 +120,7 @@ export const LISTINGS: Listing[] = [
   },
   {
     slug: "apartament-2-camere-cluj-napoca",
+    report: { date: "2026-09" },
     title: "Apartament 2 camere, bloc nou, Cluj-Napoca",
     type: "Apartament",
     city: "Cluj-Napoca",
@@ -141,4 +147,9 @@ export const formatEur = (n: number) => new Intl.NumberFormat("ro-RO", { maximum
 export const pricePerSqm = (l: Listing) => {
   const area = l.surface ?? l.land;
   return area ? Math.round(l.price / area) : undefined;
+};
+
+export const reportDate = (d: string) => {
+  const [y, m] = d.split("-").map(Number);
+  return new Date(y, m - 1, 1).toLocaleDateString("ro-RO", { month: "long", year: "numeric" });
 };
