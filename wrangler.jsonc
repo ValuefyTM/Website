@@ -4,6 +4,8 @@
 	"main": ".open-next/worker.js",
 	"compatibility_date": "2026-09-25",
 	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	// Keep the variables set in the Cloudflare dashboard (API keys, email settings) on every deploy.
+	"keep_vars": true,
 	"assets": {
 		"directory": ".open-next/assets",
 		"binding": "ASSETS"
