@@ -8,6 +8,7 @@ import s from "./Header.module.css";
 
 const mobileLinks = [
   ["Servicii", "/#servicii"],
+  ["Proprietăți de vânzare", "/imobiliare"],
   ["Cum funcționează", "/#cum-functioneaza"],
   ["Despre noi", "/#despre"],
   ["Întrebări frecvente", "/#faq"],
@@ -35,6 +36,7 @@ export function Header() {
           </a>
           <nav aria-label="Navigare principală" className={s.nav}>
             <a href="/#servicii">Servicii</a>
+            <a href="/imobiliare">Proprietăți</a>
             <a href="/#cum-functioneaza">Cum funcționează</a>
             <a href="/#faq">Întrebări</a>
           </nav>
