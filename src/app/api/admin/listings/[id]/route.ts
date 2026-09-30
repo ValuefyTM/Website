@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/admin-api";
 import { deleteListing, getById, setPublished, updateListing, validateInput } from "@/lib/listings-db";
+import { withAutoEnglish } from "@/lib/translate-listing";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ id: string }> };
@@ -12,8 +13,9 @@ export async function PUT(req: Request, { params }: Ctx) {
   if (!(await getById(a.db, id))) return NextResponse.json({ error: "Anunțul nu există." }, { status: 404 });
   const v = validateInput(await req.json().catch(() => null));
   if (!v.ok) return NextResponse.json({ error: v.error }, { status: 400 });
-  const slug = await updateListing(a.db, id, v.value);
-  return NextResponse.json({ ok: true, slug });
+  const value = await withAutoEnglish(v.value);
+  const slug = await updateListing(a.db, id, value);
+  return NextResponse.json({ ok: true, slug, en: { title: value.title_en ?? "", description: value.description_en ?? "", features: value.features_en ?? [] } });
 }
 
 /** Quick publish / unpublish from the admin list. */

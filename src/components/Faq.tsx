@@ -2,12 +2,32 @@
 
 import { useState } from "react";
 import { site, phoneHref } from "@/config/site";
+import { useLang } from "@/i18n/client";
 import { useAssistant } from "./Assistant";
 import { FAQS } from "@/lib/faqs";
 import s from "./Faq.module.css";
 
+const T = {
+  ro: {
+    eyebrow: "Întrebări frecvente",
+    title: "Ce vor să știe clienții înainte de evaluare.",
+    helpTitle: "Nu găsești răspunsul?",
+    helpText: "Întreabă asistentul sau sună-ne — îți răspundem pe loc.",
+    ask: "Întreabă asistentul →",
+  },
+  en: {
+    eyebrow: "FAQ",
+    title: "What clients want to know before a valuation.",
+    helpTitle: "Can't find the answer?",
+    helpText: "Ask the assistant or give us a call — we'll answer right away.",
+    ask: "Ask the assistant →",
+  },
+};
+
 export function Faq() {
   const { open } = useAssistant();
+  const lang = useLang();
+  const t = T[lang];
   const [openIdx, setOpenIdx] = useState(0);
 
   return (
@@ -15,21 +35,21 @@ export function Faq() {
       <div className={`container ${s.inner}`}>
         <div className={s.side}>
           <div className={s.head}>
-            <div className="eyebrow">Întrebări frecvente</div>
-            <h2 id="faq-title" className="h2">Ce vor să știe clienții înainte de evaluare.</h2>
+            <div className="eyebrow">{t.eyebrow}</div>
+            <h2 id="faq-title" className="h2">{t.title}</h2>
           </div>
           <div className={s.help}>
             <div aria-hidden="true" className={s.helpGlow} />
-            <span className={s.helpTitle}>Nu găsești răspunsul?</span>
-            <span className={s.helpText}>Întreabă asistentul sau sună-ne — îți răspundem pe loc.</span>
+            <span className={s.helpTitle}>{t.helpTitle}</span>
+            <span className={s.helpText}>{t.helpText}</span>
             <div className={s.helpActions}>
-              <button type="button" className={s.helpAsk} onClick={() => open()}>Întreabă asistentul →</button>
+              <button type="button" className={s.helpAsk} onClick={() => open()}>{t.ask}</button>
               <a href={phoneHref(site.phone)} className={s.helpPhone}>{site.phone}</a>
             </div>
           </div>
         </div>
         <div data-rv className={s.list}>
-          {FAQS.map(([q, a], i) => {
+          {FAQS[lang].map(([q, a], i) => {
             const o = openIdx === i;
             return (
               <div key={q} className={`${s.item} ${o ? s.itemOpen : ""}`}>

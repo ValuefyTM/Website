@@ -1,4 +1,6 @@
 // Listing types and formatting helpers — safe to import in client components.
+import { numberLocale, type Lang } from "@/i18n/lang";
+import { label } from "@/i18n/labels";
 
 export const LISTING_TYPES = ["Apartament", "Casă", "Teren", "Spațiu comercial", "Hală / industrial"] as const;
 export const LISTING_STATUSES = ["Nou", "Rezervat", "Preț redus"] as const;
@@ -31,7 +33,7 @@ export type Listing = {
 };
 
 /** The listing with its text fields in the visitor's language (falls back to Romanian). */
-export function inLang(l: Listing, lang: "ro" | "en"): Listing {
+export function inLang(l: Listing, lang: Lang): Listing {
   if (lang !== "en" || !l.en) return l;
   return {
     ...l,
@@ -44,11 +46,35 @@ export function inLang(l: Listing, lang: "ro" | "en"): Listing {
 export const photoUrl = (id: string) => `/api/photos/${id}`;
 export const socialUrl = (id: string, version: string) => `/api/social/${id}?v=${encodeURIComponent(version)}`;
 
-/** Every property is sold with no commission for the buyer. */
+/** Every property is sold with no commission for the buyer. (Romanian; used by the admin.) */
 export const COMMISSION_NOTE = "Comision 0%";
 
-/** Short spec line, e.g. "3 camere · 74 m² · etaj 2 din 4". */
-export function specLine(l: Pick<Listing, "rooms" | "surface" | "land" | "floor">) {
+/** The "0% commission" note in the visitor's language. */
+export const commissionNote = (lang: Lang = "ro") => (lang === "en" ? "0% commission" : COMMISSION_NOTE);
+
+/** Floor as entered by the admin (Romanian, e.g. "2 din 4", "parter"), in the visitor's language. */
+export function floorText(floor: string, lang: Lang = "ro") {
+  if (lang !== "en") return floor;
+  return floor
+    .replace(/\bdin\b/gi, "of")
+    .replace(/\bparter\b/gi, "ground floor")
+    .replace(/\bdemisol\b/gi, "semi-basement")
+    .replace(/\bsubsol\b/gi, "basement")
+    .replace(/\bmansard[aă]/gi, "attic");
+}
+
+/** Short spec line, e.g. "3 camere · 74 m² · etaj 2 din 4" / "3 rooms · 74 m² · floor 2 of 4". */
+export function specLine(l: Pick<Listing, "rooms" | "surface" | "land" | "floor">, lang: Lang = "ro") {
+  const loc = numberLocale(lang);
+  if (lang === "en") {
+    const floor = l.floor ? floorText(l.floor, "en") : "";
+    return [
+      l.rooms ? `${l.rooms} ${l.rooms === 1 ? "room" : "rooms"}` : "",
+      l.surface ? `${l.surface.toLocaleString(loc)} m²` : "",
+      l.land ? `land ${l.land.toLocaleString(loc)} m²` : "",
+      floor ? (/floor|basement|attic/i.test(floor) ? floor : `floor ${floor}`) : "",
+    ].filter(Boolean).join(" · ");
+  }
   return [
     l.rooms ? `${l.rooms} ${l.rooms === 1 ? "cameră" : "camere"}` : "",
     l.surface ? `${l.surface.toLocaleString("ro-RO")} m²` : "",
@@ -57,30 +83,62 @@ export function specLine(l: Pick<Listing, "rooms" | "surface" | "land" | "floor"
   ].filter(Boolean).join(" · ");
 }
 
-/** Recommendation message for WhatsApp / SMS / email. */
-export function shareMessage(l: Listing, url: string) {
+/** Recommendation message for WhatsApp / SMS / email. Pass a listing already run through inLang() for English. */
+export function shareMessage(l: Listing, url: string, lang: Lang = "ro") {
   const where = [l.zone, l.city].filter(Boolean).join(", ");
+  const spec = specLine(l, lang);
+  if (lang === "en") {
+    return [
+      `Hi! Here's a property I think you'd like:`,
+      ``,
+      `🏠 ${l.title}`,
+      `📍 ${where}`,
+      `💶 ${formatEur(l.price, "en")}${spec ? " · " + spec : ""}`,
+      `✅ ${commissionNote("en")} — no commission to pay when you buy${l.report ? "\n📄 ANEVAR valuation report available" : ""}`,
+      ``,
+      url,
+    ].join("\n");
+  }
   return [
     `Salut! Uite o proprietate care cred că te-ar interesa:`,
     ``,
     `🏠 ${l.title}`,
     `📍 ${where}`,
-    `💶 ${formatEur(l.price)}${specLine(l) ? " · " + specLine(l) : ""}`,
+    `💶 ${formatEur(l.price)}${spec ? " · " + spec : ""}`,
     `✅ ${COMMISSION_NOTE} — fără comision la cumpărare${l.report ? "\n📄 Are raport de evaluare ANEVAR" : ""}`,
     ``,
     url,
   ].join("\n");
 }
 
-/** Longer post for Facebook / Instagram / LinkedIn. */
-export function socialPost(l: Listing, url: string) {
+/** Longer post for Facebook / Instagram / LinkedIn. Pass a listing already run through inLang() for English. */
+export function socialPost(l: Listing, url: string, lang: Lang = "ro") {
   const where = [l.zone, l.city].filter(Boolean).join(", ");
   const tag = (s: string) => "#" + slugify(s).replace(/-/g, "");
+  const spec = specLine(l, lang);
+  if (lang === "en") {
+    const type = label(l.type, "en");
+    return [
+      `${type} for sale · ${where}`,
+      ``,
+      `${l.title}`,
+      `💶 ${formatEur(l.price, "en")}${spec ? " · " + spec : ""}`,
+      ``,
+      ...l.features.slice(0, 5).map((f) => `✓ ${f}`),
+      ...(l.features.length ? [``] : []),
+      `✅ ${commissionNote("en")} — you pay no commission when you buy.`,
+      ...(l.report ? [`📄 The property has a valuation report prepared by an ANEVAR-authorised valuer.`] : []),
+      ``,
+      `Details and viewings: ${url}`,
+      ``,
+      [tag(type), tag(l.city), "#realestate", "#forsale", "#romania", "#valuefy"].join(" "),
+    ].join("\n");
+  }
   return [
     `${l.type} de vânzare · ${where}`,
     ``,
     `${l.title}`,
-    `💶 ${formatEur(l.price)}${specLine(l) ? " · " + specLine(l) : ""}`,
+    `💶 ${formatEur(l.price)}${spec ? " · " + spec : ""}`,
     ``,
     ...l.features.slice(0, 5).map((f) => `✓ ${f}`),
     ...(l.features.length ? [``] : []),
@@ -93,17 +151,21 @@ export function socialPost(l: Listing, url: string) {
   ].join("\n");
 }
 
-export const formatEur = (n: number) => new Intl.NumberFormat("ro-RO", { maximumFractionDigits: 0 }).format(n) + " €";
+/** "142.000 €" (ro) / "€142,000" (en). */
+export const formatEur = (n: number, lang: Lang = "ro") =>
+  lang === "en"
+    ? "€" + new Intl.NumberFormat(numberLocale(lang), { maximumFractionDigits: 0 }).format(n)
+    : new Intl.NumberFormat("ro-RO", { maximumFractionDigits: 0 }).format(n) + " €";
 
 export const pricePerSqm = (l: Pick<Listing, "price" | "surface" | "land">) => {
   const area = l.surface ?? l.land;
   return area ? Math.round(l.price / area) : undefined;
 };
 
-export const reportDate = (d: string) => {
+export const reportDate = (d: string, lang: Lang = "ro") => {
   const [y, m] = d.split("-").map(Number);
   if (!y || !m) return d;
-  return new Date(y, m - 1, 1).toLocaleDateString("ro-RO", { month: "long", year: "numeric" });
+  return new Date(y, m - 1, 1).toLocaleDateString(numberLocale(lang), { month: "long", year: "numeric" });
 };
 
 /** URL-safe slug from a Romanian title. */

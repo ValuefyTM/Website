@@ -46,6 +46,18 @@ Binding `DB`, database `valuefy-db`, schema in `migrations/` — shared with the
 - Local: `npm run db:migrate:local` once, then `npm run preview`.
 - Browse the data: Cloudflare dashboard → Storage & Databases → D1 → `valuefy-db` → Explore / Console.
 
+## Languages (RO/EN)
+
+Romanian is the default, at unprefixed URLs; English lives under `/en` (`/en/properties`, `/en/movable-asset-valuation`, `/en/tax-valuation`, `/en/client`, …). The admin panel and `/api/*` are Romanian-only and never localized.
+
+- **Routes:** each page's implementation is a *view module* next to the Romanian route (e.g. `src/app/(ro)/home-view.tsx`, `src/app/(ro)/evaluare-bunuri-mobile/view.tsx`) exporting `XView({ lang })` and `xMetadata(lang)`. The Romanian `page.tsx` and the English `src/app/en/.../page.tsx` are thin wrappers that pass `lang` and repeat the route config (`dynamic`, …). Each language has its own root layout (`src/app/(ro)/layout.tsx`, `src/app/en/layout.tsx`) that sets `<html lang>` and wraps the page in `LangProvider`.
+- **Language in components:** a view calls `setLang(lang)` (`src/i18n/server.ts`); nested server components call `getLang()`, client components `useLang()` (`src/i18n/client.tsx`).
+- **Dictionaries:** texts are colocated in each component as `const T = { ro: {...}, en: {...} }` with the same keys, read as `T[lang]`.
+- **Links:** always write the Romanian path and wrap it in `localize(lang, path)` (`src/i18n/lang.ts`), e.g. `localize("en", "/imobiliare/x/raport")` → `/en/properties/x/report`. `switchPath()` gives the same page in the other language; new localized sections go in the `PATHS` table there.
+- **Stored values:** property types, purposes, deadlines etc. are stored in Romanian (database, emails, CRM) and never change; show them to visitors with `label(value, lang)` (`src/i18n/labels.ts`).
+- **Listings:** the English title, description and features of a property are entered in the admin; `inLang(listing, lang)` (`src/lib/listing-format.ts`) uses them and falls back to Romanian when missing.
+- **SEO:** each page sets `alternates.languages` (ro/en); `src/app/sitemap.ts` lists both URLs of every page and listing with hreflang alternates.
+
 ## Deploy — Cloudflare Workers
 
 The app runs on Cloudflare Workers through the [OpenNext adapter](https://opennext.js.org/cloudflare)

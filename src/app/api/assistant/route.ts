@@ -9,7 +9,11 @@ const MODEL = process.env.ASSISTANT_MODEL || "claude-haiku-4-5";
 const MAX_TURNS = 40;
 const MAX_CHARS = 2000;
 
-const FALLBACK = "Momentan nu pot răspunde. Poți continua solicitarea folosind opțiunile de mai jos.";
+const FALLBACK = {
+  ro: "Momentan nu pot răspunde. Poți continua solicitarea folosind opțiunile de mai jos.",
+  en: "I can't reply right now. You can continue your request using the options below.",
+};
+const NOTED = { ro: "Am notat.", en: "Noted." };
 
 const properties: Record<string, { type: "string"; enum?: readonly string[] }> = {};
 for (const k of LEAD_TEXT_FIELDS) properties[k] = LEAD_ENUMS[k] ? { type: "string", enum: LEAD_ENUMS[k] } : { type: "string" };
@@ -27,11 +31,14 @@ type InMsg = { role: "user" | "assistant"; content: string };
 const SALE_NOTE = `
 MOD VÂNZARE: vizitatorul vrea să VÂNDĂ o proprietate imobiliară prin VALUEFY (VALUEFY o evaluează, o prezintă și găsește cumpărătorul). Nu întreba și nu completa scopul evaluării sau termenul raportului. Colectează doar date despre proprietate, documente și contact. Dacă spune un preț dorit, pune-l în asking_price (doar număr, în euro). Nu estima prețul și nu promite un termen de vânzare; nu face afirmații despre comisionul vânzătorului — le discută consultantul.`;
 
-function systemPrompt(step: string, lead: Lead) {
+const EN_NOTE = `
+LIMBA: vizitatorul folosește versiunea în engleză a site-ului și scrie în engleză. Răspunde DOAR în engleză (British English), cald și profesionist, în maxim 2 propoziții scurte. Pentru set_lead_fields folosește în continuare exact valorile enum în română (ex. "Apartament", "Credit bancar", "Persoană fizică"), chiar dacă vizitatorul scrie în engleză.`;
+
+function systemPrompt(step: string, lead: Lead, lang: "ro" | "en" = "ro") {
   return `${isSale(lead) ? SALE_NOTE + "\n" : ""}Ești asistentul de evaluare VALUEFY — firmă de evaluare autorizată ANEVAR — evaluează proprietăți imobiliare (apartamente, case, terenuri, spații comerciale, hale) și bunuri mobile (utilaje, echipamente, autovehicule, mijloace fixe) — cu birouri în Timișoara (sediu central) și Cluj-Napoca și o rețea de evaluatori colaboratori autorizați ANEVAR, deci evaluează oriunde în România. Funcționezi ca un formular conversațional ghidat.
 Pasul curent în interfață: ${step}. Date colectate: ${JSON.stringify(lead)}.
 Dacă utilizatorul oferă informații, apelează set_lead_fields cu valori normalizate (pentru câmpurile enum folosește exact una dintre opțiuni; suprafețele doar ca număr; deadline: "Standard", "Urgent" sau o dată). Pentru utilaje, echipamente, autovehicule sau alte bunuri mobile folosește property_type "Bunuri mobile"; pentru "Bunuri mobile" și "Altă proprietate" pune în property_description o descriere scurtă a ce vrea să evalueze.
-Apoi răspunde în română, cald și profesionist, în maxim 2 propoziții scurte. NU pune următoarea întrebare — interfața o afișează automat. Nu oferi prețuri, valori estimate sau termene exacte: costul și termenul sunt comunicate în ofertă, pentru că depind de tipul proprietății, scop, localizare și complexitate. Nu afirma că ai verificat autenticitatea documentelor. Fără markdown.`;
+Apoi răspunde în română, cald și profesionist, în maxim 2 propoziții scurte. NU pune următoarea întrebare — interfața o afișează automat. Nu oferi prețuri, valori estimate sau termene exacte: costul și termenul sunt comunicate în ofertă, pentru că depind de tipul proprietății, scop, localizare și complexitate. Nu afirma că ai verificat autenticitatea documentelor. Fără markdown.${lang === "en" ? "\n" + EN_NOTE : ""}`;
 }
 
 // Normalise what the model extracted: keep non-empty strings, respect enums.
@@ -57,7 +64,7 @@ function cleanFields(input: unknown, sale = false): Lead {
 }
 
 export async function POST(req: Request) {
-  let body: { messages?: InMsg[]; step?: string; lead?: Lead };
+  let body: { messages?: InMsg[]; step?: string; lead?: Lead; lang?: string };
   try {
     body = await req.json();
   } catch {
@@ -79,7 +86,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "no_user_message" }, { status: 400 });
   }
 
-  const system = systemPrompt(String(body.step || "type").slice(0, 20), body.lead || {});
+  const lang = body.lang === "en" || body.lead?.lang === "en" ? "en" : "ro";
+  const system = systemPrompt(String(body.step || "type").slice(0, 20), body.lead || {}, lang);
   let fields: Lead = {};
   const messages = [...history];
 
@@ -102,19 +110,19 @@ export async function POST(req: Request) {
       for (const t of toolUses) fields = { ...fields, ...cleanFields(t.input, isSale(body.lead || {})) };
 
       if (response.stop_reason !== "tool_use" || !toolUses.length) {
-        return NextResponse.json({ reply: text || "Am notat.", fields });
+        return NextResponse.json({ reply: text || NOTED[lang], fields });
       }
       messages.push({ role: "assistant", content: response.content });
       messages.push({
         role: "user",
         content: toolUses.map((t) => ({ type: "tool_result" as const, tool_use_id: t.id, content: "Salvat." })),
       });
-      if (round === 1) return NextResponse.json({ reply: text || "Am notat.", fields });
+      if (round === 1) return NextResponse.json({ reply: text || NOTED[lang], fields });
     }
   } catch (error) {
     if (error instanceof Anthropic.APIError) console.error(`[assistant] API error ${error.status}:`, error.message);
     else console.error("[assistant]", error);
-    return NextResponse.json({ reply: FALLBACK, fields, ai: false });
+    return NextResponse.json({ reply: FALLBACK[lang], fields, ai: false });
   }
-  return NextResponse.json({ reply: "Am notat.", fields });
+  return NextResponse.json({ reply: NOTED[lang], fields });
 }

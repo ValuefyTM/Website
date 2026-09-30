@@ -1,17 +1,55 @@
 import { ICONS, unsplash } from "@/lib/icons";
 import { ASSET_TYPES, MOBILE, PURPOSES } from "@/lib/lead";
+import { getLang } from "@/i18n/server";
+import { localize } from "@/i18n/lang";
+import { label } from "@/i18n/labels";
 import { AssistantButton } from "./AssistantButton";
 import s from "./Selectors.module.css";
 
-const PURPOSE_DESC = [
-  "Raport pentru garantarea unui credit ipotecar sau de investiții.",
-  "Afli valoarea de piață înainte de negociere.",
-  "Evaluarea clădirilor pentru calculul impozitului local.",
-  "Active evaluate pentru situațiile financiare și contabilitate.",
-  "Valoarea bunurilor pentru moștenire sau partaj.",
-  "Rapoarte pentru instanță, executări și proceduri.",
-  "Asigurare, aport la capital sau alt scop specific.",
-];
+const T = {
+  ro: {
+    typesTitle: "Ce dorești să evaluezi?",
+    typesLead: "Selectează tipul proprietății sau al bunului și te ghidăm mai departe.",
+    typeAria: (k: string) => `Evaluare ${k}`,
+    mobileTitle: "Evaluăm și bunuri mobile",
+    mobileText: "Utilaje, echipamente, autovehicule și mijloace fixe — pentru credit, raportare financiară, vânzare sau alte scopuri.",
+    mobileMore: "Ce evaluăm",
+    mobileCta: "Solicită evaluare →",
+    purposeEyebrow: "Scopul evaluării",
+    purposeTitle: "Pentru ce ai nevoie de evaluare?",
+    purposeLead: "Alege scopul, iar noi pregătim raportul potrivit cerințelor băncii, instanței sau autorităților.",
+    purposeDesc: [
+      "Raport pentru garantarea unui credit ipotecar sau de investiții.",
+      "Afli valoarea de piață înainte de negociere.",
+      "Evaluarea clădirilor pentru calculul impozitului local.",
+      "Active evaluate pentru situațiile financiare și contabilitate.",
+      "Valoarea bunurilor pentru moștenire sau partaj.",
+      "Rapoarte pentru instanță, executări și proceduri.",
+      "Asigurare, aport la capital sau alt scop specific.",
+    ],
+  },
+  en: {
+    typesTitle: "What would you like valued?",
+    typesLead: "Select the type of property or asset and we'll guide you from there.",
+    typeAria: (k: string) => `${k} valuation`,
+    mobileTitle: "We also value movable assets",
+    mobileText: "Machinery, equipment, vehicles and fixed assets — for loans, financial reporting, sale or other purposes.",
+    mobileMore: "What we value",
+    mobileCta: "Request a valuation →",
+    purposeEyebrow: "Purpose of the valuation",
+    purposeTitle: "What do you need the valuation for?",
+    purposeLead: "Choose the purpose and we'll prepare a report that meets the requirements of the bank, the court or the authorities.",
+    purposeDesc: [
+      "A report to secure a mortgage or investment loan.",
+      "Find out the market value before negotiating.",
+      "Building valuation for calculating local property tax.",
+      "Assets valued for financial statements and accounting.",
+      "The value of assets for inheritance or division.",
+      "Reports for court, enforcement and legal proceedings.",
+      "Insurance, capital contribution or another specific purpose.",
+    ],
+  },
+};
 
 // Property types + movable assets (movable assets use a photo hosted on the site).
 const CARDS = ASSET_TYPES.map((t) => ({
@@ -21,11 +59,13 @@ const CARDS = ASSET_TYPES.map((t) => ({
 }));
 
 export function PropertyTypes() {
+  const lang = getLang();
+  const t = T[lang];
   return (
     <section aria-labelledby="sel-title" className={`container ${s.types}`}>
       <div className={s.typesHead}>
-        <h2 id="sel-title" className="h2">Ce dorești să evaluezi?</h2>
-        <p>Selectează tipul proprietății sau al bunului și te ghidăm mai departe.</p>
+        <h2 id="sel-title" className="h2">{t.typesTitle}</h2>
+        <p>{t.typesLead}</p>
       </div>
       <ul data-rv className={s.typeGrid}>
         {CARDS.map((c) => (
@@ -40,11 +80,11 @@ export function PropertyTypes() {
               </div>
             </div>
             <div className={s.typeFoot}>
-              <span>{c.k.toUpperCase()}</span>
+              <span>{label(c.k, lang).toUpperCase()}</span>
               <span className={s.typeArrow} aria-hidden="true">→</span>
             </div>
             {/* Transparent button covering the whole card. */}
-            <AssistantButton type_={c.k} className={s.typeHit} aria-label={`Evaluare ${c.k}`} />
+            <AssistantButton type_={c.k} className={s.typeHit} aria-label={t.typeAria(label(c.k, lang))} />
           </li>
         ))}
       </ul>
@@ -54,12 +94,12 @@ export function PropertyTypes() {
           <img src={ICONS.mobileGold} alt="" width={26} height={26} />
         </span>
         <span className={s.mobileText}>
-          <b>Evaluăm și bunuri mobile</b>
-          <span>Utilaje, echipamente, autovehicule și mijloace fixe — pentru credit, raportare financiară, vânzare sau alte scopuri.</span>
+          <b>{t.mobileTitle}</b>
+          <span>{t.mobileText}</span>
         </span>
         <span className={s.mobileActions}>
-          <a href="/evaluare-bunuri-mobile" className={s.mobileMore}>Ce evaluăm</a>
-          <AssistantButton type_={MOBILE} className={s.mobileCta}>Solicită evaluare →</AssistantButton>
+          <a href={localize(lang, "/evaluare-bunuri-mobile")} className={s.mobileMore}>{t.mobileMore}</a>
+          <AssistantButton type_={MOBILE} className={s.mobileCta}>{t.mobileCta}</AssistantButton>
         </span>
       </div>
     </section>
@@ -67,13 +107,15 @@ export function PropertyTypes() {
 }
 
 export function Purposes() {
+  const lang = getLang();
+  const t = T[lang];
   return (
     <section aria-labelledby="scop-title" className={`container ${s.purposes}`}>
       <div className={s.purposeGrid}>
         <div className={s.purposeIntro}>
-          <div className="eyebrow">Scopul evaluării</div>
-          <h2 id="scop-title" className="h2">Pentru ce ai nevoie de evaluare?</h2>
-          <p>Alege scopul, iar noi pregătim raportul potrivit cerințelor băncii, instanței sau autorităților.</p>
+          <div className="eyebrow">{t.purposeEyebrow}</div>
+          <h2 id="scop-title" className="h2">{t.purposeTitle}</h2>
+          <p>{t.purposeLead}</p>
         </div>
         <ul data-rv className={s.purposeList}>
           {PURPOSES.map((p, i) => (
@@ -81,8 +123,8 @@ export function Purposes() {
               <AssistantButton purpose={p} className={s.purposeBtn}>
                 <span className={s.purposeN}>{String(i + 1).padStart(2, "0")}</span>
                 <span className={s.purposeText}>
-                  <span className={s.purposeLabel}>{p}</span>
-                  <span className={s.purposeDesc}>{PURPOSE_DESC[i]}</span>
+                  <span className={s.purposeLabel}>{label(p, lang)}</span>
+                  <span className={s.purposeDesc}>{t.purposeDesc[i]}</span>
                 </span>
                 <span aria-hidden="true" className={s.purposeArrow}>→</span>
               </AssistantButton>

@@ -8,6 +8,7 @@ import a from "../admin.module.css";
 type Form = {
   title: string; type: string; city: string; zone: string; price: string; surface: string; land: string; rooms: string; baths: string;
   floor: string; year: string; status: string; features: string; description: string; hasReport: boolean; report_date: string; published: boolean;
+  title_en: string; description_en: string; features_en: string;
 };
 
 const s = (v: unknown) => (v === undefined || v === null ? "" : String(v));
@@ -18,7 +19,16 @@ function toForm(l?: Listing): Form {
     rooms: s(l?.rooms), baths: s(l?.baths), floor: s(l?.floor), year: s(l?.year), status: s(l?.status),
     features: (l?.features ?? []).join("\n"), description: (l?.description ?? []).join("\n\n"),
     hasReport: !!l?.report, report_date: l?.report?.date ?? "", published: l?.published ?? false,
+    title_en: s(l?.en?.title), description_en: (l?.en?.description ?? []).join("\n\n"), features_en: (l?.en?.features ?? []).join("\n"),
   };
+}
+
+const lines = (v: string) => v.split(/\n|,/).map((x) => x.trim()).filter(Boolean);
+const paras = (v: string) => v.split(/\n\s*\n/).map((x) => x.trim()).filter(Boolean);
+
+/** The English fields of the form as sent to the API. */
+function englishPayload(f: Form) {
+  return { title_en: f.title_en, description_en: f.description_en, features_en: lines(f.features_en) };
 }
 
 /** Resize in the browser: max 1600 px, JPEG ~0.82 — keeps photos small for the database. */
@@ -52,8 +62,9 @@ export function ListingEditor({ listing }: { listing?: Listing }) {
       slug,
       title: f.title, type: f.type, city: f.city, zone: f.zone, price: num(f.price) ?? 0, surface: num(f.surface), land: num(f.land),
       rooms: num(f.rooms), baths: num(f.baths), floor: f.floor || undefined, year: num(f.year), status: f.status || undefined,
-      features: f.features.split(/\n|,/).map((x) => x.trim()).filter(Boolean),
-      description: f.description.split(/\n\s*\n/).map((x) => x.trim()).filter(Boolean),
+      features: lines(f.features),
+      description: paras(f.description),
+      en: { title: f.title_en.trim() || undefined, description: paras(f.description_en), features: lines(f.features_en) },
       report: f.hasReport && f.report_date ? { date: f.report_date } : undefined, published: f.published,
       photoIds: photos, photos: photos.map(photoUrl),
     };
@@ -75,7 +86,8 @@ export function ListingEditor({ listing }: { listing?: Listing }) {
     setMsg(null);
     const body = {
       ...f,
-      features: f.features.split(/\n|,/).map((x) => x.trim()).filter(Boolean),
+      features: lines(f.features),
+      ...englishPayload(f),
       report_date: f.hasReport ? f.report_date : "",
     };
     const r = await fetch(listing ? `/api/admin/listings/${listing.id}` : "/api/admin/listings", {
@@ -83,14 +95,47 @@ export function ListingEditor({ listing }: { listing?: Listing }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
-    const d = (await r.json().catch(() => ({}))) as { error?: string; id?: string; slug?: string };
+    const d = (await r.json().catch(() => ({}))) as {
+      error?: string; id?: string; slug?: string; en?: { title: string; description: string; features: string[] };
+    };
     setBusy(false);
     if (!r.ok) return setMsg({ ok: false, text: d.error || "Nu am putut salva." });
     if (!listing && d.id) location.href = `/admin/proprietati/${d.id}?nou=1`;
     else {
       setMsg({ ok: true, text: "Salvat." });
       if (d.slug) setSlug(d.slug);
+      // The server may have filled in the English texts by translating automatically.
+      if (d.en && !f.title_en.trim() && !f.description_en.trim() && (d.en.title || d.en.description)) {
+        const en = d.en;
+        setF((p) => ({ ...p, title_en: en.title, description_en: en.description, features_en: en.features.join("\n") }));
+        setMsg({ ok: true, text: "Salvat. Varianta în engleză a fost tradusă automat." });
+      }
       syncShare();
+    }
+  };
+
+  const [translating, setTranslating] = useState(false);
+  const [enMsg, setEnMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const translate = async () => {
+    if (!f.title.trim() && !f.description.trim()) return setEnMsg({ ok: false, text: "Completează întâi titlul și descrierea în română." });
+    const hasEnglish = f.title_en.trim() || f.description_en.trim() || f.features_en.trim();
+    if (hasEnglish && !confirm("Înlocuiești textele în engleză cu traducerea automată?")) return;
+    setTranslating(true);
+    setEnMsg(null);
+    try {
+      const r = await fetch("/api/admin/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: f.title, description: paras(f.description), features: lines(f.features) }),
+      });
+      const d = (await r.json().catch(() => ({}))) as { error?: string; title?: string; description?: string[]; features?: string[] };
+      if (!r.ok || !d.title) return setEnMsg({ ok: false, text: d.error || "Traducerea automată nu a reușit. Încearcă din nou." });
+      setF((p) => ({ ...p, title_en: d.title ?? "", description_en: (d.description ?? []).join("\n\n"), features_en: (d.features ?? []).join("\n") }));
+      setEnMsg({ ok: true, text: "Tradus. Verifică textul, apoi salvează." });
+    } catch {
+      setEnMsg({ ok: false, text: "Traducerea automată nu a reușit. Verifică conexiunea și încearcă din nou." });
+    } finally {
+      setTranslating(false);
     }
   };
 
@@ -183,6 +228,24 @@ export function ListingEditor({ listing }: { listing?: Listing }) {
         <label className={a.full}>Dotări<span className={a.hint}>Câte una pe rând (ex. Centrală proprie, Loc de parcare).</span>
           <textarea value={f.features} onChange={set("features")} rows={5} />
         </label>
+
+        <fieldset className={a.enBox}>
+          <legend>Varianta în engleză</legend>
+          <span className={a.hint}>Apare pe site-ul în engleză. Dacă lași câmpurile goale, traducem automat la salvare.</span>
+          <div>
+            <button type="button" className={a.ghostBtn} onClick={translate} disabled={translating}>
+              {translating ? "Se traduce…" : "Tradu automat din română"}
+            </button>
+          </div>
+          {enMsg && <div role={enMsg.ok ? "status" : "alert"} className={enMsg.ok ? a.ok : a.err}>{enMsg.text}</div>}
+          <label className={a.full}>Titlu (EN)<input value={f.title_en} onChange={set("title_en")} lang="en" placeholder="ex. Renovated 3-room flat, Complex Studențesc area" /></label>
+          <label className={a.full}>Descriere (EN)<span className={a.hint}>Lasă un rând liber între paragrafe.</span>
+            <textarea value={f.description_en} onChange={set("description_en")} rows={7} lang="en" />
+          </label>
+          <label className={a.full}>Dotări (EN)<span className={a.hint}>Câte una pe rând (ex. Own central heating, Parking space).</span>
+            <textarea value={f.features_en} onChange={set("features_en")} rows={5} lang="en" />
+          </label>
+        </fieldset>
 
         <div className={a.reportBox}>
           <label className={a.check}><input type="checkbox" checked={f.hasReport} onChange={set("hasReport")} />Proprietatea are raport de evaluare</label>

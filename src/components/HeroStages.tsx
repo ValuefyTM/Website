@@ -1,15 +1,33 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLang } from "@/i18n/client";
 import s from "./Hero.module.css";
 
-const STAGES = [
-  ["Documente primite", "Extras CF, act de proprietate, releveu"],
-  ["Inspecție la fața locului", "Evaluatorul vizitează proprietatea"],
-  ["Analiză și evaluare", "Piața din zonă și metodele de evaluare"],
-];
+const T = {
+  ro: {
+    stages: [
+      ["Documente primite", "Extras CF, act de proprietate, releveu"],
+      ["Inspecție la fața locului", "Evaluatorul vizitează proprietatea"],
+      ["Analiză și evaluare", "Piața din zonă și metodele de evaluare"],
+    ],
+    done: "Finalizat", active: "În curs…", todo: "În așteptare",
+    signed: "Raport semnat de evaluator", preparing: "Raport în pregătire", available: "Disponibil în portalul client.",
+  },
+  en: {
+    stages: [
+      ["Documents received", "Land registry extract, title deed, floor plan"],
+      ["On-site inspection", "The valuer visits the property"],
+      ["Analysis and valuation", "The local market and valuation methods"],
+    ],
+    done: "Completed", active: "In progress…", todo: "Pending",
+    signed: "Report signed by the valuer", preparing: "Report in preparation", available: "Available in the client portal.",
+  },
+};
 
 export function HeroStages() {
+  const lang = useLang();
+  const t = T[lang];
   const [hs, setHs] = useState(0);
 
   useEffect(() => {
@@ -29,7 +47,7 @@ export function HeroStages() {
   return (
     <>
       <div className={s.stages}>
-        {STAGES.map(([label, sub], i) => {
+        {t.stages.map(([label, sub], i) => {
           const d = i < hs, a = i === hs;
           return (
             <div key={label} className={s.stage}>
@@ -42,7 +60,7 @@ export function HeroStages() {
               <div className={s.stageBody}>
                 <div className={s.stageHead}>
                   <span style={{ color: d || a ? "#17173A" : "#9A9FA8" }}>{label}</span>
-                  <span className={s.stageState}>{d ? "Finalizat" : a ? "În curs…" : "În așteptare"}</span>
+                  <span className={s.stageState}>{d ? t.done : a ? t.active : t.todo}</span>
                 </div>
                 <div className={s.stageSub}>{sub}</div>
                 <div className={s.stageTrack}>
@@ -56,8 +74,8 @@ export function HeroStages() {
       <div className={s.doneBox} style={{ background: done ? "var(--acc-soft)" : "#F7F8FA" }}>
         <div className={s.doneIcon} style={{ background: done ? "var(--acc)" : "#D5D8DE" }}>✓</div>
         <div className={s.doneText}>
-          <div style={{ color: done ? "#17173A" : "#9A9FA8" }}>{done ? "Raport semnat de evaluator" : "Raport în pregătire"}</div>
-          <span>Disponibil în portalul client.</span>
+          <div style={{ color: done ? "#17173A" : "#9A9FA8" }}>{done ? t.signed : t.preparing}</div>
+          <span>{t.available}</span>
         </div>
       </div>
     </>

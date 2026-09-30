@@ -1,5 +1,12 @@
 // Browser-only: draws the listing share card (link preview / social post) on a canvas.
-import { COMMISSION_NOTE, formatEur, specLine, type Listing } from "./listing-format";
+import { commissionNote, formatEur, specLine, type Listing } from "./listing-format";
+import { label } from "@/i18n/labels";
+import type { Lang } from "@/i18n/lang";
+
+const TEXT = {
+  ro: { forSale: (type: string) => `${type} de vânzare`, verified: "Proprietăți verificate", report: "Raport de evaluare ANEVAR" },
+  en: { forSale: (type: string) => `${label(type, "en")} for sale`, verified: "Verified properties", report: "ANEVAR valuation report" },
+};
 
 export const CARD_FORMATS = {
   link: { w: 1200, h: 630, label: "Previzualizare link (1200×630)" },
@@ -62,8 +69,9 @@ function pill(ctx: CanvasRenderingContext2D, text: string, x: number, y: number,
   return w;
 }
 
-/** Renders the card and returns a canvas. */
-export async function drawCard(l: Listing, format: CardFormat): Promise<HTMLCanvasElement> {
+/** Renders the card and returns a canvas. For English, pass a listing already run through inLang(). */
+export async function drawCard(l: Listing, format: CardFormat, lang: Lang = "ro"): Promise<HTMLCanvasElement> {
+  const t = TEXT[lang];
   const { w, h } = CARD_FORMATS[format];
   const canvas = document.createElement("canvas");
   canvas.width = w;
@@ -93,7 +101,7 @@ export async function drawCard(l: Listing, format: CardFormat): Promise<HTMLCanv
   const pad = wide ? 48 : 60;
   ctx.fillStyle = "rgba(255,255,255,0.94)";
   ctx.font = `bold ${wide ? 20 : 26}px ${FONT}`;
-  const typeText = `${l.type} de vânzare`;
+  const typeText = t.forSale(l.type);
   const tw = ctx.measureText(typeText).width + (wide ? 32 : 40);
   ctx.beginPath();
   ctx.roundRect(pad, pad, tw, wide ? 44 : 56, wide ? 22 : 28);
@@ -114,12 +122,12 @@ export async function drawCard(l: Listing, format: CardFormat): Promise<HTMLCanv
   const brandW = ctx.measureText("VALUEFY").width;
   ctx.fillStyle = "#a9abc4";
   ctx.font = `${wide ? 18 : 24}px ${FONT}`;
-  ctx.fillText("·  Proprietăți verificate", tx + brandW + 14, y);
+  ctx.fillText(`·  ${t.verified}`, tx + brandW + 14, y);
 
   y += wide ? 62 : 74;
   ctx.fillStyle = "#fff";
   ctx.font = `bold ${wide ? 50 : 64}px ${FONT}`;
-  ctx.fillText(formatEur(l.price), tx, y);
+  ctx.fillText(formatEur(l.price, lang), tx, y);
 
   y += wide ? 48 : 60;
   ctx.font = `bold ${wide ? 26 : 34}px ${FONT}`;
@@ -129,25 +137,25 @@ export async function drawCard(l: Listing, format: CardFormat): Promise<HTMLCanv
   ctx.font = `${wide ? 20 : 27}px ${FONT}`;
   y += wide ? 8 : 10;
   y = wrap(ctx, [l.zone, l.city].filter(Boolean).join(", "), tx, y, maxW, wide ? 28 : 36, 1);
-  const spec = specLine(l);
+  const spec = specLine(l, lang);
   if (spec) y = wrap(ctx, spec, tx, y + 2, maxW, wide ? 28 : 36, 1);
 
   // Badges pinned to the bottom of the panel.
   const size = wide ? 18 : 24;
   const by = h - (wide ? 48 : 60) - size * 2.1;
-  const first = pill(ctx, `✓ ${COMMISSION_NOTE}`, tx, by, size, true);
+  const first = pill(ctx, `✓ ${commissionNote(lang)}`, tx, by, size, true);
   if (l.report) {
-    const label = "Raport de evaluare ANEVAR";
+    const badge = t.report;
     ctx.font = `bold ${size}px ${FONT}`;
-    const fits = first + 14 + ctx.measureText(label).width + size * 1.6 <= maxW;
-    if (fits) pill(ctx, label, tx + first + 14, by, size, false);
-    else pill(ctx, label, tx, by - size * 2.1 - 12, size, false);
+    const fits = first + 14 + ctx.measureText(badge).width + size * 1.6 <= maxW;
+    if (fits) pill(ctx, badge, tx + first + 14, by, size, false);
+    else pill(ctx, badge, tx, by - size * 2.1 - 12, size, false);
   }
   return canvas;
 }
 
-export async function cardBlob(l: Listing, format: CardFormat, quality = 0.86): Promise<Blob> {
-  const canvas = await drawCard(l, format);
+export async function cardBlob(l: Listing, format: CardFormat, quality = 0.86, lang: Lang = "ro"): Promise<Blob> {
+  const canvas = await drawCard(l, format, lang);
   return new Promise((res, rej) => canvas.toBlob((b) => (b ? res(b) : rej(new Error("card"))), "image/jpeg", quality));
 }
 

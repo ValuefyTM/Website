@@ -1,20 +1,49 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { LISTING_TYPES, formatEur, pricePerSqm, type Listing, COMMISSION_NOTE } from "@/lib/listing-format";
+import { LISTING_TYPES, formatEur, pricePerSqm, type Listing, commissionNote } from "@/lib/listing-format";
+import { useLang } from "@/i18n/client";
+import { localize, numberLocale } from "@/i18n/lang";
+import { label } from "@/i18n/labels";
 import s from "./imobiliare.module.css";
 
 const TYPES = LISTING_TYPES;
 const MAX_PRICES = [100000, 150000, 250000, 500000];
-const SORTS = { recent: "Cele mai noi", asc: "Preț crescător", desc: "Preț descrescător" } as const;
+type Sort = "recent" | "asc" | "desc";
 
+const T = {
+  ro: {
+    filters: "Filtrează proprietățile", type: "Tip proprietate", all: "Toate", city: "Localitate", maxPrice: "Preț maxim", any: "Oricât",
+    upTo: (p: string) => `până la ${p}`, rooms: "Camere", anyRooms: "Oricâte", roomsPlus: (n: number) => `${n}+ camere`,
+    withReport: "Doar cu raport de evaluare", withReportHint: "Proprietăți cu raport întocmit de evaluator autorizat ANEVAR",
+    count: (n: number) => (n === 1 ? "proprietate" : "proprietăți"), reset: "Șterge filtrele", sort: "Sortează",
+    sorts: { recent: "Cele mai noi", asc: "Preț crescător", desc: "Preț descrescător" } as Record<Sort, string>,
+    noPhoto: "Fără fotografii", photos: (n: number) => `${n} foto`, report: "Raport de evaluare",
+    usable: (n: number) => `${n} m² utili`, roomsN: (n: number) => `${n} camere`, land: (n: string) => `${n} m² teren`, year: (y: number) => `an ${y}`,
+    empty: "Nicio proprietate nu corespunde filtrelor.",
+  },
+  en: {
+    filters: "Filter properties", type: "Property type", all: "All", city: "Location", maxPrice: "Max. price", any: "Any",
+    upTo: (p: string) => `up to ${p}`, rooms: "Rooms", anyRooms: "Any", roomsPlus: (n: number) => `${n}+ rooms`,
+    withReport: "Only with a valuation report", withReportHint: "Properties with a report prepared by an ANEVAR-authorised valuer",
+    count: (n: number) => (n === 1 ? "property" : "properties"), reset: "Clear filters", sort: "Sort by",
+    sorts: { recent: "Newest", asc: "Price: low to high", desc: "Price: high to low" } as Record<Sort, string>,
+    noPhoto: "No photos", photos: (n: number) => `${n} photos`, report: "Valuation report",
+    usable: (n: number) => `${n} m² usable`, roomsN: (n: number) => `${n} ${n === 1 ? "room" : "rooms"}`, land: (n: string) => `${n} m² land`, year: (y: number) => `built ${y}`,
+    empty: "No properties match your filters.",
+  },
+};
+
+/** `listings` should already be in the visitor's language (inLang); filters compare the stored Romanian type values. */
 export function ListingsBrowser({ listings, cities }: { listings: Listing[]; cities: string[] }) {
+  const lang = useLang();
+  const t = T[lang];
   const [type, setType] = useState("");
   const [city, setCity] = useState("");
   const [maxPrice, setMaxPrice] = useState(0);
   const [minRooms, setMinRooms] = useState(0);
   const [withReport, setWithReport] = useState(false);
-  const [sort, setSort] = useState<keyof typeof SORTS>("recent");
+  const [sort, setSort] = useState<Sort>("recent");
 
   const shown = useMemo(() => {
     const r = listings.filter(
@@ -30,42 +59,42 @@ export function ListingsBrowser({ listings, cities }: { listings: Listing[]; cit
 
   return (
     <>
-      <form className={s.filters} onSubmit={(e) => e.preventDefault()} aria-label="Filtrează proprietățile">
-        <label>Tip proprietate
+      <form className={s.filters} onSubmit={(e) => e.preventDefault()} aria-label={t.filters}>
+        <label>{t.type}
           <select value={type} onChange={(e) => setType(e.target.value)}>
-            <option value="">Toate</option>
-            {TYPES.map((t) => <option key={t}>{t}</option>)}
+            <option value="">{t.all}</option>
+            {TYPES.map((v) => <option key={v} value={v}>{label(v, lang)}</option>)}
           </select>
         </label>
-        <label>Localitate
+        <label>{t.city}
           <select value={city} onChange={(e) => setCity(e.target.value)}>
-            <option value="">Toate</option>
+            <option value="">{t.all}</option>
             {cities.map((c) => <option key={c}>{c}</option>)}
           </select>
         </label>
-        <label>Preț maxim
+        <label>{t.maxPrice}
           <select value={maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value))}>
-            <option value={0}>Oricât</option>
-            {MAX_PRICES.map((p) => <option key={p} value={p}>până la {formatEur(p)}</option>)}
+            <option value={0}>{t.any}</option>
+            {MAX_PRICES.map((p) => <option key={p} value={p}>{t.upTo(formatEur(p, lang))}</option>)}
           </select>
         </label>
-        <label>Camere
+        <label>{t.rooms}
           <select value={minRooms} onChange={(e) => setMinRooms(Number(e.target.value))}>
-            <option value={0}>Oricâte</option>
-            {[1, 2, 3, 4].map((n) => <option key={n} value={n}>{n}+ camere</option>)}
+            <option value={0}>{t.anyRooms}</option>
+            {[1, 2, 3, 4].map((n) => <option key={n} value={n}>{t.roomsPlus(n)}</option>)}
           </select>
         </label>
         <label className={s.reportFilter}>
           <input type="checkbox" checked={withReport} onChange={(e) => setWithReport(e.target.checked)} />
-          <span><b>Doar cu raport de evaluare</b><small>Proprietăți cu raport întocmit de evaluator autorizat ANEVAR</small></span>
+          <span><b>{t.withReport}</b><small>{t.withReportHint}</small></span>
         </label>
       </form>
 
       <div className={s.listHead}>
-        <p aria-live="polite"><b>{shown.length}</b> {shown.length === 1 ? "proprietate" : "proprietăți"}{filtered ? <> · <button type="button" onClick={reset} className={s.resetBtn}>Șterge filtrele</button></> : null}</p>
-        <label className={s.sort}>Sortează
-          <select value={sort} onChange={(e) => setSort(e.target.value as keyof typeof SORTS)}>
-            {Object.entries(SORTS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+        <p aria-live="polite"><b>{shown.length}</b> {t.count(shown.length)}{filtered ? <> · <button type="button" onClick={reset} className={s.resetBtn}>{t.reset}</button></> : null}</p>
+        <label className={s.sort}>{t.sort}
+          <select value={sort} onChange={(e) => setSort(e.target.value as Sort)}>
+            {Object.entries(t.sorts).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
         </label>
       </div>
@@ -74,28 +103,28 @@ export function ListingsBrowser({ listings, cities }: { listings: Listing[]; cit
         <ul className={s.grid}>
           {shown.map((l) => (
             <li key={l.slug} className={s.card}>
-              <a href={`/imobiliare/${l.slug}`} className={s.cardLink}>
+              <a href={localize(lang, `/imobiliare/${l.slug}`)} className={s.cardLink}>
                 <div className={s.cardImg}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  {l.photos[0] ? <img src={l.photos[0]} alt={l.title} loading="lazy" decoding="async" /> : <span className={s.noPhoto}>Fără fotografii</span>}
-                  <span className={s.typeTag}>{l.type}</span>
-                  {l.status && <span className={`${s.statusTag} ${l.status === "Rezervat" ? s.reserved : ""}`}>{l.status}</span>}
-                  {l.photos.length > 1 && <span className={s.photoCount}>{l.photos.length} foto</span>}
-                  {l.report && <span className={s.reportTag}><i aria-hidden="true">✓</i>Raport de evaluare</span>}
+                  {l.photos[0] ? <img src={l.photos[0]} alt={l.title} loading="lazy" decoding="async" /> : <span className={s.noPhoto}>{t.noPhoto}</span>}
+                  <span className={s.typeTag}>{label(l.type, lang)}</span>
+                  {l.status && <span className={`${s.statusTag} ${l.status === "Rezervat" ? s.reserved : ""}`}>{label(l.status, lang)}</span>}
+                  {l.photos.length > 1 && <span className={s.photoCount}>{t.photos(l.photos.length)}</span>}
+                  {l.report && <span className={s.reportTag}><i aria-hidden="true">✓</i>{t.report}</span>}
                 </div>
                 <div className={s.cardBody}>
                   <div className={s.priceRow}>
-                    <b>{formatEur(l.price)}</b>
-                    {pricePerSqm(l) && <span>{formatEur(pricePerSqm(l)!)}/m²</span>}
+                    <b>{formatEur(l.price, lang)}</b>
+                    {pricePerSqm(l) && <span>{formatEur(pricePerSqm(l)!, lang)}/m²</span>}
                   </div>
-                  <span className={s.zeroFee}>{COMMISSION_NOTE}</span>
+                  <span className={s.zeroFee}>{commissionNote(lang)}</span>
                   <h3>{l.title}</h3>
                   <p className={s.loc}>{l.zone}, {l.city}</p>
                   <ul className={s.facts}>
-                    {l.surface && <li>{l.surface} m² utili</li>}
-                    {l.rooms && <li>{l.rooms} camere</li>}
-                    {l.land && <li>{l.land.toLocaleString("ro-RO")} m² teren</li>}
-                    {l.year && <li>an {l.year}</li>}
+                    {l.surface && <li>{t.usable(l.surface)}</li>}
+                    {l.rooms && <li>{t.roomsN(l.rooms)}</li>}
+                    {l.land && <li>{t.land(l.land.toLocaleString(numberLocale(lang)))}</li>}
+                    {l.year && <li>{t.year(l.year)}</li>}
                   </ul>
                 </div>
               </a>
@@ -104,8 +133,8 @@ export function ListingsBrowser({ listings, cities }: { listings: Listing[]; cit
         </ul>
       ) : (
         <div className={s.empty}>
-          <b>Nicio proprietate nu corespunde filtrelor.</b>
-          <button type="button" onClick={reset} className={s.resetBtn}>Șterge filtrele</button>
+          <b>{t.empty}</b>
+          <button type="button" onClick={reset} className={s.resetBtn}>{t.reset}</button>
         </div>
       )}
     </>

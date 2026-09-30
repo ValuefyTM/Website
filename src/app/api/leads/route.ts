@@ -68,6 +68,7 @@ function emailHtml(r: LeadRecord) {
     ["Email", r.email],
     ["Alte detalii", r.notes],
     ["Fișiere", r.documents.join(", ") || "—"],
+    ["Limba", r.lang === "en" ? "EN" : "RO"],
   ];
   return `<div style="font-family:Verdana,sans-serif;color:#17173A">
 <h2 style="margin:0 0 4px">${sale ? "Proprietate de vânzare" : "Solicitare nouă"} ${esc(r.lead_id)}</h2>
@@ -184,7 +185,7 @@ async function sendClientConfirmation(record: LeadRecord, baseUrl: string): Prom
   const replyTo = (process.env.LEAD_EMAIL_TO || process.env.NEXT_PUBLIC_EMAIL || "").split(",")[0].trim();
   if (!apiKey || !from || !record.email || process.env.CLIENT_CONFIRMATION === "off") return false;
 
-  const { subject, html, text } = confirmationEmail(record, baseUrl);
+  const { subject, html, text } = confirmationEmail(record, baseUrl, record.lang === "en" ? "en" : "ro");
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",

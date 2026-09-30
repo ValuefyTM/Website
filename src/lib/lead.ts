@@ -1,5 +1,7 @@
 // Lead model shared by the assistant UI and the API routes.
 import { ICONS } from "./icons";
+import type { Lang } from "@/i18n/lang";
+import { label } from "@/i18n/labels";
 
 export const TYPES = [
   { k: "Apartament", g: "apartamentului", icon: ICONS.apt, img: "photo-1545324418-cc1a3fa10c00" },
@@ -59,6 +61,8 @@ export type Lead = {
   phone?: string;
   email?: string;
   notes?: string;
+  /** Language the visitor used on the site (display only — stored values stay Romanian). */
+  lang?: Lang;
 };
 
 // Fields the AI may fill from free text.
@@ -74,18 +78,29 @@ export type Step = "type" | "describe" | "city" | "details" | "purpose" | "deadl
 
 export const GROUPS: Record<string, number> = { type: 1, describe: 1, city: 2, details: 3, purpose: 4, deadline: 4, date: 4, documents: 5, customer: 6, contact: 6, summary: 6, done: 6 };
 export const GROUP_NAMES = ["Proprietate", "Localizare", "Detalii", "Scop și termen", "Documente", "Contact"];
+const GROUP_NAMES_EN = ["Property", "Location", "Details", "Purpose & deadline", "Documents", "Contact"];
 // Selling skips "Scop și termen".
 const SALE_GROUPS: Record<string, number> = { type: 1, describe: 1, city: 2, details: 3, documents: 4, customer: 5, contact: 5, summary: 5, done: 5 };
 const SALE_GROUP_NAMES = ["Proprietate", "Localizare", "Detalii", "Documente", "Contact"];
+const SALE_GROUP_NAMES_EN = ["Property", "Location", "Details", "Documents", "Contact"];
 export const groupOf = (step: Step, l: Lead) => (isSale(l) ? SALE_GROUPS : GROUPS)[step];
-export const groupNames = (l: Lead) => (isSale(l) ? SALE_GROUP_NAMES : GROUP_NAMES);
+export const groupNames = (l: Lead, lang: Lang = "ro") =>
+  lang === "en" ? (isSale(l) ? SALE_GROUP_NAMES_EN : GROUP_NAMES_EN) : isSale(l) ? SALE_GROUP_NAMES : GROUP_NAMES;
 
 export const DOC_HELP =
   "De regulă sunt necesare:\n• extras de carte funciară (recent)\n• actul de proprietate\n• documentația cadastrală / releveul\n• autorizația de construire, dacă e cazul\n\nLista exactă depinde de proprietate și de scop — specialistul ți-o confirmă în ofertă. Le poți trimite și ulterior.";
+const DOC_HELP_EN =
+  "Usually you will need:\n• a recent land registry extract\n• the title deed\n• the cadastral documentation / floor plan survey\n• the building permit, if applicable\n\nThe exact list depends on the property and the purpose — the specialist will confirm it in the offer. You can also send them later.";
+export const docHelp = (lang: Lang = "ro") => (lang === "en" ? DOC_HELP_EN : DOC_HELP);
 
 export const SALE_GREETING = "Bună! 👋\n\nVrei să vinzi o proprietate? Te ajutăm cu evaluarea, prezentarea și găsirea cumpărătorului — cu documentele verificate și un preț argumentat.\n\nCe proprietate vrei să vinzi?";
 
 export const GREETING = "Bună! 👋\n\nTe pot ajuta să afli ce presupune evaluarea proprietății sau a bunurilor tale și să soliciți o ofertă.\n\nCe dorești să evaluezi?";
+
+const SALE_GREETING_EN = "Hello! 👋\n\nThinking of selling a property? We help with the valuation, the presentation and finding the buyer — with verified documents and a well-supported price.\n\nWhich property would you like to sell?";
+const GREETING_EN = "Hello! 👋\n\nI can help you find out what a valuation of your property or assets involves and request an offer.\n\nWhat would you like to have valued?";
+export const greeting = (sale = false, lang: Lang = "ro") =>
+  lang === "en" ? (sale ? SALE_GREETING_EN : GREETING_EN) : sale ? SALE_GREETING : GREETING;
 
 export const typeObj = (k?: string) => ASSET_TYPES.find((t) => t.k === k) || ASSET_TYPES[5];
 
@@ -102,9 +117,10 @@ export function nextStep(l: Lead): Step {
   return "summary";
 }
 
-export function question(step: Step, l: Lead): string {
+export function question(step: Step, l: Lead, lang: Lang = "ro"): string {
   const t = typeObj(l.property_type);
   const mobile = l.property_type === MOBILE;
+  if (lang === "en") return questionEn(step, l);
   if (isSale(l)) {
     const sq: Partial<Record<Step, string>> = {
       type: "Ce proprietate vrei să vinzi?",
@@ -134,6 +150,43 @@ export function question(step: Step, l: Lead): string {
     customer: "Solicitarea este pentru o persoană fizică sau pentru o companie?",
     contact: "Aproape gata. Ca un specialist VALUEFY să îți trimită oferta cu costul, termenul și lista de documente, am nevoie de datele tale de contact. Le folosim doar pentru această solicitare.",
     summary: "Mulțumesc! Verifică te rog datele de mai jos înainte de trimitere.",
+  };
+  return q[step] || "";
+}
+
+function questionEn(step: Step, l: Lead): string {
+  const mobile = l.property_type === MOBILE;
+  const other = l.property_type === "Altă proprietate";
+  const what = other ? "the property" : label(typeObj(l.property_type).k, "en").toLowerCase();
+  if (isSale(l)) {
+    const sq: Partial<Record<Step, string>> = {
+      type: "Which property would you like to sell?",
+      describe: "Which property would you like to sell? Describe it briefly — for example an office building, a guesthouse or land with buildings.",
+      city: "Great. Where is the property you would like to sell located?",
+      details: `A few details about the ${other ? "property" : what} help us prepare the price estimate and the sales plan.`,
+      documents: "Do you have the property documents to hand (land registry extract, title deed, cadastral documentation)?",
+      customer: "Is the property owned by an individual or by a company?",
+      contact: "Almost done. So that a VALUEFY consultant can contact you about the valuation and the sales plan, I need your contact details. We only use them for this request.",
+      summary: "Thank you! Please check the details below before sending.",
+    };
+    return sq[step] || "";
+  }
+  const q: Partial<Record<Step, string>> = {
+    type: "What would you like to have valued?",
+    describe: mobile
+      ? "Which movable assets would you like to have valued? Describe them briefly — for example production machinery, equipment, vehicles or fixed assets."
+      : "Which property would you like to have valued? Describe it briefly — for example an office building, a guesthouse, a petrol station or land with buildings.",
+    city: mobile
+      ? "Great. I'll help you get an offer for the valuation of your movable assets. Where are the assets located?"
+      : `Great. I'll help you get an offer for the valuation of ${other ? "the property" : "the " + what}. Where is the property located?`,
+    details: `A few details about the ${other ? "property" : what} help us prepare an accurate offer.`,
+    purpose: "What do you need the valuation for?",
+    deadline: "When do you need the report?",
+    date: "Choose the date by which you need the report.",
+    documents: mobile ? "Do you have the documents for the assets to hand (invoices, technical sheets, fixed asset register)?" : "Do you have the property documents to hand?",
+    customer: "Is the request for an individual or for a company?",
+    contact: "Almost done. So that a VALUEFY specialist can send you the offer with the cost, the timeframe and the list of documents, I need your contact details. We only use them for this request.",
+    summary: "Thank you! Please check the details below before sending.",
   };
   return q[step] || "";
 }
@@ -198,6 +251,7 @@ export function buildRecord(l: Lead, opts: { id: string; summary: string; docume
     conversation_summary: opts.summary,
     lead_status: "NEW",
     priority: priority(l),
+    lang: l.lang === "en" ? "en" : "ro",
   };
 }
 export type LeadRecord = ReturnType<typeof buildRecord>;

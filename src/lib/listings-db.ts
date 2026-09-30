@@ -6,23 +6,43 @@ type Row = {
   surface: number | null; land: number | null; rooms: number | null; baths: number | null; floor: string | null; year: number | null;
   status: string | null; features: string; description: string; report_date: string | null; published: number; updated_at: string;
   photo_ids: string | null; social_v: string | null;
+  title_en: string | null; description_en: string | null; features_en: string | null;
 };
+
+const paragraphs = (text: string) => text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+const jsonList = (json: string | null) => {
+  try {
+    const v = JSON.parse(json ?? "[]") as unknown;
+    return Array.isArray(v) ? v.map(String) : [];
+  } catch {
+    return [];
+  }
+};
+
+/** English texts, only the ones that are filled in (undefined when none are). */
+function englishOf(r: Row): Listing["en"] {
+  const title = r.title_en?.trim() || undefined;
+  const description = r.description_en ? paragraphs(r.description_en) : [];
+  const features = jsonList(r.features_en);
+  if (!title && !description.length && !features.length) return undefined;
+  return { title, description: description.length ? description : undefined, features: features.length ? features : undefined };
+}
 
 const SELECT = `SELECT l.*, (SELECT group_concat(id, ',') FROM (SELECT id FROM listing_photos p WHERE p.listing_id = l.id ORDER BY position, created_at)) AS photo_ids,
   (SELECT updated_at FROM listing_social s WHERE s.listing_id = l.id) AS social_v FROM listings l`;
 
 function toListing(r: Row): Listing {
   const photoIds = r.photo_ids ? r.photo_ids.split(",") : [];
-  let features: string[] = [];
-  try { features = JSON.parse(r.features) as string[]; } catch { /* keep empty */ }
+  const features = jsonList(r.features);
   return {
     id: r.id, slug: r.slug, title: r.title, type: r.type, city: r.city, zone: r.zone, price: r.price,
     surface: r.surface ?? undefined, land: r.land ?? undefined, rooms: r.rooms ?? undefined, baths: r.baths ?? undefined,
     floor: r.floor ?? undefined, year: r.year ?? undefined, status: r.status ?? undefined, features,
-    description: r.description.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean),
+    description: paragraphs(r.description),
     report: r.report_date ? { date: r.report_date } : undefined,
     published: r.published === 1, photoIds, photos: photoIds.map(photoUrl), updatedAt: r.updated_at,
     socialImage: r.social_v ? socialUrl(r.id, r.social_v) : undefined,
+    en: englishOf(r),
   };
 }
 
@@ -51,6 +71,8 @@ export type ListingInput = {
   title: string; type: string; city: string; zone?: string; price: number;
   surface?: number | null; land?: number | null; rooms?: number | null; baths?: number | null; floor?: string | null; year?: number | null;
   status?: string | null; features?: string[]; description?: string; report_date?: string | null; published?: boolean;
+  /** English versions (empty = shown in Romanian on the English site). */
+  title_en?: string; description_en?: string; features_en?: string[];
 };
 
 const clean = (v: unknown) => (v === "" || v === undefined ? null : v);
@@ -78,7 +100,8 @@ export function validateInput(body: unknown): { ok: true; value: ListingInput } 
   }
   const report = str("report_date", 7);
   if (report && !/^\d{4}-\d{2}$/.test(report)) return { ok: false, error: "Data raportului trebuie să fie de forma AAAA-LL." };
-  const features = Array.isArray(b.features) ? (b.features as unknown[]).map((x) => String(x).trim().slice(0, 80)).filter(Boolean).slice(0, 30) : [];
+  const list = (k: string) => (Array.isArray(b[k]) ? (b[k] as unknown[]).map((x) => String(x).trim().slice(0, 80)).filter(Boolean).slice(0, 30) : []);
+  const features = list("features");
   return {
     ok: true,
     value: {
@@ -86,6 +109,7 @@ export function validateInput(body: unknown): { ok: true; value: ListingInput } 
       surface: nums.surface, land: nums.land, rooms: nums.rooms === null ? null : Math.round(nums.rooms), baths: nums.baths === null ? null : Math.round(nums.baths),
       year: nums.year === null ? null : Math.round(nums.year), floor: clean(str("floor", 40)) as string | null, status: clean(str("status", 20)) as string | null,
       features, description: str("description", 8000), report_date: report || null, published: b.published === true,
+      title_en: str("title_en", 160), description_en: str("description_en", 8000), features_en: list("features_en"),
     },
   };
 }
@@ -104,6 +128,7 @@ async function uniqueSlug(db: D1Database, title: string, city: string, exceptId?
 const cols = (v: ListingInput) => [
   v.title, v.type, v.city, v.zone ?? "", v.price, v.surface ?? null, v.land ?? null, v.rooms ?? null, v.baths ?? null,
   v.floor ?? null, v.year ?? null, v.status ?? null, JSON.stringify(v.features ?? []), v.description ?? "", v.report_date ?? null, v.published ? 1 : 0,
+  v.title_en || null, v.description_en || null, v.features_en?.length ? JSON.stringify(v.features_en) : null,
 ];
 
 export async function createListing(db: D1Database, v: ListingInput): Promise<string> {
@@ -111,8 +136,9 @@ export async function createListing(db: D1Database, v: ListingInput): Promise<st
   const slug = await uniqueSlug(db, v.title, v.city);
   await db
     .prepare(
-      `INSERT INTO listings (id, slug, title, type, city, zone, price, surface, land, rooms, baths, floor, year, status, features, description, report_date, published)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO listings (id, slug, title, type, city, zone, price, surface, land, rooms, baths, floor, year, status, features, description, report_date, published,
+       title_en, description_en, features_en)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .bind(id, slug, ...cols(v))
     .run();
@@ -124,7 +150,8 @@ export async function updateListing(db: D1Database, id: string, v: ListingInput)
   await db
     .prepare(
       `UPDATE listings SET slug = ?, title = ?, type = ?, city = ?, zone = ?, price = ?, surface = ?, land = ?, rooms = ?, baths = ?, floor = ?,
-       year = ?, status = ?, features = ?, description = ?, report_date = ?, published = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?`,
+       year = ?, status = ?, features = ?, description = ?, report_date = ?, published = ?,
+       title_en = ?, description_en = ?, features_en = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?`,
     )
     .bind(slug, ...cols(v), id)
     .run();

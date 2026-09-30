@@ -95,6 +95,9 @@
 .check input { width: 18px; height: 18px; accent-color: var(--acc-ink); }
 .reportBox { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 12px; background: var(--acc-soft); border: 1px solid #f3dcb2; }
 .reportBox label:not(.check) { max-width: 240px; }
+.enBox { display: flex; flex-direction: column; gap: 12px; margin: 0; padding: 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--gray-bg); min-width: 0; }
+.enBox legend { padding: 0 6px; font-size: 14px; font-weight: 700; color: var(--ink); }
+.enBox .ok { margin-bottom: 0; }
 .publish { padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--gray-bg); }
 .actions { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .ok { padding: 10px 14px; border-radius: 10px; background: #e8f6ef; color: #127a4f; font-size: 14px; font-weight: 600; margin-bottom: 12px; }

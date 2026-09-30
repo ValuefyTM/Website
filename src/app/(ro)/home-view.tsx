@@ -26,25 +26,31 @@ export function homeMetadata(lang: Lang): Metadata {
   };
 }
 
-const jsonLd = {
+const LD = {
+  ro: { description: "Evaluări imobiliare și de bunuri mobile. Firmă autorizată ANEVAR.", country: "România" },
+  en: { description: "Property and movable asset valuations. ANEVAR-authorised firm.", country: "Romania" },
+};
+
+const jsonLd = (lang: Lang) => ({
   "@context": "https://schema.org",
   "@graph": [
     {
       "@type": "ProfessionalService",
       name: site.name,
-      url: site.url,
+      url: `${site.url}${lang === "en" ? "/en" : ""}`,
       logo: `${site.url}/valuefy-logo.png`,
       telephone: site.phone,
       email: site.email,
-      description: "Evaluări imobiliare și de bunuri mobile. Firmă autorizată ANEVAR.",
-      areaServed: ["Timișoara", "Cluj-Napoca", "România"],
+      description: LD[lang].description,
+      areaServed: ["Timișoara", "Cluj-Napoca", LD[lang].country],
     },
     {
       "@type": "FAQPage",
-      mainEntity: FAQS.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
+      inLanguage: lang,
+      mainEntity: FAQS[lang].map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
     },
   ],
-};
+});
 
 async function featured(): Promise<Listing[]> {
   try {
@@ -78,7 +84,7 @@ export async function HomeView({ lang }: { lang: Lang }) {
       </main>
       <Footer />
       <RevealOnScroll />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(lang))}} />
     </AssistantProvider>
   );
 }
