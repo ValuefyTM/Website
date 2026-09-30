@@ -26,7 +26,20 @@ export type Listing = {
   photoIds: string[];
   updatedAt?: string;
   socialImage?: string; // 1200×630 share image URL, when generated
+  /** English version of the text fields, when available (empty fields fall back to Romanian). */
+  en?: { title?: string; description?: string[]; features?: string[] };
 };
+
+/** The listing with its text fields in the visitor's language (falls back to Romanian). */
+export function inLang(l: Listing, lang: "ro" | "en"): Listing {
+  if (lang !== "en" || !l.en) return l;
+  return {
+    ...l,
+    title: l.en.title?.trim() || l.title,
+    description: l.en.description?.length ? l.en.description : l.description,
+    features: l.en.features?.length ? l.en.features : l.features,
+  };
+}
 
 export const photoUrl = (id: string) => `/api/photos/${id}`;
 export const socialUrl = (id: string, version: string) => `/api/social/${id}?v=${encodeURIComponent(version)}`;

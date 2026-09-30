@@ -15,12 +15,16 @@ import { getDb } from "@/lib/db";
 import { listPublished } from "@/lib/listings-db";
 import type { Listing } from "@/lib/listing-format";
 
-// The property carousel reads the database, so the page renders per request.
-export const dynamic = "force-dynamic";
+import { setLang } from "@/i18n/server";
+import { localize, type Lang } from "@/i18n/lang";
 
-export const metadata: Metadata = {
-  alternates: { canonical: "/" },
-};
+// Shared by / and /en — see page.tsx in both route trees.
+
+export function homeMetadata(lang: Lang): Metadata {
+  return {
+    alternates: { canonical: localize(lang, "/"), languages: { ro: "/", en: "/en" } },
+  };
+}
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -52,7 +56,8 @@ async function featured(): Promise<Listing[]> {
   }
 }
 
-export default async function Home() {
+export async function HomeView({ lang }: { lang: Lang }) {
+  setLang(lang);
   const listings = await featured();
   return (
     <AssistantProvider>

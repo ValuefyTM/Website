@@ -55,6 +55,16 @@
   font-size: 12px; display: flex; align-items: center; justify-content: center;
 }
 
+.lang {
+  display: flex; align-items: center; gap: 2px; padding: 3px; border-radius: 999px; border: 1px solid #e2daca; background: rgba(255, 255, 255, 0.7);
+}
+.lang a {
+  min-width: 34px; height: 32px; padding: 0 8px; border-radius: 999px; font-size: 12.5px; font-weight: 800; letter-spacing: 0.02em;
+  color: var(--muted-2); display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+}
+.lang a:hover { color: var(--ink); background: #fff; }
+.lang a[aria-current] { background: var(--navy); color: #fff; }
+.langMobile { display: none; grid-column: 2; justify-self: end; }
 .burger {
   display: none; grid-column: 3; justify-self: end; width: 48px; height: 48px;
   border: 1px solid var(--line); border-radius: 12px; background: #fff; cursor: pointer;
@@ -84,11 +94,14 @@
   .ctaArrow { display: none; }
 }
 @media (max-width: 1179px) {
+  .lang a { min-width: 30px; padding: 0 6px; }
   .portal { padding: 0 12px 0 10px; font-size: 13.5px; }
   .cta { padding: 0 16px; }
 }
 @media (max-width: 1079px) {
   .nav, .actions { display: none; }
+  .langMobile { display: flex; }
+  .lang a { height: 38px; min-width: 40px; }
   .burger { display: flex; }
   .mobileMenu { display: flex; }
 }

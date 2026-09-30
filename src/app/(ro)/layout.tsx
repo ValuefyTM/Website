@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { site } from "@/config/site";
-import "./globals.css";
+import { LangProvider } from "@/i18n/client";
+import "../globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -22,10 +23,13 @@ export const viewport: Viewport = {
   themeColor: "#F2ECE0",
 };
 
+/** Root layout for the Romanian site (and the admin). English pages have their own, under /en. */
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ro">
-      <body>{children}</body>
+      <body>
+        <LangProvider lang="ro">{children}</LangProvider>
+      </body>
     </html>
   );
 }
