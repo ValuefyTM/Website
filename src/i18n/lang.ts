@@ -8,8 +8,11 @@ export const pick = <T,>(dict: { ro: T; en: T }, lang: Lang): T => dict[lang];
 
 // Romanian path prefix → English path prefix. Longest first.
 const PATHS: [string, string][] = [
+  ["/politica-de-confidentialitate", "/en/privacy-policy"],
   ["/evaluare-bunuri-mobile", "/en/movable-asset-valuation"],
   ["/evaluare-pentru-impozitare", "/en/tax-valuation"],
+  ["/termeni-si-conditii", "/en/terms"],
+  ["/politica-cookies", "/en/cookie-policy"],
   ["/imobiliare", "/en/properties"],
   ["/client", "/en/client"],
 ];
@@ -26,7 +29,7 @@ export function localize(lang: Lang, path: string): string {
       return en + rest + h;
     }
   }
-  return base + h; // pages that exist only in Romanian (e.g. legal pages)
+  return base + h; // pages that exist only in Romanian
 }
 
 /** The Romanian path for any path on the site. */

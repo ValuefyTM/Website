@@ -7,7 +7,7 @@ import {
   docHelp, greeting, groupNames, groupOf, isSale, nextStep, question, typeObj, type Lead, type Step,
 } from "@/lib/lead";
 import { useLang } from "@/i18n/client";
-import { numberLocale, type Lang } from "@/i18n/lang";
+import { localize, numberLocale, type Lang } from "@/i18n/lang";
 import { label } from "@/i18n/labels";
 import { useMediaQuery } from "@/lib/useMediaQuery";
 import s from "./Assistant.module.css";
@@ -828,7 +828,7 @@ export function AssistantProvider({ children, saleCta = false }: { children: Rea
               </label>
               <label className={s.consent}>
                 <input type="checkbox" checked={f.consent} onChange={setField("consent")} />
-                <span>{t.consentPre}{sale ? t.consentSale : t.consentOffer}{t.consentMid}<a href="/politica-de-confidentialitate">{t.privacy}</a>.</span>
+                <span>{t.consentPre}{sale ? t.consentSale : t.consentOffer}{t.consentMid}<a href={localize(lang, "/politica-de-confidentialitate")}>{t.privacy}</a>.</span>
               </label>
               {contactErr && <div role="alert" className={s.err}>{contactErr}</div>}
               <button type="button" className={s.primary} onClick={contactSubmit}>{t.toReview}</button>

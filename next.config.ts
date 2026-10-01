@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Two root layouts (RO and /en) → unmatched URLs use app/global-not-found.tsx.
+  experimental: { globalNotFound: true },
   images: {
     // Served as-is: Unsplash URLs already request the right width and a modern format (auto=format),
     // which avoids needing the paid Cloudflare Images binding for Next.js image optimization.

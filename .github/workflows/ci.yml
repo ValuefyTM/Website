@@ -1,0 +1,31 @@
+# Checks every push and pull request: types, production build, and a smoke test of the built site.
+# Deployment itself is done by Cloudflare Workers Builds.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Type check
+        run: npx tsc --noEmit
+      - name: Build
+        run: npm run build
+      - name: Local database
+        run: npx wrangler d1 migrations apply DB --local
+      - name: Smoke test
+        run: |
+          npx next start -p 3000 &
+          for i in $(seq 1 30); do curl -sf -o /dev/null http://localhost:3000/ && break; sleep 2; done
+          npm run test:smoke -- http://localhost:3000

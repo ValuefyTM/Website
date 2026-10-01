@@ -5,7 +5,7 @@ type Row = {
   id: string; slug: string; title: string; type: string; city: string; zone: string; price: number;
   surface: number | null; land: number | null; rooms: number | null; baths: number | null; floor: string | null; year: number | null;
   status: string | null; features: string; description: string; report_date: string | null; published: number; updated_at: string;
-  photo_ids: string | null; social_v: string | null;
+  photo_ids: string | null; social_v: string | null; social_v_en: string | null;
   title_en: string | null; description_en: string | null; features_en: string | null;
 };
 
@@ -29,7 +29,8 @@ function englishOf(r: Row): Listing["en"] {
 }
 
 const SELECT = `SELECT l.*, (SELECT group_concat(id, ',') FROM (SELECT id FROM listing_photos p WHERE p.listing_id = l.id ORDER BY position, created_at)) AS photo_ids,
-  (SELECT updated_at FROM listing_social s WHERE s.listing_id = l.id) AS social_v FROM listings l`;
+  (SELECT updated_at FROM listing_social s WHERE s.listing_id = l.id) AS social_v,
+  (SELECT updated_at_en FROM listing_social s WHERE s.listing_id = l.id AND s.data_en IS NOT NULL) AS social_v_en FROM listings l`;
 
 function toListing(r: Row): Listing {
   const photoIds = r.photo_ids ? r.photo_ids.split(",") : [];
@@ -42,6 +43,7 @@ function toListing(r: Row): Listing {
     report: r.report_date ? { date: r.report_date } : undefined,
     published: r.published === 1, photoIds, photos: photoIds.map(photoUrl), updatedAt: r.updated_at,
     socialImage: r.social_v ? socialUrl(r.id, r.social_v) : undefined,
+    socialImageEn: r.social_v_en ? socialUrl(r.id, r.social_v_en, "en") : undefined,
     en: englishOf(r),
   };
 }
@@ -213,7 +215,19 @@ export async function listInquiries(db: D1Database, limit = 100): Promise<Inquir
 
 export const MAX_SOCIAL_BYTES = 900_000;
 
-export async function setSocialImage(db: D1Database, listingId: string, data: ArrayBuffer, contentType: string) {
+export async function setSocialImage(db: D1Database, listingId: string, data: ArrayBuffer, contentType: string, lang: "ro" | "en" = "ro") {
+  if (lang === "en") {
+    // The English card is stored next to the Romanian one; create the row if needed.
+    await db
+      .prepare(
+        `INSERT INTO listing_social (listing_id, content_type, data, updated_at, content_type_en, data_en, updated_at_en)
+         VALUES (?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+         ON CONFLICT(listing_id) DO UPDATE SET content_type_en = excluded.content_type_en, data_en = excluded.data_en, updated_at_en = excluded.updated_at_en`,
+      )
+      .bind(listingId, contentType, data, contentType, data)
+      .run();
+    return;
+  }
   await db
     .prepare(
       `INSERT INTO listing_social (listing_id, content_type, data, updated_at) VALUES (?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
@@ -224,10 +238,11 @@ export async function setSocialImage(db: D1Database, listingId: string, data: Ar
 }
 
 /** Share image of a listing; drafts only for admins. */
-export async function getSocialImage(db: D1Database, listingId: string, includeUnpublished = false) {
+export async function getSocialImage(db: D1Database, listingId: string, includeUnpublished = false, lang: "ro" | "en" = "ro") {
+  const cols = lang === "en" ? "s.content_type_en AS content_type, s.data_en AS data" : "s.content_type, s.data";
   return db
     .prepare(
-      `SELECT s.content_type, s.data FROM listing_social s JOIN listings l ON l.id = s.listing_id WHERE s.listing_id = ?${includeUnpublished ? "" : " AND l.published = 1"}`,
+      `SELECT ${cols} FROM listing_social s JOIN listings l ON l.id = s.listing_id WHERE s.listing_id = ?${includeUnpublished ? "" : " AND l.published = 1"}`,
     )
     .bind(listingId)
     .first<{ content_type: string; data: ArrayBuffer | number[] }>();

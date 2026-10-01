@@ -1,5 +1,5 @@
 // Browser-only: draws the listing share card (link preview / social post) on a canvas.
-import { commissionNote, formatEur, specLine, type Listing } from "./listing-format";
+import { commissionNote, formatEur, inLang, specLine, type Listing } from "./listing-format";
 import { label } from "@/i18n/labels";
 import type { Lang } from "@/i18n/lang";
 
@@ -161,7 +161,13 @@ export async function cardBlob(l: Listing, format: CardFormat, quality = 0.86, l
 
 /** Generates the 1200×630 link preview and stores it, so WhatsApp / Facebook show it when the link is shared. Admin only. */
 export async function uploadShareImage(l: Listing) {
-  const blob = await cardBlob(l, "link");
-  const r = await fetch(`/api/admin/listings/${l.id}/social`, { method: "PUT", headers: { "Content-Type": "image/jpeg" }, body: blob });
-  return r.ok;
+  const put = async (lang: Lang) => {
+    const blob = await cardBlob(lang === "en" ? inLang(l, "en") : l, "link", 0.86, lang);
+    const q = lang === "en" ? "?lang=en" : "";
+    return (await fetch(`/api/admin/listings/${l.id}/social${q}`, { method: "PUT", headers: { "Content-Type": "image/jpeg" }, body: blob })).ok;
+  };
+  // Romanian first: it creates the row the English card is stored in.
+  const ro = await put("ro");
+  const en = await put("en");
+  return ro && en;
 }

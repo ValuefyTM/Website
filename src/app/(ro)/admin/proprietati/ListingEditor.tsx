@@ -71,7 +71,7 @@ export function ListingEditor({ listing }: { listing?: Listing }) {
   }, [listing, f, photos, slug]);
 
   // Keep the stored link-preview image in sync: on first open when missing, and whenever the cover photo changes.
-  const syncedCover = useRef<string | undefined>(listing?.socialImage ? listing.photoIds[0] : "__none__");
+  const syncedCover = useRef<string | undefined>(listing?.socialImage && listing?.socialImageEn ? listing.photoIds[0] : "__none__");
   const syncShare = () => { if (current) uploadShareImage(current).catch(() => {}); };
   useEffect(() => {
     if (!current || syncedCover.current === photos[0]) return;

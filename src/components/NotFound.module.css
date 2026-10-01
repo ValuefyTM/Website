@@ -1,0 +1,38 @@
+.page { background: linear-gradient(180deg, #fdfbf7 0%, #f7f1e4 100%); border-bottom: 1px solid var(--line-warm); }
+.inner {
+  padding-top: clamp(48px, 8vw, 112px); padding-bottom: clamp(56px, 8vw, 112px);
+  display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(24px, 5vw, 72px); align-items: center;
+}
+@media (max-width: 859px) { .inner { grid-template-columns: 1fr; } }
+.code {
+  font-size: clamp(120px, 20vw, 260px); font-weight: 700; line-height: 0.85; letter-spacing: -0.07em;
+  color: var(--navy); position: relative; user-select: none;
+}
+.code::after {
+  content: ""; position: absolute; width: 0.22em; height: 0.22em; border-radius: 50%; background: var(--acc);
+  right: 0.08em; top: -0.02em; box-shadow: 0 0 0 0.05em var(--acc-soft);
+}
+@media (max-width: 859px) { .code { font-size: 120px; } }
+.copy { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.title { margin: 0; font-size: clamp(28px, 3.6vw, 44px); line-height: 1.1; letter-spacing: -0.04em; text-wrap: balance; }
+.lead { margin: 0; font-size: 17px; line-height: 1.65; color: var(--muted-2); max-width: 34em; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+.primary, .secondary, .ghost {
+  height: 50px; padding: 0 20px; border-radius: 12px; font-size: 15px; font-weight: 700; display: inline-flex; align-items: center;
+  white-space: nowrap; cursor: pointer; font-family: inherit;
+}
+.primary { background: var(--acc); color: var(--ink); border: 0; box-shadow: 0 10px 30px -10px rgba(242, 169, 59, 0.55); }
+.primary:hover { background: var(--acc-ink); color: var(--ink); }
+.secondary { background: var(--navy); color: #fff; border: 0; }
+.secondary:hover { background: #24245a; color: #fff; }
+.ghost { background: #fff; color: var(--ink); border: 1px solid var(--line-warm); }
+.ghost:hover { border-color: var(--ink); }
+@media (max-width: 559px) { .primary, .secondary, .ghost { width: 100%; justify-content: center; } }
+.links { margin-top: 14px; padding-top: 18px; border-top: 1px solid var(--line-warm); }
+.links h2 { margin: 0 0 8px; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.links ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 0 24px; }
+.links a { display: flex; justify-content: space-between; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line-warm); font-size: 15px; font-weight: 600; color: var(--ink); }
+.links a span { color: var(--acc-text); }
+.links a:hover { color: var(--acc-text); }
+.alt { margin: 0; font-size: 14px; color: var(--muted-2); }
+.alt a { color: var(--acc-text); font-weight: 700; }

@@ -92,9 +92,10 @@ export async function listingMetadata(slug: string, lang: Lang): Promise<Metadat
   const description = [`${price} · ${where}`, specLine(l, lang), t.metaFee(commissionNote(lang)), l.report ? t.metaReport : ""]
     .filter(Boolean)
     .join(" · ");
-  // The stored share card (generated in the admin) is in Romanian; it is used for both languages.
-  const image = l.socialImage
-    ? { url: abs(l.socialImage), width: 1200, height: 630, alt: l.title }
+  // Share card generated in the admin, in the page's language (English falls back to the Romanian one).
+  const card = lang === "en" ? l.socialImageEn ?? l.socialImage : l.socialImage;
+  const image = card
+    ? { url: abs(card), width: 1200, height: 630, alt: l.title }
     : { url: abs(l.photos[0] ?? "/opengraph-image.png"), alt: l.title };
   const roPath = `/imobiliare/${l.slug}`;
   const path = localize(lang, roPath);

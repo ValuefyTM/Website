@@ -15,6 +15,7 @@ export async function PUT(req: Request, { params }: Ctx) {
   if (type !== "image/jpeg") return NextResponse.json({ error: "Format invalid." }, { status: 400 });
   const data = await req.arrayBuffer();
   if (!data.byteLength || data.byteLength > MAX_SOCIAL_BYTES) return NextResponse.json({ error: "Imagine prea mare." }, { status: 400 });
-  await setSocialImage(a.db, id, data, type);
+  const lang = new URL(req.url).searchParams.get("lang") === "en" ? "en" : "ro";
+  await setSocialImage(a.db, id, data, type, lang);
   return NextResponse.json({ ok: true });
 }

@@ -11,6 +11,9 @@ const PAGES: { path: string; priority: number }[] = [
   { path: "/evaluare-pentru-impozitare", priority: 0.8 },
   { path: "/evaluare-bunuri-mobile", priority: 0.8 },
   { path: "/imobiliare", priority: 0.7 },
+  { path: "/politica-de-confidentialitate", priority: 0.3 },
+  { path: "/politica-cookies", priority: 0.3 },
+  { path: "/termeni-si-conditii", priority: 0.3 },
 ];
 
 // Includes published listings, so it is generated on request.

@@ -28,6 +28,7 @@ export type Listing = {
   photoIds: string[];
   updatedAt?: string;
   socialImage?: string; // 1200×630 share image URL, when generated
+  socialImageEn?: string; // the same card in English
   /** English version of the text fields, when available (empty fields fall back to Romanian). */
   en?: { title?: string; description?: string[]; features?: string[] };
 };
@@ -44,7 +45,8 @@ export function inLang(l: Listing, lang: Lang): Listing {
 }
 
 export const photoUrl = (id: string) => `/api/photos/${id}`;
-export const socialUrl = (id: string, version: string) => `/api/social/${id}?v=${encodeURIComponent(version)}`;
+export const socialUrl = (id: string, version: string, lang: "ro" | "en" = "ro") =>
+  `/api/social/${id}?${lang === "en" ? "lang=en&" : ""}v=${encodeURIComponent(version)}`;
 
 /** Every property is sold with no commission for the buyer. (Romanian; used by the admin.) */
 export const COMMISSION_NOTE = "Comision 0%";

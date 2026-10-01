@@ -1,3 +1,5 @@
+import LOCAL from "./local-photos.json";
+
 // Line icons as data-URI SVGs (24×24, 1.5 stroke), matching the design.
 export const svg = (d: string, stroke = "#17173A") =>
   "data:image/svg+xml," +
@@ -20,5 +22,8 @@ export const ICONS = {
   lock: svg('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/>', "#C98A10"),
 };
 
+const local = new Set<string>(LOCAL);
+
+/** A stock photo: served from the site when the build copied it (scripts/fetch-photos.mjs), else from Unsplash. */
 export const unsplash = (id: string, w = 900) =>
-  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=70`;
+  local.has(id) ? `/photos/u/${id}-${w <= 900 ? 800 : 1600}.jpg` : `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=70`;
