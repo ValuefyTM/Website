@@ -4,6 +4,7 @@ import { setLang } from "@/i18n/server";
 import { localize, type Lang } from "@/i18n/lang";
 import { label } from "@/i18n/labels";
 import { LoginForm } from "./LoginForm";
+import { RoleOnly, RoleProvider, RoleTabs } from "./role";
 import s from "./client.module.css";
 
 // Shared by /client and /en/client — see page.tsx in both route trees.
@@ -27,6 +28,15 @@ const T = {
     back: "← Înapoi la site",
     h1: "Intră în cont",
     subtitle: "Urmărește evaluarea, descarcă rapoartele și vorbește cu evaluatorul.",
+    partnerEyebrow: "Portal colaboratori",
+    partnerTitle: "Comandă evaluări pentru clienții tăi și urmărește-le pe toate.",
+    partnerFeats: [
+      ["Comenzi în numele clienților", "Trimiți solicitarea cu datele proprietății și ale clientului, în câteva minute."],
+      ["Toate dosarele într-un loc", "Vezi statusul fiecărei evaluări comandate, pe client și pe proprietate."],
+      ["Raportul ajunge la timp", "Tu și clientul tău primiți raportul și documentele imediat ce sunt gata."],
+    ],
+    partnerH1: "Intră în contul de colaborator",
+    partnerSubtitle: "Pentru agenți imobiliari și brokeri de credite care comandă evaluări în numele clienților lor.",
   },
   en: {
     title: "Client portal sign-in | VALUEFY",
@@ -46,6 +56,15 @@ const T = {
     back: "← Back to the website",
     h1: "Sign in",
     subtitle: "Track your valuation, download your reports and talk to your valuer.",
+    partnerEyebrow: "Partner portal",
+    partnerTitle: "Order valuations for your clients and track them all.",
+    partnerFeats: [
+      ["Orders on behalf of your clients", "Send a request with the property and client details in a few minutes."],
+      ["Every file in one place", "See the status of each valuation you ordered, by client and by property."],
+      ["Reports delivered on time", "You and your client receive the report and documents as soon as they are ready."],
+    ],
+    partnerH1: "Sign in to your partner account",
+    partnerSubtitle: "For real-estate agents and mortgage brokers who order valuations on behalf of their clients.",
   },
 };
 
@@ -65,20 +84,21 @@ export function ClientLoginView({ lang }: { lang: Lang }) {
   setLang(lang);
   const t = T[lang];
   return (
+    <RoleProvider>
     <div className={s.page}>
       <aside className={s.side} aria-label={t.sideLabel}>
         <div aria-hidden="true" className={s.glow} />
         <div className={s.sideBody}>
-          <div className={s.eyebrow}>{t.eyebrow}</div>
-          <h2 className={s.sideTitle}>{t.sideTitle}</h2>
-          <ul className={s.feats}>
-            {t.feats.map(([title, d], i) => (
-              <li key={title}>
-                <span className={s.featN}>{String(i + 1).padStart(2, "0")}</span>
-                <span><b>{title}</b><span>{d}</span></span>
-              </li>
-            ))}
-          </ul>
+          <RoleOnly role="client">
+            <div className={s.eyebrow}>{t.eyebrow}</div>
+            <h2 className={s.sideTitle}>{t.sideTitle}</h2>
+            <Feats items={t.feats} />
+          </RoleOnly>
+          <RoleOnly role="partner">
+            <div className={s.eyebrow}>{t.partnerEyebrow}</div>
+            <h2 className={s.sideTitle}>{t.partnerTitle}</h2>
+            <Feats items={t.partnerFeats} />
+          </RoleOnly>
           <div className={s.mini} aria-hidden="true">
             <div className={s.miniHead}>
               <span>
@@ -109,11 +129,34 @@ export function ClientLoginView({ lang }: { lang: Lang }) {
           <a href={localize(lang, "/")} className={s.back}>{t.back}</a>
         </div>
         <div className={s.formWrap}>
-          <h1 className={s.title}>{t.h1}</h1>
-          <p className={s.subtitle}>{t.subtitle}</p>
-          <LoginForm />
+          <RoleTabs />
+          <div id="login-panel" role="tabpanel" aria-labelledby="role-client role-partner" className={s.panel}>
+            <RoleOnly role="client">
+              <h1 className={s.title}>{t.h1}</h1>
+              <p className={s.subtitle}>{t.subtitle}</p>
+            </RoleOnly>
+            <RoleOnly role="partner">
+              <h1 className={s.title}>{t.partnerH1}</h1>
+              <p className={s.subtitle}>{t.partnerSubtitle}</p>
+            </RoleOnly>
+            <LoginForm />
+          </div>
         </div>
       </main>
     </div>
+    </RoleProvider>
+  );
+}
+
+function Feats({ items }: { items: string[][] }) {
+  return (
+    <ul className={s.feats}>
+      {items.map(([title, d], i) => (
+        <li key={title}>
+          <span className={s.featN}>{String(i + 1).padStart(2, "0")}</span>
+          <span><b>{title}</b><span>{d}</span></span>
+        </li>
+      ))}
+    </ul>
   );
 }

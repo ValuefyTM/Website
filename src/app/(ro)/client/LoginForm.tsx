@@ -4,6 +4,7 @@ import { useState } from "react";
 import { site, phoneHref } from "@/config/site";
 import { useLang } from "@/i18n/client";
 import { localize } from "@/i18n/lang";
+import { useRole } from "./role";
 import s from "./client.module.css";
 
 type Notice = { kind: "error" | "info"; text: React.ReactNode } | null;
@@ -31,6 +32,11 @@ const T = {
     noAccount: "Nu ai cont?",
     help: "Accesul în portal îl primești pe email, odată cu confirmarea comenzii de evaluare.",
     request: "Solicită o evaluare →",
+    partnerNoAccount: "Nu ai cont de colaborator?",
+    partnerHelp: "Lucrezi ca agent imobiliar sau broker de credite? Deschidem conturi de colaborator după un scurt acord de colaborare.",
+    partnerRequest: "Solicită cont de colaborator →",
+    partnerSubject: "Cont de colaborator VALUEFY",
+    partnerNotReady: "Portalul colaboratorilor este în pregătire, iar autentificarea va fi activată în curând. Între timp poți trimite comenzile prin asistentul de pe site.",
   },
   en: {
     contactPre: "For a valuation in progress, call us on ",
@@ -54,12 +60,18 @@ const T = {
     noAccount: "Don't have an account?",
     help: "You receive portal access by email once your valuation order is confirmed.",
     request: "Request a valuation →",
+    partnerNoAccount: "No partner account yet?",
+    partnerHelp: "Are you a real-estate agent or mortgage broker? We open partner accounts after a short partnership agreement.",
+    partnerRequest: "Apply for a partner account →",
+    partnerSubject: "VALUEFY partner account",
+    partnerNotReady: "The partner portal is being prepared, and sign-in will be enabled soon. Meanwhile you can send orders through the assistant on the website.",
   },
 };
 
 export function LoginForm() {
   const lang = useLang();
   const t = T[lang];
+  const partner = useRole() === "partner";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -85,7 +97,7 @@ export function LoginForm() {
     // No authentication backend yet — the portal is being built.
     setTimeout(() => {
       setBusy(false);
-      setNotice({ kind: "info", text: <>{t.notReady}{contact}</> });
+      setNotice({ kind: "info", text: <>{partner ? t.partnerNotReady : t.notReady}{contact}</> });
     }, 600);
   };
 
@@ -156,9 +168,20 @@ export function LoginForm() {
         {busy ? t.checking : t.submit}
       </button>
 
-      <div className={s.divider}><span>{t.noAccount}</span></div>
-      <p className={s.help}>{t.help}</p>
-      <a href={localize(lang, "/")} className={s.secondary}>{t.request}</a>
+      {partner ? (
+        <>
+          <div className={s.divider}><span>{t.partnerNoAccount}</span></div>
+          <p className={s.help}>{t.partnerHelp}</p>
+          <a href={`mailto:${site.email}?subject=${encodeURIComponent(t.partnerSubject)}`} className={s.secondary}>{t.partnerRequest}</a>
+          <p className={s.help}>{site.email} · <a href={phoneHref(site.phone)}>{site.phone}</a></p>
+        </>
+      ) : (
+        <>
+          <div className={s.divider}><span>{t.noAccount}</span></div>
+          <p className={s.help}>{t.help}</p>
+          <a href={localize(lang, "/")} className={s.secondary}>{t.request}</a>
+        </>
+      )}
     </form>
   );
 }
