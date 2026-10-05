@@ -28,6 +28,7 @@ export const PURPOSES = [
   "Raportare financiară",
   "Succesiune / partaj",
   "Expertiză / litigiu",
+  "Garanție eșalonare ANAF",
   "Alt scop",
 ];
 /** Set (hidden) when the visitor wants to sell a property through VALUEFY instead of ordering a valuation. */
@@ -200,7 +201,7 @@ export function priority(l: Lead): "URGENT" | "PRIORITY" | "NORMAL" {
   }
   let s = 0;
   if (["Spațiu comercial", "Hală / industrial"].includes(l.property_type || "")) s++;
-  if (["Credit bancar", "Expertiză / litigiu", "Raportare financiară"].includes(l.valuation_purpose || "")) s++;
+  if (["Credit bancar", "Expertiză / litigiu", "Raportare financiară", "Garanție eșalonare ANAF"].includes(l.valuation_purpose || "")) s++;
   if (l.customer_type === "Companie") s++;
   if (l.documents_status === "Da") s++;
   return s >= 2 ? "PRIORITY" : "NORMAL";

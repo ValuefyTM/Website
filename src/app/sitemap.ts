@@ -10,6 +10,7 @@ const PAGES: { path: string; priority: number }[] = [
   { path: "/", priority: 1 },
   { path: "/evaluare-pentru-impozitare", priority: 0.8 },
   { path: "/evaluare-bunuri-mobile", priority: 0.8 },
+  { path: "/evaluare-esalonare-anaf", priority: 0.8 },
   { path: "/imobiliare", priority: 0.7 },
   { path: "/politica-de-confidentialitate", priority: 0.3 },
   { path: "/politica-cookies", priority: 0.3 },

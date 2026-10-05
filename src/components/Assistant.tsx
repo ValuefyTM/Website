@@ -33,7 +33,7 @@ const baseLead = (sale = false, lang: Lang = "ro"): Lead => (sale ? { request_ki
 
 const T = {
   ro: {
-    notedPurpose: (p: string) => `Am notat: evaluare pentru ${p.toLowerCase()}. `,
+    notedPurpose: (p: string) => `Am notat: evaluare pentru ${lowerFirst(p)}. `,
     whatToValue: "Ce dorești să evaluezi?",
     replyFallback: "Momentan nu pot răspunde. Poți continua solicitarea folosind opțiunile de mai jos.",
     noted: "Am notat.",
@@ -136,7 +136,7 @@ const T = {
     sendMessage: "Trimite mesajul",
   },
   en: {
-    notedPurpose: (p: string) => `Noted: a valuation for ${label(p, "en").toLowerCase()}. `,
+    notedPurpose: (p: string) => `Noted: a valuation for ${lowerFirst(label(p, "en"))}. `,
     whatToValue: "What would you like to have valued?",
     replyFallback: "I can't reply right now. You can continue your request using the options below.",
     noted: "Noted.",
@@ -239,6 +239,8 @@ const T = {
     sendMessage: "Send message",
   },
 };
+// Lower-cases only the first letter, so acronyms such as ANAF stay intact.
+const lowerFirst = (v: string) => v.charAt(0).toLowerCase() + v.slice(1);
 const fold = (v: string) => v.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 
 type Form = { describe: string; city: string; address: string; surface: string; rooms: string; land: string; price: string; notes: string; date: string; name: string; phone: string; email: string; consent: boolean };

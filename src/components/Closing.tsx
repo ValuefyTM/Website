@@ -15,7 +15,7 @@ const T = {
     cols: [
       {
         t: "SERVICII",
-        links: [["Evaluări imobiliare", "/#servicii"], ["Creditare", "/#servicii"], ["Impozitare", "/evaluare-pentru-impozitare"], ["Raportare financiară", "/#servicii"], ["Proprietăți comerciale", "/#servicii"], ["Bunuri mobile", "/evaluare-bunuri-mobile"]],
+        links: [["Evaluări imobiliare", "/#servicii"], ["Creditare", "/#servicii"], ["Impozitare", "/evaluare-pentru-impozitare"], ["Eșalonare ANAF", "/evaluare-esalonare-anaf"], ["Raportare financiară", "/#servicii"], ["Proprietăți comerciale", "/#servicii"], ["Bunuri mobile", "/evaluare-bunuri-mobile"]],
       },
       {
         t: "COMPANIE",
@@ -35,7 +35,7 @@ const T = {
     cols: [
       {
         t: "SERVICES",
-        links: [["Property valuations", "/#servicii"], ["Lending", "/#servicii"], ["Taxation", "/evaluare-pentru-impozitare"], ["Financial reporting", "/#servicii"], ["Commercial properties", "/#servicii"], ["Movable assets", "/evaluare-bunuri-mobile"]],
+        links: [["Property valuations", "/#servicii"], ["Lending", "/#servicii"], ["Taxation", "/evaluare-pentru-impozitare"], ["ANAF instalment plans", "/evaluare-esalonare-anaf"], ["Financial reporting", "/#servicii"], ["Commercial properties", "/#servicii"], ["Movable assets", "/evaluare-bunuri-mobile"]],
       },
       {
         t: "COMPANY",

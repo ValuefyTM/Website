@@ -8,6 +8,7 @@ export const pick = <T,>(dict: { ro: T; en: T }, lang: Lang): T => dict[lang];
 
 // Romanian path prefix → English path prefix. Longest first.
 const PATHS: [string, string][] = [
+  ["/evaluare-esalonare-anaf", "/en/anaf-instalment-valuation"],
   ["/politica-de-confidentialitate", "/en/privacy-policy"],
   ["/evaluare-bunuri-mobile", "/en/movable-asset-valuation"],
   ["/evaluare-pentru-impozitare", "/en/tax-valuation"],

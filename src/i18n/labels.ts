@@ -18,6 +18,7 @@ const EN: Record<string, string> = {
   "Raportare financiară": "Financial reporting",
   "Succesiune / partaj": "Inheritance / division",
   "Expertiză / litigiu": "Expert report / litigation",
+  "Garanție eșalonare ANAF": "Collateral for ANAF instalment plan",
   "Alt scop": "Other purpose",
   "Vânzare prin VALUEFY": "Sale through VALUEFY",
   // Deadlines

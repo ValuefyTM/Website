@@ -12,6 +12,8 @@ const pages = [
   ["/en/movable-asset-valuation", 200, "en", "movable assets"],
   ["/evaluare-pentru-impozitare", 200, "ro", "impozit"],
   ["/en/tax-valuation", 200, "en", "tax"],
+  ["/evaluare-esalonare-anaf", 200, "ro", "eșalonare"],
+  ["/en/anaf-instalment-valuation", 200, "en", "instalment"],
   ["/client", 200, "ro", "Colaborator"],
   ["/en/client", 200, "en", "Partner"],
   ["/politica-de-confidentialitate", 200, "ro", "VALUEFY S.R.L."],
