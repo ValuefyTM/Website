@@ -1,4 +1,5 @@
 import { setLang } from "@/i18n/server";
+import { site } from "@/config/site";
 import { localize, type Lang } from "@/i18n/lang";
 import { AssistantProvider } from "./Assistant";
 import { AssistantButton } from "./AssistantButton";
@@ -21,7 +22,7 @@ const T = {
       ["Evaluarea bunurilor mobile", "/evaluare-bunuri-mobile"],
       ["Evaluare pentru impozitare", "/evaluare-pentru-impozitare"],
       ["Întrebări frecvente", "/#faq"],
-      ["Portal client", "/client"],
+      ["Portal client", site.portalUrl],
     ],
   },
   en: {
@@ -38,7 +39,7 @@ const T = {
       ["Movable asset valuation", "/evaluare-bunuri-mobile"],
       ["Valuation for tax purposes", "/evaluare-pentru-impozitare"],
       ["FAQ", "/#faq"],
-      ["Client portal", "/client"],
+      ["Client portal", site.portalUrl],
     ],
   },
 };

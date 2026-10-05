@@ -20,7 +20,7 @@ npm run dev                  # http://localhost:3000
 | `CLIENT_CONFIRMATION` | Set to `off` to stop the confirmation email sent to the visitor (on by default when the visitor gives an email) |
 | `NEXT_PUBLIC_PHONE`, `NEXT_PUBLIC_EMAIL` | Contact details shown on the site |
 | `NEXT_PUBLIC_ANEVAR_NO` | ANEVAR authorization number; hidden while empty |
-| `NEXT_PUBLIC_PORTAL_URL` | Client portal link (default `/client`, a placeholder page) |
+| `NEXT_PUBLIC_PORTAL_URL` | Client and partner portal (default `https://portal.valuefy.ro/login`; `/client` redirects there) |
 
 Without `ANTHROPIC_API_KEY` the assistant still works through the guided steps; free text gets a fallback reply.
 Without email configured, requests are only logged in development; in production the submission returns an error so no request is silently lost.

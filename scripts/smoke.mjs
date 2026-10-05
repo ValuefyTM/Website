@@ -14,8 +14,6 @@ const pages = [
   ["/en/tax-valuation", 200, "en", "tax"],
   ["/evaluare-esalonare-anaf", 200, "ro", "eșalonare"],
   ["/en/anaf-instalment-valuation", 200, "en", "instalment"],
-  ["/client", 200, "ro", "Colaborator"],
-  ["/en/client", 200, "en", "Partner"],
   ["/politica-de-confidentialitate", 200, "ro", "VALUEFY S.R.L."],
   ["/en/privacy-policy", 200, "en", "VALUEFY S.R.L."],
   ["/politica-cookies", 200, "ro", "cookie"],
@@ -54,6 +52,7 @@ for (const [path, check] of [
   ["/robots.txt", (r, b) => r.status === 200 && b.includes("Disallow: /admin")],
   ["/sitemap.xml", (r, b) => r.status === 200 && b.includes("/en/properties")],
   ["/api/assistant/status", (r, b) => r.status === 200 && b.includes('"online"')],
+  ["/client?tip=colaborator", (r) => [307, 308].includes(r.status) && (r.headers.get("location") || "").endsWith("/login?tip=colaborator")],
   ["/admin", (r) => [302, 303, 307, 308].includes(r.status) && (r.headers.get("location") || "").includes("/admin/login")],
 ]) {
   try {

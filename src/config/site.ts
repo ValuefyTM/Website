@@ -12,7 +12,8 @@ export const site = {
   vatNo: process.env.NEXT_PUBLIC_VAT_NO || "RO38250411",
   regCom: process.env.NEXT_PUBLIC_REG_COM || "J35/3816/2017",
   address: process.env.NEXT_PUBLIC_ADDRESS || "Str. Bega nr. 25/4, sat Giroc, comuna Giroc, județul Timiș, cod 307220, România",
-  portalUrl: process.env.NEXT_PUBLIC_PORTAL_URL || "/client",
+  // Client and partner portal (VALUEFY CRM app). /client redirects there.
+  portalUrl: process.env.NEXT_PUBLIC_PORTAL_URL || "https://portal.valuefy.ro/login",
 };
 
 export const phoneHref = (phone: string) => "tel:" + phone.replace(/\s/g, "");
