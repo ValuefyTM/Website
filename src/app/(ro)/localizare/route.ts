@@ -13,7 +13,9 @@ export async function GET(req: Request) {
   }
   const page = await locatorAsset("index.html", req);
   if (!page) return new Response("Pagina nu este disponibilă momentan.", { status: 503, headers: PRIVATE });
-  return new Response(await page.text(), { headers: { "Content-Type": "text/html; charset=utf-8", ...PRIVATE } });
+  // The page is the one supplied as is; the export to PDF / Word / PNG is added as a separate script.
+  const html = (await page.text()).replace("</body>", '<script src="/api/localizare/script" defer></script></body>');
+  return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8", ...PRIVATE } });
 }
 
 function loginPage(wrong: boolean) {
