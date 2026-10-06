@@ -1,6 +1,8 @@
-/* VALUEFY · Căutare cadastrală — export fișă de localizare (PDF, Word, PNG).
-   Script separat de pagină: folosește variabilele globale ale paginii (U, P, BL, cur, geom, fmt, toast)
-   și adaugă butoanele sub fiecare parcelă / construcție afișată. */
+/* VALUEFY · Căutare cadastrală — completări la pagina primită:
+   1. export fișă de localizare (PDF, Word, PNG) pentru parcela / construcția afișată;
+   2. localizare multiplă: mai multe numere cadastrale separate prin virgulă → doar acele parcele pe hartă.
+   Script separat de pagină: folosește variabilele și funcțiile globale ale paginii (U, P, BL, byId, cur, map, all, bL,
+   sel, lblL, show, loadUat, geom, fmt, toast, $) fără să le modifice codul. */
 (() => {
   "use strict";
   const NAVY = "#17173A", GOLD = "#F2A93B", INK = "#17173A", MUTED = "#4A4A66", LINE = "#E2D8C4", CREAM = "#FBF8F2";
@@ -34,6 +36,7 @@
 
   /* ---------- datele fișei ---------- */
   function sheetData(o) {
+    if (o.multi) return multiData(o);
     const g = geom(o);
     const b = isBuilding(o);
     const parent = b && o.p >= 0 ? P[o.p] : null;
@@ -45,7 +48,7 @@
       subtitle: `UAT ${U.name} · județul Timiș${parent ? ` · pe nr. cad. ${parent.id}` : ""}`,
       file: b ? `Localizare_${safe(o.c || "constructie")}_${parent ? parent.id : ""}_${U.key}` : `Localizare_${o.id}_${U.key}`,
       facts: [[b ? "Arie la sol" : "Suprafață", `${nf(o.a, 2)} mp`], ["Perimetru", `${nf(g.per, 2)} m`], ["Puncte de contur", String(o.s.length)]],
-      notes: [], sections: [], coords,
+      notes: [], sections: [], rows: coords, cols: COLS, tableTitle: "Inventar de coordonate · Stereo 70 și WGS84",
       total: `S = ${nf(o.a, 2)} mp    P = ${nf(g.per, 3)} m`,
       center: `${center[0].toFixed(7)}, ${center[1].toFixed(7)}`,
     };
@@ -63,14 +66,35 @@
     return d;
   }
 
+  const MCOLS = [["Nr. cadastral", 190], ["Suprafață [mp]", 190], ["Perimetru [m]", 170], ["Construcții", 140], ["Intravilan ist.", 160], ["Centru (WGS84)", 250]];
+
+  /** Sheet of a multiple location: every parcel found, with totals and the numbers not found. */
+  function multiData(m) {
+    const tot = m.items.reduce((s, p) => s + p.a, 0);
+    const blds = m.items.reduce((s, p) => s + (p.bs ? p.bs.length : 0), 0);
+    const notes = [];
+    if (m.missing.length) notes.push(`Nu apar în planul pentru ${U.name}: ${m.missing.join(", ")}.`);
+    const c = [(m.bb[0] + m.bb[2]) / 2, (m.bb[1] + m.bb[3]) / 2];
+    return {
+      kind: "Localizare multiplă", title: `${m.items.length} imobile`, subtitle: `UAT ${U.name} · județul Timiș`,
+      file: `Localizare_multipla_${m.items.length}_imobile_${U.key}`,
+      facts: [["Imobile găsite", `${m.items.length} din ${m.items.length + m.missing.length}`], ["Suprafață totală", `${nf(tot, 2)} mp`], ["Construcții", String(blds)], ["Negăsite", String(m.missing.length)]],
+      notes, sections: [], cols: MCOLS, tableTitle: "Imobilele localizate",
+      rows: m.items.map((p) => [p.id, nf(p.a, 2), nf(geom(p).per, 2), String(p.bs ? p.bs.length : 0), p.iv ? "da" : "nu", `${p.c[0].toFixed(5)}, ${p.c[1].toFixed(5)}`]),
+      total: `Total: ${m.items.length} imobile · S = ${nf(tot, 2)} mp`,
+      center: `${c[0].toFixed(7)}, ${c[1].toFixed(7)}`,
+    };
+  }
+
   /* ---------- harta (satelit + plan cadastral) ---------- */
   const TS = 256;
   const lx = (lng, z) => ((lng + 180) / 360) * TS * 2 ** z;
   const ly = (lat, z) => { const s = Math.sin((lat * Math.PI) / 180); return (0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * TS * 2 ** z; };
 
   async function mapCanvas(o, W, H) {
-    const parent = isBuilding(o) && o.p >= 0 ? P[o.p] : null;
-    const bb = parent ? [Math.min(o.bb[0], parent.bb[0]), Math.min(o.bb[1], parent.bb[1]), Math.max(o.bb[2], parent.bb[2]), Math.max(o.bb[3], parent.bb[3])] : o.bb;
+    const multi = !!o.multi, items = multi ? o.items : [o];
+    const parent = !multi && isBuilding(o) && o.p >= 0 ? P[o.p] : null;
+    const bb = multi ? o.bb : parent ? [Math.min(o.bb[0], parent.bb[0]), Math.min(o.bb[1], parent.bb[1]), Math.max(o.bb[2], parent.bb[2]), Math.max(o.bb[3], parent.bb[3])] : o.bb;
     let z = 20;
     while (z > 3 && ((lx(bb[3], z) - lx(bb[1], z)) * 1.6 > W || (ly(bb[0], z) - ly(bb[2], z)) * 1.6 > H)) z--;
     const cx = (lx(bb[1], z) + lx(bb[3], z)) / 2, cy = (ly(bb[0], z) + ly(bb[2], z)) / 2;
@@ -96,15 +120,28 @@
     const inView = (q) => { const a = pt([q.bb[0], q.bb[1]]), b = pt([q.bb[2], q.bb[3]]); return Math.max(a[0], b[0]) > 0 && Math.min(a[0], b[0]) < W && Math.max(a[1], b[1]) > 0 && Math.min(a[1], b[1]) < H; };
     // Parcelele din jur și construcțiile
     x.lineWidth = 1.2; x.strokeStyle = "rgba(255,255,255,.6)";
-    for (const q of P) if (q !== o && q !== parent && vis(q) && inView(q)) { path(q.w); x.stroke(); }
-    for (const q of BL || []) if (q !== o && vis(q) && inView(q)) { path(q.w); x.fillStyle = "rgba(227,38,46,.45)"; x.fill(); x.strokeStyle = "rgba(255,210,31,.8)"; x.lineWidth = 1; x.stroke(); }
+    // La localizarea multiplă se văd doar parcelele cerute; restul planului rămâne doar ca fir subțire.
+    if (multi) { x.strokeStyle = "rgba(255,255,255,.22)"; x.lineWidth = 1; }
+    for (const q of P) if (!items.includes(q) && q !== parent && vis(q) && inView(q)) { path(q.w); x.stroke(); }
+    if (!multi) for (const q of BL || []) if (q !== o && vis(q) && inView(q)) { path(q.w); x.fillStyle = "rgba(227,38,46,.45)"; x.fill(); x.strokeStyle = "rgba(255,210,31,.8)"; x.lineWidth = 1; x.stroke(); }
     if (parent) { path(parent.w); x.setLineDash([10, 7]); x.strokeStyle = GOLD; x.lineWidth = 2.5; x.stroke(); x.setLineDash([]); }
-    // Conturul selectat
-    path(o.w);
-    x.fillStyle = isBuilding(o) ? "rgba(227,38,46,.55)" : "rgba(242,169,59,.22)"; x.fill();
-    x.strokeStyle = isBuilding(o) ? "#FFD21F" : GOLD; x.lineWidth = 4; x.lineJoin = "round"; x.stroke();
+    // Conturul selectat (sau conturele, la localizarea multiplă)
+    for (const it of items) {
+      path(it.w);
+      x.fillStyle = isBuilding(it) ? "rgba(227,38,46,.55)" : multi ? "rgba(242,169,59,.35)" : "rgba(242,169,59,.22)"; x.fill();
+      x.strokeStyle = isBuilding(it) ? "#FFD21F" : GOLD; x.lineWidth = multi ? 3 : 4; x.lineJoin = "round"; x.stroke();
+    }
+    if (multi) {
+      // Numărul cadastral pe fiecare parcelă
+      x.font = `bold 17px ${FONT}`; x.textAlign = "center"; x.textBaseline = "middle";
+      for (const it of items) {
+        const [a, b] = pt(it.c), tw = x.measureText(it.id).width + 18;
+        x.fillStyle = "rgba(255,255,255,.95)"; x.beginPath(); x.roundRect ? x.roundRect(a - tw / 2, b - 15, tw, 30, 15) : x.rect(a - tw / 2, b - 15, tw, 30); x.fill();
+        x.strokeStyle = GOLD; x.lineWidth = 2; x.stroke(); x.fillStyle = NAVY; x.fillText(it.id, a, b + 1);
+      }
+    }
     // Puncte numerotate
-    if (o.w.length <= 80) {
+    if (!multi && o.w.length <= 80) {
       const r = o.w.length > 40 ? 10 : 13;
       x.font = `bold ${r}px ${FONT}`; x.textAlign = "center"; x.textBaseline = "middle";
       o.w.forEach((w, k) => { const [a, b] = pt(w); x.beginPath(); x.arc(a, b, r, 0, 2 * Math.PI); x.fillStyle = GOLD; x.fill(); x.lineWidth = 2; x.strokeStyle = NAVY; x.stroke(); x.fillStyle = NAVY; x.fillText(String(k + 1), a, b + 1); });
@@ -176,13 +213,13 @@
       } });
     }
     out.push({ h: 58, table: "head", draw: (y) => {
-      x.fillStyle = "#9A5F00"; x.font = `bold 15px ${FONT}`; x.fillText("INVENTAR DE COORDONATE · STEREO 70 ȘI WGS84", M, y + 22);
+      x.fillStyle = "#9A5F00"; x.font = `bold 15px ${FONT}`; x.fillText(d.tableTitle.toUpperCase(), M, y + 22);
       x.fillStyle = NAVY; x.fillRect(M, y + 32, W, 26); x.fillStyle = "#fff"; x.font = `bold 13px ${FONT}`;
-      let cx = M; COLS.forEach(([t, w]) => { x.fillText(t, cx + 10, y + 50); cx += w; });
+      let cx = M; d.cols.forEach(([t, w]) => { x.fillText(t, cx + 10, y + 50); cx += w; });
     } });
-    d.coords.forEach((r, i) => out.push({ h: 30, row: true, draw: (y) => {
+    d.rows.forEach((r, i) => out.push({ h: 30, row: true, draw: (y) => {
       if (i % 2) { x.fillStyle = CREAM; x.fillRect(M, y, W, 30); }
-      x.fillStyle = INK; x.font = `14px ${MONO}`; let cx = M; r.forEach((v, j) => { x.fillText(v, cx + 10, y + 20); cx += COLS[j][1]; });
+      x.fillStyle = INK; x.font = `14px ${MONO}`; let cx = M; r.forEach((v, j) => { x.fillText(v, cx + 10, y + 20); cx += d.cols[j][1]; });
     } }));
     out.push({ h: 44, draw: (y) => { x.strokeStyle = INK; x.lineWidth = 2; x.beginPath(); x.moveTo(M, y + 2); x.lineTo(M + W, y + 2); x.stroke(); x.fillStyle = INK; x.font = `bold 15px ${MONO}`; x.fillText(d.total, M + 10, y + 28); } });
     return out;
@@ -257,8 +294,8 @@
     const facts = new D.Table({ width: { size: 100, type: D.WidthType.PERCENTAGE }, borders,
       rows: [new D.TableRow({ children: d.facts.map(([k]) => cell(k, { fill: "FBF8F2", color: "4A4A66" })) }), new D.TableRow({ children: d.facts.map(([, v]) => cell(v, { bold: true, size: 22 })) })] });
     const coords = new D.Table({ width: { size: 100, type: D.WidthType.PERCENTAGE }, borders,
-      rows: [new D.TableRow({ tableHeader: true, children: COLS.map(([t]) => cell(t, { bold: true, color: "FFFFFF", fill: "17173A" })) })]
-        .concat(d.coords.map((r, i) => new D.TableRow({ children: r.map((v) => cell(v, { font: "Consolas", fill: i % 2 ? "FBF8F2" : undefined })) }))) });
+      rows: [new D.TableRow({ tableHeader: true, children: d.cols.map(([t]) => cell(t, { bold: true, color: "FFFFFF", fill: "17173A" })) })]
+        .concat(d.rows.map((r, i) => new D.TableRow({ children: r.map((v) => cell(v, { font: "Consolas", fill: i % 2 ? "FBF8F2" : undefined })) }))) });
     const children = [];
     if (logo) children.push(P_(new D.ImageRun({ type: "png", data: logo, transformation: { width: 150, height: Math.round((150 * logoImg.height) / logoImg.width) } })));
     children.push(
@@ -271,7 +308,7 @@
       ...d.notes.concat([`Coordonate centru (WGS84): ${d.center}`]).map((n) => P_(T(n), { spacing: { before: 160, after: 0 } })),
     );
     for (const s of d.sections) children.push(H_(s.h), ...s.lines.map((l) => P_(T(l))));
-    children.push(H_("Inventar de coordonate · Stereo 70 și WGS84"), coords, P_(T(d.total, { bold: true, font: "Consolas" }), { spacing: { before: 120 } }),
+    children.push(H_(d.tableTitle), coords, P_(T(d.total, { bold: true, font: "Consolas" }), { spacing: { before: 120 } }),
       P_(T(DISCLAIMER, { size: 16, color: "6B6B85", italics: true }), { spacing: { before: 240 } }));
     const doc = new D.Document({
       creator: "VALUEFY", title: `${d.title} · ${U.name}`, description: "Fișă de localizare cadastrală",
@@ -285,14 +322,17 @@
   const css = document.createElement("style");
   css.textContent = ".vfx{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 4px;padding:12px 14px;border-radius:14px;background:#fdf1dc;border:1px solid #f5d9a6}" +
     ".vfx span{font-size:12.5px;font-weight:700;color:#9a5f00;margin-right:4px}.vfx button{height:36px;padding:0 14px;border-radius:999px;border:1px solid #e2d8c4;background:#fff;color:#17173a;font:700 13px Verdana,Geneva,sans-serif;cursor:pointer}" +
-    ".vfx button:hover{border-color:#17173a}.vfx button:disabled{opacity:.55;cursor:progress}";
+    ".vfx button:hover{border-color:#17173a}.vfx button:disabled{opacity:.55;cursor:progress}" +
+    ".vfm-l{background:#fff;border:2px solid #f2a93b;border-radius:999px;color:#17173a;font:700 12px ui-monospace,Menlo,monospace;padding:2px 8px;box-shadow:none}.vfm-l:before{display:none}" +
+    ".vfm-t td button{border:0;background:none;padding:0;font:inherit;font-weight:700;color:#17173a;text-decoration:underline;text-underline-offset:3px;cursor:pointer}.vfm-t td button:hover{color:#9a5f00}" +
+    ".vfm-miss{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.vfm-miss span{font:700 12px ui-monospace,Menlo,monospace;padding:3px 9px;border-radius:999px;background:#fbe9e7;color:#b3261e}";
   document.head.append(css);
 
   let busy = false;
   async function run(kind, btns) {
-    if (busy || !cur || !cur.s) return;
+    const o = multiSel || cur;
+    if (busy || !o || !(o.s || o.multi)) return;
     busy = true; btns.forEach((b) => (b.disabled = true));
-    const o = cur;
     say("Se pregătește fișa…");
     try {
       const r = kind === "pdf" ? await asPDF(o) : kind === "docx" ? await asWord(o) : await asPNG(o);
@@ -315,4 +355,104 @@
   const out = document.getElementById("out");
   if (out) new MutationObserver(addButtons).observe(out, { childList: true });
   addButtons();
+
+  /* ---------- localizare multiplă ---------- */
+  let multiSel = null, hidden = null;
+
+  /** "405306, 405307 406991" → ["405306","405307","406991"]; null when it is a single number or a topo number. */
+  function parseMany(v) {
+    const t = String(v || "").split(/[\s,;]+/).filter(Boolean);
+    if (t.length < 2 || !t.every((x) => /^\d+$/.test(x))) return null;
+    return [...new Set(t)];
+  }
+
+  /** Back to the normal map (all parcels and buildings) when the page shows something else. */
+  function leaveMulti() {
+    if (!multiSel) return;
+    multiSel = null;
+    if (hidden) { if (hidden.all && !map.hasLayer(all)) all.addTo(map); if (hidden.bL && !map.hasLayer(bL)) bL.addTo(map); hidden = null; }
+  }
+  for (const fn of ["show", "showBuilding", "loadUat", "renderNear", "topoSearch", "goToPoint"]) {
+    const orig = window[fn];
+    if (typeof orig === "function") window[fn] = function (...a) { leaveMulti(); return orig.apply(this, a); };
+  }
+
+  function locateMany(list) {
+    const out = $("out");
+    if (!U) { out.innerHTML = '<div class="flag">Alege întâi localitatea (UAT) din listă sau de pe hartă. Numerele cadastrale se repetă de la o localitate la alta.</div>'; $("uatSel").focus(); return; }
+    leaveMulti();
+    const items = [], missing = [];
+    for (const id of list) { const l = byId.get(id); if (l) items.push(...l); else missing.push(id); }
+    if (!items.length) { sel.clearLayers(); out.innerHTML = '<div class="flag">Niciunul dintre numerele <b>' + esc(list.join(", ")) + "</b> nu apare în planul pentru " + esc(U.name) + ". Verifică UAT-ul ales.</div>"; return; }
+    let bb = [90, 180, -90, -180];
+    for (const p of items) bb = [Math.min(bb[0], p.bb[0]), Math.min(bb[1], p.bb[1]), Math.max(bb[2], p.bb[2]), Math.max(bb[3], p.bb[3])];
+    multiSel = { multi: true, items, missing, bb, list };
+    cur = null; lastNear = null;
+    // Doar parcelele cerute pe hartă
+    hidden = { all: map.hasLayer(all), bL: map.hasLayer(bL) };
+    map.removeLayer(all); map.removeLayer(bL);
+    sel.clearLayers(); try { locLayer.clearLayers(); } catch { /* fără strat de adresă */ }
+    const polys = items.map((p) => L.polygon(p.w, { color: "#f2a93b", weight: 3, fillColor: "#f2a93b", fillOpacity: 0.3 })
+      .bindTooltip(p.id, { permanent: true, direction: "center", className: "vfm-l" })
+      .on("click", () => { q.value = p.id; show(p.id, p.i, true); }).addTo(sel));
+    map.fitBounds(L.featureGroup(polys).getBounds(), { padding: [40, 40], maxZoom: 19, animate: false });
+
+    const tot = items.reduce((s2, p) => s2 + p.a, 0), blds = items.reduce((s2, p) => s2 + (p.bs ? p.bs.length : 0), 0);
+    let h = '<div class="idrow"><div><div class="lbl">Localizare multiplă · ' + esc(U.name) + '</div><div class="id">' + items.length + " imobile</div></div>" +
+      '<span class="pill">doar cele cerute</span></div>';
+    h += '<div class="facts"><div><small>Găsite</small><b>' + items.length + " din " + (items.length + missing.length) + "</b></div><div><small>Suprafață totală</small><b>" +
+      nf(tot, 2) + " mp</b></div><div><small>Construcții</small><b>" + blds + "</b></div></div>";
+    if (missing.length) h += '<div class="flag">Nu apar în planul pentru ' + esc(U.name) + ":<div class=\"vfm-miss\">" + missing.map((m) => "<span>" + esc(m) + "</span>").join("") + "</div></div>";
+    h += '<section><h2>Imobile (' + items.length + ')</h2><div class="tw"><table class="vfm-t"><thead><tr><th>Nr. cadastral</th><th>Suprafață [mp]</th><th>Constr.</th><th>Intravilan ist.</th></tr></thead><tbody>' +
+      items.map((p) => '<tr><td><button type="button" data-v="' + p.i + '">' + esc(p.id) + "</button></td><td>" + nf(p.a, 2) + "</td><td>" + (p.bs ? p.bs.length : 0) + "</td><td>" + (p.iv ? "da" : "nu") + "</td></tr>").join("") +
+      '</tbody><tfoot><tr><td colspan="4" style="text-align:left">Total S = ' + nf(tot, 2) + " mp</td></tr></tfoot></table></div>" +
+      '<p class="hint" style="margin-top:8px">Atinge un număr ca să vezi parcela, coordonatele și vecinii.</p></section>';
+    h += '<div class="actions"><button type="button" class="btn2" id="vfmCopy">Copiază tabelul</button><button type="button" class="btn2" id="vfmKml">Descarcă KML</button>' +
+      '<button type="button" class="btn2" id="vfmAll">Arată tot planul</button></div>';
+    out.innerHTML = h;
+    out.querySelectorAll("[data-v]").forEach((b) => (b.onclick = () => { const p = P[+b.dataset.v]; q.value = p.id; show(p.id, p.i, true); }));
+    $("vfmAll").onclick = (e) => {
+      const showing = map.hasLayer(all);
+      if (showing) { map.removeLayer(all); map.removeLayer(bL); } else { all.addTo(map); bL.addTo(map); }
+      e.target.textContent = showing ? "Arată tot planul" : "Doar parcelele cerute";
+      sel.eachLayer((l) => l.bringToFront && l.bringToFront());
+    };
+    $("vfmCopy").onclick = () => {
+      const rows = ["Nr. cadastral\tSuprafață [mp]\tPerimetru [m]\tConstrucții\tIntravilan istoric\tLatitudine\tLongitudine"]
+        .concat(items.map((p) => [p.id, p.a.toFixed(2), geom(p).per.toFixed(2), p.bs ? p.bs.length : 0, p.iv ? "da" : "nu", p.c[0].toFixed(7), p.c[1].toFixed(7)].join("\t")));
+      if (missing.length) rows.push("Negăsite: " + missing.join(", "));
+      const txt = rows.join("\n");
+      (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => say("Tabel copiat. Lipește-l în Excel sau Word."), () => say("Copierea nu e permisă în acest browser"));
+    };
+    $("vfmKml").onclick = () => {
+      const pm = items.map((p) => "<Placemark><name>" + esc(p.id) + "</name><description>" + esc(nf(p.a, 2) + " mp · " + U.name) + "</description><styleUrl>#p</styleUrl><Polygon><outerBoundaryIs><LinearRing><coordinates>" +
+        p.w.concat([p.w[0]]).map((w) => w[1] + "," + w[0] + ",0").join(" ") + "</coordinates></LinearRing></outerBoundaryIs></Polygon></Placemark>").join("");
+      const doc = '<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Localizare multiplă · ' + esc(U.name) +
+        '</name><Style id="p"><LineStyle><color>ff3ba9f2</color><width>3</width></LineStyle><PolyStyle><color>553ba9f2</color></PolyStyle></Style>' + pm + "</Document></kml>";
+      save(new Blob([doc], { type: "application/vnd.google-earth.kml+xml" }), `Localizare_multipla_${items.length}_imobile_${U.key}.kml`);
+    };
+    history.replaceState(null, "", "#" + U.key + "-" + list.join(","));
+    try { scrollToMap(); } catch { /* desktop */ }
+  }
+
+  // Căutarea: mai multe numere cadastrale → localizare multiplă; un singur număr merge ca înainte.
+  document.addEventListener("submit", (e) => {
+    if (!e.target || e.target.id !== "f" || (typeof searchMode !== "undefined" && searchMode !== "cad")) return;
+    const many = parseMany(q.value);
+    if (!many) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    q.blur(); const sg = document.getElementById("sugg"); if (sg) sg.innerHTML = "";
+    locateMany(many);
+  }, true);
+  q.addEventListener("input", () => { if (parseMany(q.value) || /[,;]\s*$/.test(q.value)) { const sg = document.getElementById("sugg"); if (sg) sg.innerHTML = ""; } });
+  q.placeholder = "ex. 405306 sau mai multe: 405306, 405307";
+
+  // Link direct: #giroc-406991,405306
+  (async () => {
+    const m = decodeURIComponent(location.hash.slice(1)).match(/^([a-z-]+?)-(\d+(?:,\d+)+)$/);
+    if (!m || !UATS.some((u) => u.key === m[1])) return;
+    await loadUat(m[1]);
+    q.value = m[2].split(",").join(", ");
+    locateMany(parseMany(m[2]));
+  })();
 })();
