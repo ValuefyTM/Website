@@ -247,12 +247,16 @@ type Form = { describe: string; city: string; address: string; surface: string; 
 const emptyForm: Form = { describe: "", city: "", address: "", surface: "", rooms: "", land: "", price: "", notes: "", date: "", name: "", phone: "", email: "", consent: false };
 
 /** `saleCta`: on phones, the floating / sticky button reads "Vinde și tu" and starts a sale request (listing pages). */
-export function AssistantProvider({ children, saleCta = false }: { children: React.ReactNode; saleCta?: boolean }) {
+/**
+ * `embedded`: the assistant is the page itself (/comanda), always open inside the page instead of a drawer,
+ * started with `start` (property type / purpose from the link).
+ */
+export function AssistantProvider({ children, saleCta = false, embedded = false, start }: { children?: React.ReactNode; saleCta?: boolean; embedded?: boolean; start?: Ctx }) {
   const lang = useLang();
   const t = T[lang];
   const loc = numberLocale(lang);
   const isMobile = useMediaQuery("(max-width: 1079px)");
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(embedded);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [msgs, setMsgs] = useState<Msg[]>(() => [greetingMsg(false, lang)]);
@@ -371,10 +375,19 @@ export function AssistantProvider({ children, saleCta = false }: { children: Rea
       stepAskedRef.current = next;
       botSay(text);
     }
-    setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 400);
-  }, [botSay, reset, lang]);
+    if (!embedded) setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 400);
+  }, [botSay, reset, lang, embedded]);
+
+  // A link with a property type or purpose (/comanda?tip=apartament) starts the conversation there.
+  const started = useRef(false);
+  useEffect(() => {
+    if (!embedded || started.current || !(start?.type || start?.purpose || start?.sale)) return;
+    started.current = true;
+    openAssistant(start);
+  }, [embedded, start, openAssistant]);
 
   const close = useCallback(() => {
+    if (embedded) return;
     setOpen(false);
     openerRef.current?.focus?.({ preventScroll: true });
   }, []);
@@ -510,13 +523,13 @@ export function AssistantProvider({ children, saleCta = false }: { children: Rea
 
   // Esc closes; lock page scroll behind the full-screen mobile drawer.
   useEffect(() => {
-    if (!open) return;
+    if (!open || embedded) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
     window.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     if (isMobile) document.body.style.overflow = "hidden";
     return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
-  }, [open, isMobile, close]);
+  }, [open, isMobile, close, embedded]);
 
   const api = useMemo(() => ({ open: openAssistant, menuOpen, setMenuOpen }), [openAssistant, menuOpen]);
 
@@ -630,8 +643,8 @@ export function AssistantProvider({ children, saleCta = false }: { children: Rea
   };
 
   const sellHere = saleCta && isMobile;
-  const showSticky = isMobile && !open && scrolled;
-  const showFab = !open && !showSticky && !(isMobile && menuOpen);
+  const showSticky = !embedded && isMobile && !open && scrolled;
+  const showFab = !embedded && !open && !showSticky && !(isMobile && menuOpen);
   const chips = !busy ? chipSets[st] : undefined;
 
   const logoMark = (
@@ -670,12 +683,12 @@ export function AssistantProvider({ children, saleCta = false }: { children: Rea
       )}
 
       <div
-        role="dialog"
-        aria-modal={isMobile}
+        role={embedded ? "region" : "dialog"}
+        aria-modal={embedded ? undefined : isMobile}
         aria-label={sale ? t.dialogSale : t.dialogValuation}
         aria-hidden={!open}
         inert={!open}
-        className={`${s.drawer} ${open ? s.drawerOpen : ""}`}
+        className={`${s.drawer} ${open ? s.drawerOpen : ""} ${embedded ? s.embedded : ""}`}
       >
         <div className={s.head}>
           <div className={s.headLogo}>{logoMark}</div>
@@ -689,7 +702,7 @@ export function AssistantProvider({ children, saleCta = false }: { children: Rea
             </div>
           </div>
           <button type="button" className={s.iconBtn} onClick={() => reset()} aria-label={t.newRequest} title={t.newRequest}>↺</button>
-          <button type="button" className={`${s.iconBtn} ${s.closeBtn}`} onClick={close} aria-label={t.closeAssistant}>×</button>
+          {!embedded && <button type="button" className={`${s.iconBtn} ${s.closeBtn}`} onClick={close} aria-label={t.closeAssistant}>×</button>}
         </div>
 
         <div className={s.progress}>

@@ -15,6 +15,7 @@ const PATHS: [string, string][] = [
   ["/termeni-si-conditii", "/en/terms"],
   ["/politica-cookies", "/en/cookie-policy"],
   ["/imobiliare", "/en/properties"],
+  ["/comanda", "/en/order"],
   ["/client", "/en/client"],
 ];
 

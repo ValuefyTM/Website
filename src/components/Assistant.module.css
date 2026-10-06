@@ -219,3 +219,17 @@
 }
 .send:hover { background: var(--acc-ink); }
 .send:disabled { opacity: 0.6; cursor: progress; }
+
+/* The assistant as the page itself (/comanda): always open, inside the page instead of a drawer. */
+.drawer.embedded {
+  position: relative; z-index: 1; inset: auto; top: auto; right: auto; bottom: auto; width: 100%;
+  height: min(780px, calc(100dvh - 150px)); min-height: 560px;
+  opacity: 1; transform: none; visibility: visible; pointer-events: auto; transition: none;
+  box-shadow: 0 30px 70px -30px rgba(17, 19, 24, 0.28);
+}
+@media (max-width: 1079px) {
+  .drawer.embedded { inset: auto; border-radius: 20px; transform: none; height: calc(100dvh - 128px); min-height: 520px; }
+}
+@media (max-width: 639px) {
+  .drawer.embedded { border-radius: 0; border-left: 0; border-right: 0; height: calc(100dvh - 64px); min-height: 0; box-shadow: none; }
+}

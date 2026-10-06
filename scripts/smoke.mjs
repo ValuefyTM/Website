@@ -14,6 +14,8 @@ const pages = [
   ["/en/tax-valuation", 200, "en", "tax"],
   ["/evaluare-esalonare-anaf", 200, "ro", "eșalonare"],
   ["/en/anaf-instalment-valuation", 200, "en", "instalment"],
+  ["/comanda", 200, "ro", "Comandă o evaluare"],
+  ["/en/order", 200, "en", "Order a valuation"],
   ["/politica-de-confidentialitate", 200, "ro", "VALUEFY S.R.L."],
   ["/en/privacy-policy", 200, "en", "VALUEFY S.R.L."],
   ["/politica-cookies", 200, "ro", "cookie"],
