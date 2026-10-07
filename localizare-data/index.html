@@ -107,6 +107,19 @@ tfoot td{background:var(--cream);font-weight:700}
 .loading{position:absolute;inset:0;display:grid;place-items:center;background:rgba(23,23,58,.35);color:#fff;font-weight:700;z-index:900}
 .mapwrap{position:relative;min-width:0;min-height:0}
 .mapwrap #map{position:absolute;inset:0}
+.gpsBtn{margin-top:8px;background:var(--white);color:var(--ink);border:1px solid var(--line,#e2d8c4);display:flex;align-items:center;justify-content:center;gap:8px}
+.gpsBtn[aria-pressed="true"],.gpsCtl[aria-pressed="true"]{background:#3b74d4;color:#fff;border-color:#3b74d4}
+.gpsCtl{position:absolute;left:10px;top:84px;z-index:500;width:34px;height:34px;border-radius:4px;border:2px solid rgba(0,0,0,.2);background:#fff;color:#17173a;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;background-clip:padding-box}
+.gpsBar{position:absolute;left:10px;right:10px;bottom:26px;z-index:600;background:#fff;color:#17173a;border-radius:14px;padding:9px 12px;box-shadow:0 8px 24px rgba(23,23,58,.3);font-size:13px;line-height:1.5;max-height:45%;overflow:auto}
+.gpsBar .sub{display:block;color:#6b6b85;font-size:12px;margin-top:2px}
+.gpsBar .acts{margin-top:7px}
+.mapwrap:has(.gpsBar:not([hidden])) .legend{display:none}
+.gpsBar b{font-family:var(--mono,ui-monospace,monospace)}
+.gpsBar .ok{color:#157f55;font-weight:700}.gpsBar .no{color:#9a5f00;font-weight:700}
+.gpsBar .acts{display:flex;gap:6px;flex-wrap:wrap}
+.gpsBar button.pid{padding:2px 8px;margin:0 2px}
+.gpsBar button{font:inherit;font-size:12px;font-weight:700;padding:5px 10px;display:inline-block;border-radius:999px;border:1px solid #e2d8c4;background:#fbf8f2;color:#17173a;cursor:pointer}
+.gpsBar button.pid{background:#fdf1dc;border-color:#f5d9a6;font-family:var(--mono,ui-monospace,monospace)}
 #toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--navy);color:#f4f5f7;padding:10px 16px;border-radius:12px;font-size:13px;z-index:2000;box-shadow:0 14px 30px -14px rgba(23,23,58,.5);max-width:calc(100% - 32px)}
 .vx{font:800 11px var(--mono);color:var(--ink);background:var(--acc);border:1.5px solid var(--navy);border-radius:999px;min-width:20px;height:20px;display:grid;place-items:center;padding:0 4px}
 .leaflet-tooltip.pl{font:700 12px var(--mono);color:var(--ink)}
@@ -174,10 +187,11 @@ tfoot td{background:var(--cream);font-weight:700}
         <div class="field"><label for="rad">Rază</label><select id="rad"><option value="50">50 m</option><option value="100" selected>100 m</option><option value="250">250 m</option></select></div>
       </div>
       <button class="btn" type="submit">Caută →</button>
+      <button class="btn gpsBtn" type="button" id="gpsBtn" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/><circle cx="12" cy="12" r="8"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3"/></svg><span>Unde sunt? Folosește locația mea</span></button>
       <div id="sugg"></div>
       <p class="hint" id="hint">Sau atinge o parcelă pe hartă.</p>
     </form>
-    <div class="mapwrap"><div id="map" role="region" aria-label="Hartă"></div><div class="loading" id="load" hidden>Se încarcă…</div><div class="legend" id="legend" hidden></div></div>
+    <div class="mapwrap"><div id="map" role="region" aria-label="Hartă"></div><div class="loading" id="load" hidden>Se încarcă…</div><div class="legend" id="legend" hidden></div><button type="button" class="gpsCtl" id="gpsMap" aria-label="Locația mea" title="Locația mea"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/><circle cx="12" cy="12" r="8"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3"/></svg></button><div class="gpsBar" id="gpsBar" role="status" aria-live="polite" hidden></div></div>
     <main id="out" aria-live="polite"><p class="empty">Alege UAT-ul și introdu numărul cadastral din extrasul CF. Vezi conturul pe imaginea satelit, inventarul de coordonate și vecinii.</p></main>
     <p class="note" id="foot" hidden></p>
   </aside>
@@ -381,7 +395,8 @@ function renderNear(){
   h+= here.length?'':'<p class="empty">Punctul nu cade într-o parcelă înscrisă (drum, curte comună sau imobil neînscris). Mai jos sunt cele mai apropiate.</p>';
   h+='<section><h2>Parcele în rază de '+$('rad').value+' m ('+N.near.length+')</h2><div class="near">'+
      (N.near.length?N.near.slice(0,60).map(n=>'<button type="button" data-id="'+esc(n.p.id)+'" data-i="'+n.p.i+'"'+(n.d===0?' class="here"':'')+'><b>'+esc(n.p.id)+'</b><span>'+fmt(n.p.a,0)+' mp</span><span>'+(n.d===0?'în punct':fmt(n.d,0)+' m')+'</span></button>').join(''):'<p class="empty">Nicio parcelă înscrisă în rază. Mărește raza.</p>')+'</div></section>';
-  h+='<p class="hint">Poziția adresei vine din OpenStreetMap și poate fi aproximativă, mai ales la numărul de casă. Pentru precizie, lipește coordonatele din Google Maps (clic dreapta pe locație → copiezi coordonatele).</p>';
+  if(/^Locația mea/.test(N.label))h+='<p class="hint">Poziția vine de la GPS-ul telefonului; precizia e afișată pe hartă (cercul albastru). În aer liber e de obicei 3–10 m, în clădiri poate fi mult mai slabă.</p>';
+  else h+='<p class="hint">Poziția adresei vine din OpenStreetMap și poate fi aproximativă, mai ales la numărul de casă. Pentru precizie, lipește coordonatele din Google Maps (clic dreapta pe locație → copiezi coordonatele).</p>';
   $('out').innerHTML=h;
   $('out').querySelectorAll('.near [data-id]').forEach(b=>b.onclick=()=>{$('q').value=b.dataset.id;show(b.dataset.id,+b.dataset.i,true)});
   $('out').querySelectorAll('[data-alt]').forEach(b=>b.onclick=()=>{const a=N.alts[+b.dataset.alt];const rest=[a].concat(N.alts.filter(x=>x!==a));goToPoint(a.lat,a.lng,a.label,rest)});
@@ -514,6 +529,66 @@ $('f').addEventListener('submit',e=>{e.preventDefault();sugg.innerHTML='';
       if(D&&D.parcels.some(p=>p.id===v)){await loadUat(s.key);toast('Numărul '+v+' e în '+s.name+'. Am schimbat localitatea.');break}}}
     show(v);history.replaceState(null,'','#'+U.key+'-'+v);scrollToMap()})();
 });
+/* ---------- Locația mea (GPS): punct live pe hartă și parcela pe care stai ---------- */
+const gpsL=L.layerGroup().addTo(map); let gpsWatch=null, gpsFirst=true, gpsPos=null, gpsFollow=true;
+function gpsState(on){[$('gpsBtn'),$('gpsMap')].forEach(b=>b.setAttribute('aria-pressed',on));$('gpsBtn').querySelector('span').textContent=on?'Oprește locația mea':'Unde sunt? Folosește locația mea'}
+function gpsStop(){if(gpsWatch!==null)navigator.geolocation.clearWatch(gpsWatch);gpsWatch=null;gpsPos=null;gpsL.clearLayers();$('gpsBar').hidden=true;gpsState(false)}
+function gpsStart(){
+  if(!navigator.geolocation){toast('Browserul nu oferă locația.');return}
+  gpsFirst=true;gpsFollow=true;gpsState(true);
+  const bar=$('gpsBar');bar.hidden=false;bar.innerHTML='<span>Caut locația… Acceptă accesul la locație dacă browserul îl cere.</span>';
+  gpsWatch=navigator.geolocation.watchPosition(onGps,onGpsErr,{enableHighAccuracy:true,maximumAge:3000,timeout:30000});
+}
+function onGpsErr(e){
+  const m=e.code===1?'Accesul la locație este blocat. Permite-l din setările browserului (iconița de lângă adresă) și încearcă din nou.':e.code===3?'Locația nu a putut fi obținută la timp. Ieși în aer liber sau încearcă din nou.':'Locația nu este disponibilă acum.';
+  $('gpsBar').hidden=false;$('gpsBar').innerHTML='<span>'+m+'</span><div class="acts"><button type="button" data-g="stop">Închide</button></div>';
+  if(e.code===1){if(gpsWatch!==null)navigator.geolocation.clearWatch(gpsWatch);gpsWatch=null;gpsState(false)}
+}
+async function onGps(pos){
+  const la=pos.coords.latitude, lo=pos.coords.longitude, acc=Math.max(1,Math.round(pos.coords.accuracy));
+  gpsPos={la,lo,acc};
+  gpsL.clearLayers();
+  L.circle([la,lo],{radius:acc,color:'#3b74d4',weight:1,fillColor:'#3b74d4',fillOpacity:.12,interactive:false}).addTo(gpsL);
+  L.circleMarker([la,lo],{radius:8,color:'#ffffff',weight:3,fillColor:'#3b74d4',fillOpacity:1,interactive:false}).addTo(gpsL);
+  if(gpsFirst){gpsFirst=false;await goToPoint(la,lo,'Locația mea (±'+acc+' m)',[]);locLayer.clearLayers();map.setView([la,lo],Math.max(map.getZoom(),18),{animate:false})}
+  else if(gpsFollow&&!map.getBounds().pad(-0.2).contains([la,lo]))map.panTo([la,lo]);
+  gpsBar();
+}
+function edgeM(p,la,lo){ // distanța în metri de la punct la conturul parcelei (aproximare locală)
+  const kx=Math.cos(la*Math.PI/180)*111320, ky=110540; let m=Infinity; const w=p.w;
+  for(let i=0,j=w.length-1;i<w.length;j=i++){const ax=(w[j][1]-lo)*kx,ay=(w[j][0]-la)*ky,bx=(w[i][1]-lo)*kx,by=(w[i][0]-la)*ky;
+    const dx=bx-ax,dy=by-ay,t=Math.max(0,Math.min(1,-(ax*dx+ay*dy)/((dx*dx+dy*dy)||1)));m=Math.min(m,Math.hypot(ax+t*dx,ay+t*dy))}
+  return m}
+function gpsBar(){
+  const g=gpsPos; if(!g)return;
+  let h='';
+  const inUat=U&&P.length&&UATS.some(u=>u.key===U.key&&inBB(u.bb,g.la,g.lo,0.002));
+  if(!inUat){h='<span class="no">Nu ești într-o localitate încărcată pe hartă.</span>'}
+  else{
+    const cand=P.filter(p=>inBB(p.bb,g.la,g.lo,0.0015));
+    const here=cand.filter(p=>distM(p,g.la,g.lo)===0);
+    if(here.length){h='<span class="ok">Ești pe parcela</span> '+[...new Set(here.map(p=>p.id))].map(id=>'<button type="button" class="pid" data-pid="'+esc(id)+'">'+esc(id)+'</button>').join(' ')+' <span>· '+esc(U.name)+'</span>';
+      const e=edgeM(here[0],g.la,g.lo);
+      if(e<g.acc)h+='<span class="sub">La '+fmt(e,0)+' m de limită, sub precizia GPS: poți fi și pe parcela vecină.</span>'}
+    else{const nn=cand.map(p=>({p,d:distM(p,g.la,g.lo)})).sort((a,b)=>a.d-b.d)[0];
+      h='<span class="no">Nu ești pe o parcelă înscrisă</span> <span>(drum sau imobil neînscris).</span>'+(nn&&nn.d<60?' <span>Cea mai apropiată:</span> <button type="button" class="pid" data-pid="'+esc(nn.p.id)+'">'+esc(nn.p.id)+'</button> <span>la '+fmt(nn.d,0)+' m</span>':'')}
+  }
+  h+='<span class="sub">Precizie GPS ±'+g.acc+' m'+(g.acc>25?' — slabă, ieși în aer liber':'')+'</span>';
+  h+='<div class="acts"><button type="button" data-g="center">Centrează</button><button type="button" data-g="here">Parcele în jur</button><button type="button" data-g="stop">Oprește</button></div>';
+  const bar=$('gpsBar');bar.hidden=false;bar.innerHTML=h;
+}
+$('gpsBar').addEventListener('click',async e=>{
+  const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.pid){const list=byId.get(b.dataset.pid);if(list){gpsFollow=false;$('q').value=b.dataset.pid;show(b.dataset.pid,list[0].i,true)}return}
+  if(b.dataset.g==='stop')return gpsStop();
+  if(!gpsPos)return;
+  if(b.dataset.g==='center'){gpsFollow=true;map.setView([gpsPos.la,gpsPos.lo],Math.max(map.getZoom(),18))}
+  if(b.dataset.g==='here'){await goToPoint(gpsPos.la,gpsPos.lo,'Locația mea (±'+gpsPos.acc+' m)',[]);locLayer.clearLayers();gpsBar()}
+});
+map.on('dragstart',()=>{gpsFollow=false});
+const gpsToggle=()=>gpsWatch!==null?gpsStop():gpsStart();
+$('gpsBtn').onclick=gpsToggle;$('gpsMap').onclick=e=>{L.DomEvent.stopPropagation(e);gpsToggle()};
+
 function setMode(m){searchMode=m;$('tabCad').setAttribute('aria-pressed',m==='cad');$('tabAdr').setAttribute('aria-pressed',m==='adr');$('modeCad').hidden=m!=='cad';$('modeAdr').hidden=m!=='adr';sugg.innerHTML='';(m==='cad'?q:$('addr')).focus()}
 $('tabCad').onclick=()=>setMode('cad');$('tabAdr').onclick=()=>setMode('adr');
 $('rad').onchange=()=>{if(lastNear)goToPoint(lastNear.lat,lastNear.lng,lastNear.label,lastNear.alts)};
